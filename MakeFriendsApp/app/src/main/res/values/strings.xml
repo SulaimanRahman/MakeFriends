@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">MakeFriendsApp</string>
+    <string name="tv_csun_email_text">CSUN Email</string>
+    <string name="tv_password_text">Password:</string>
+    <string name="tv_email_hint_text">@my.csun.edu</string>
 </resources>
