@@ -3,4 +3,7 @@
     <string name="tv_csun_email_text">CSUN Email</string>
     <string name="tv_password_text">Password:</string>
     <string name="tv_email_hint_text">@my.csun.edu</string>
+    <string name="btn_login">Log In</string>
+    <string name="btn_signin_text">Sign In</string>
+    <string name="btn_signup_text">Sign Up</string>
 </resources>

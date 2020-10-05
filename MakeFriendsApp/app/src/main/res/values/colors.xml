@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="red1">#FF5C5A</color>
+    <color name="red2">#E83E45</color>
     <color name="colorPrimaryRed">#D22030</color>
-    <color name="colorPrimaryDark">#383D3B</color>
+    <color name="red4">#A82531</color>
+
+    <color name="colorPrimaryDark">#373737</color>
+    <color name="grey">#BCBCBC</color>
+    <color name="lightGrey">#E4E4E4</color>
+    <color name="white">#FFFFFF</color>
 </resources>
