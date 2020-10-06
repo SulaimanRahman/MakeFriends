@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "963481774163",
+    "firebase_url": "https://makefriends-c055d.firebaseio.com",
+    "project_id": "makefriends-c055d",
+    "storage_bucket": "makefriends-c055d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:963481774163:android:96df953b781ae487f8bea6",
+        "android_client_info": {
+          "package_name": "edu.csun.compsci490.makefriendsapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "963481774163-d1ka1d1he2ndp3sgb0iepgcs2g0tltup.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "edu.csun.compsci490.makefriendsapp",
+            "certificate_hash": "5e1f5f32255768c0a7a7f9663219077b649e090c"
+          }
+        },
+        {
+          "client_id": "963481774163-h2d1pf7599rsebgob8jacjd6ej38n4i4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKdRpPDxuoPmPaxSb7Nmv78EP4RZoBzDQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "963481774163-h2d1pf7599rsebgob8jacjd6ej38n4i4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
