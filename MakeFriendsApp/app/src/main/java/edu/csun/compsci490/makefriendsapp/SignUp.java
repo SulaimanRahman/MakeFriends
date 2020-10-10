@@ -57,6 +57,10 @@ public class SignUp extends AppCompatActivity {
                   mEmail.setError("Email is Required for Registration");
                   return;
                 }
+                if(email.indexOf("@my.csun.edu")==-1){
+                    mEmail.setError("Must be CSUN provided Email!");
+                    return;
+                }
                 if(TextUtils.isEmpty(password)){
                     mPassword.setError("Please Enter Your Password!");
                     return;
@@ -90,7 +94,7 @@ public class SignUp extends AppCompatActivity {
         mLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(),SignIn.class));
+                startActivity(new Intent(getApplicationContext(),MainActivity.class));
             }
         });
 

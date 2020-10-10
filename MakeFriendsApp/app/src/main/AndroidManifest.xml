@@ -12,7 +12,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".PlaceHolder"></activity>
-        <activity android:name=".SignIn" />
         <activity android:name=".SignUp" />
         <activity
             android:name=".SplashScreen"
