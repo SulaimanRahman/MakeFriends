@@ -19,178 +19,229 @@
         app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/background_color" />
 
-    <Button
-        android:id="@+id/btn_signin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="116dp"
-        android:layout_marginLeft="116dp"
-        android:layout_marginTop="35dp"
-        android:background="@drawable/signin_button_style"
-        android:fontFamily="@font/montserrat"
-        android:text="@string/btn_signin_text"
-        android:textColor="@color/colorPrimaryDark"
-        app:layout_constraintEnd_toStartOf="@+id/btn_signup"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageview_logo" />
 
     <ImageView
         android:id="@+id/imageview_logo"
         android:layout_width="115dp"
         android:layout_height="110dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="25dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_makefriends" />
 
-    <TextView
-        android:id="@+id/tv_csun_email"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="35dp"
-        android:fontFamily="@font/montserrat"
-        android:text="@string/tv_csun_email_text"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.256"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_signin" />
-
-    <RelativeLayout
-        android:id="@+id/rl_email"
-        android:layout_width="250dp"
-        android:layout_height="29dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/input_bubble"
-        android:gravity="end"
-        android:paddingStart="10dp"
-        android:paddingLeft="10dp"
-        android:paddingEnd="10dp"
-        android:paddingRight="10dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_csun_email">
-
-        <TextView
-            android:id="@+id/tv_email_hint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:paddingTop="3dp"
-            android:text="@string/tv_email_hint_text"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="16sp" />
-
-        <EditText
-            android:id="@+id/ed_email_input"
-            android:layout_width="135dp"
-            android:layout_height="38dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginEnd="5dp"
-            android:layout_marginRight="5dp"
-            android:layout_toStartOf="@+id/tv_email_hint"
-            android:layout_toLeftOf="@+id/tv_email_hint"
-            android:background="@android:color/transparent"
-            android:ems="10"
-            android:fontFamily="@font/montserrat"
-            android:inputType="textEmailAddress"
-            android:paddingStart="10dp"
-            android:paddingLeft="10dp"
-            android:paddingEnd="0dp"
-            android:paddingRight="0dp"
-            android:textSize="16sp" />
-
-    </RelativeLayout>
-
-    <TextView
-        android:id="@+id/tv_password"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:fontFamily="@font/montserrat"
-        android:text="@string/tv_password_text"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.243"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rl_email" />
-
-    <RelativeLayout
-        android:id="@+id/rl_password"
-        android:layout_width="250dp"
-        android:layout_height="29dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/input_bubble"
-        android:gravity="start"
-        android:paddingStart="10dp"
-        android:paddingLeft="10dp"
-        android:paddingEnd="10dp"
-        android:paddingRight="10dp"
-        app:layout_constraintEnd_toEndOf="@+id/imageView"
-        app:layout_constraintStart_toStartOf="@+id/imageView"
-        app:layout_constraintTop_toBottomOf="@+id/tv_password">
-
-        <EditText
-            android:id="@+id/ed_password_input"
-            android:layout_width="match_parent"
-            android:layout_height="38dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:background="@android:color/transparent"
-            android:ems="10"
-            android:fontFamily="@font/montserrat"
-            android:inputType="textPassword"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-    </RelativeLayout>
 
     <Button
-        android:id="@+id/btn_login"
-        android:layout_width="71dp"
-        android:layout_height="40dp"
+        android:id="@+id/btn_signin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="116dp"
+        android:layout_marginLeft="116dp"
         android:layout_marginTop="25dp"
-        android:background="@drawable/button"
+        android:background="@drawable/signin_button_style"
         android:fontFamily="@font/montserrat"
-        android:text="@string/btn_login"
-        android:textColor="@android:color/white"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:text="@string/btn_signin_text"
+        android:textColor="@android:color/secondary_text_light"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toStartOf="@+id/btn_signup"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rl_password" />
+        app:layout_constraintTop_toBottomOf="@+id/imageview_logo" />
 
     <Button
         android:id="@+id/btn_signup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="35dp"
+        android:layout_marginTop="25dp"
         android:layout_marginEnd="116dp"
         android:layout_marginRight="116dp"
         android:background="@drawable/signup_button_style"
         android:fontFamily="@font/montserrat"
         android:text="@string/btn_signup_text"
         android:textColor="@android:color/white"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/btn_signin"
         app:layout_constraintTop_toBottomOf="@+id/imageview_logo" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="250dp"
+        android:layout_height="275dp"
+        android:layout_marginTop="35dp"
+        android:background="@drawable/input_form_card"
+        android:elevation="50dp"
+        android:id="@+id/constraintLayout_form"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_signin">
+
+        <TextView
+            android:id="@+id/tv_csun_email"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat"
+            android:text="@string/tv_csun_email_text"
+            android:textColor="@android:color/secondary_text_light"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <RelativeLayout
+            android:id="@+id/relativeLayout_email"
+            android:layout_width="match_parent"
+            android:layout_height="29dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/input_bubble"
+            android:gravity="end"
+            android:paddingStart="10dp"
+            android:paddingLeft="0dp"
+            android:paddingEnd="10dp"
+            android:paddingRight="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_csun_email">
+
+            <TextView
+                android:id="@+id/tv_email_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:fontFamily="@font/montserrat"
+                android:paddingTop="3dp"
+                android:text="@string/tv_email_hint_text"
+                android:textColor="@android:color/secondary_text_light"
+                android:textSize="16sp" />
+
+            <EditText
+                android:id="@+id/ed_email_input"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_marginEnd="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_toStartOf="@+id/tv_email_hint"
+                android:layout_toLeftOf="@+id/tv_email_hint"
+                android:background="@android:color/transparent"
+                android:ems="10"
+                android:fontFamily="@font/montserrat"
+                android:inputType="textEmailAddress"
+                android:paddingStart="10dp"
+                android:paddingLeft="10dp"
+                android:paddingEnd="0dp"
+                android:paddingRight="0dp"
+                android:textColor="@android:color/secondary_text_light"
+                android:textSize="16sp" />
+
+        </RelativeLayout>
+
+
+        <TextView
+            android:id="@+id/tv_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:fontFamily="@font/montserrat"
+            android:text="@string/tv_password_text"
+            android:textColor="@android:color/secondary_text_light"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.015"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/relativeLayout_email" />
+
+        <RelativeLayout
+            android:id="@+id/relativeLayout_password"
+            android:layout_width="match_parent"
+            android:layout_height="29dp"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/input_bubble"
+            android:gravity="start"
+            android:paddingStart="10dp"
+            android:paddingLeft="10dp"
+            android:paddingEnd="10dp"
+            android:paddingRight="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_password">
+
+            <EditText
+                android:id="@+id/ed_password_input"
+                android:layout_width="match_parent"
+                android:layout_height="38dp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:background="@android:color/transparent"
+                android:ems="10"
+                android:fontFamily="@font/montserrat"
+                android:inputType="textPassword"
+                android:textColor="@android:color/secondary_text_light"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/tv_forgot_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tv_forgot_password_text"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/relativeLayout_password" />
+
+        <TextView
+            android:id="@+id/tv_click_here"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tv_click_here_text"
+            android:textSize="12sp"
+            android:textColor="@color/colorPrimaryRed"
+            android:paddingLeft="5sp"
+            android:paddingRight="5sp"
+            android:paddingStart="5sp"
+            android:paddingEnd="5sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@id/tv_forgot_password"
+            app:layout_constraintTop_toBottomOf="@+id/relativeLayout_password" />
+
+        <Button
+            android:id="@+id/btn_login"
+            android:layout_width="71dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="25dp"
+            android:background="@drawable/button"
+            android:fontFamily="@font/montserrat"
+            android:text="@string/btn_login"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/relativeLayout_password" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

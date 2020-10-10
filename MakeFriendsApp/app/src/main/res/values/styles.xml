@@ -4,6 +4,7 @@
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimaryRed</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="android:ambientShadowAlpha">.5</item>
     </style>
     
     <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
