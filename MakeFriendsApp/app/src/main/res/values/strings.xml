@@ -8,4 +8,5 @@
     <string name="btn_signup_text">Sign Up</string>
     <string name="tv_forgot_password_text">Forgot password?</string>
     <string name="tv_click_here_text">Click here</string>
+    <string name="your_profile">Your Profile</string>
 </resources>

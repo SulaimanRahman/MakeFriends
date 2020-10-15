@@ -1,9 +1,11 @@
 package edu.csun.compsci490.makefriendsapp;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,6 +20,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,9 +30,10 @@ public class MainActivity extends AppCompatActivity {
 
     EditText mEmail, mPassword;
     Button mLoginBtn;
-    TextView mCreateBtn;
+    TextView mCreateBtn, forgotPwd;
     ProgressBar progressBar;
     FirebaseAuth firebaseAuth;
+    String userID;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         firebaseAuth = FirebaseAuth.getInstance();
         mLoginBtn = findViewById(R.id.btn_login);
+        forgotPwd = findViewById(R.id.tv_click_here);
+
 
         mLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,6 +103,43 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+
+            }
+        });
+        forgotPwd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final EditText resentEmail = new EditText(v.getContext());
+                final AlertDialog.Builder passwordResetDialg = new AlertDialog.Builder(v.getContext());
+                passwordResetDialg.setTitle("Reset Your Password!");
+                passwordResetDialg.setMessage("Enter Your CSUN email!");
+                passwordResetDialg.setView(resentEmail);
+
+                passwordResetDialg.setPositiveButton("Send Link", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //sent reset link
+                        String Email = resentEmail.getText().toString();
+                        firebaseAuth.sendPasswordResetEmail(Email).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Toast.makeText(MainActivity.this, "reset password link has been sent to your csun email!", Toast.LENGTH_SHORT).show();
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(MainActivity.this,"Error: "+e.getMessage(),Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                });
+                passwordResetDialg.setNegativeButton("Back to Login", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //back to sign in page
+                    }
+                });
+                passwordResetDialg.create().show();
 
             }
         });
