@@ -11,8 +11,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".PlaceHolder"></activity>
-        <activity android:name=".SignUp" />
+        <activity android:name="edu.csun.compsci490.makefriendsapp.PlaceHolder" />
+        <activity android:name="edu.csun.compsci490.makefriendsapp.SignUp" />
         <activity
             android:name=".SplashScreen"
             android:theme="@style/SplashTheme">
@@ -25,7 +25,6 @@
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
