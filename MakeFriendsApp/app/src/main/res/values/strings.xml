@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">MakeFriendsApp</string>
-    <string name="tv_csun_email_text">CSUN Email</string>
-    <string name="tv_password_text">Password</string>
+    <string name="tv_csun_email_text">CSUN Email*</string>
+    <string name="tv_password_text">Password*</string>
     <string name="tv_email_hint_text">@my.csun.edu</string>
     <string name="btn_login">Log In</string>
     <string name="btn_signin_text">Sign In</string>
@@ -9,4 +9,8 @@
     <string name="tv_forgot_password_text">Forgot password?</string>
     <string name="tv_click_here_text">Click here</string>
     <string name="your_profile">Your Profile</string>
+    <string name="required_fields_text">*Required fields</string>
+    <string name="btn_verify_text">Verify</string>
+    <string name="tv_first_name_text">First Name*</string>
+    <string name="tv_last_name_text">Last Name*</string>
 </resources>

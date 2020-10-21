@@ -7,7 +7,7 @@
     tools:context=".MainActivity">
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/signInBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
@@ -33,7 +33,7 @@
 
 
     <Button
-        android:id="@+id/btn_signin"
+        android:id="@+id/btn_signIn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="116dp"
@@ -41,28 +41,31 @@
         android:layout_marginTop="25dp"
         android:background="@drawable/signin_button_style"
         android:fontFamily="@font/montserrat"
+        android:textAllCaps="false"
         android:text="@string/btn_signin_text"
         android:textColor="@android:color/secondary_text_light"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toStartOf="@+id/btn_signup"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toStartOf="@+id/btn_signUp"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageview_logo" />
 
     <Button
-        android:id="@+id/btn_signup"
+        android:id="@+id/btn_signUp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="25dp"
         android:layout_marginEnd="116dp"
         android:layout_marginRight="116dp"
         android:background="@drawable/signup_button_style"
+        android:backgroundTint="@color/grey"
         android:fontFamily="@font/montserrat"
+        android:textAllCaps="false"
         android:text="@string/btn_signup_text"
-        android:textColor="@android:color/white"
-        android:textSize="14sp"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/btn_signin"
+        app:layout_constraintStart_toEndOf="@id/btn_signIn"
         app:layout_constraintTop_toBottomOf="@+id/imageview_logo" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -75,7 +78,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_signin">
+        app:layout_constraintTop_toBottomOf="@+id/btn_signIn">
 
         <TextView
             android:id="@+id/tv_csun_email"
@@ -228,10 +231,12 @@
             android:layout_height="40dp"
             android:layout_marginTop="25dp"
             android:background="@drawable/button"
+            android:backgroundTint="@color/grey"
             android:fontFamily="@font/montserrat"
+            android:textAllCaps="false"
             android:text="@string/btn_login"
-            android:textColor="@android:color/white"
-            android:textSize="14sp"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

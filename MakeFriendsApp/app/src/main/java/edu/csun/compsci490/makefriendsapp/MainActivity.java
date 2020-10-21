@@ -1,16 +1,8 @@
 package edu.csun.compsci490.makefriendsapp;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-
-import android.text.Html;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -18,6 +10,10 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -40,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Button button;
-        button = (Button) findViewById(R.id.btn_signup);
+        button = (Button) findViewById(R.id.btn_signUp);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -50,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Button button1;
-        button1 = (Button) findViewById(R.id.btn_signin);
+        button1 = (Button) findViewById(R.id.btn_signIn);
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
