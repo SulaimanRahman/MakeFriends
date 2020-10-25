@@ -42,4 +42,13 @@
         android:layout_gravity="center"
         android:textSize="40sp"/>
 
+    <ImageView
+        android:layout_width="85dp"
+        android:layout_height="78dp"
+        android:src="@drawable/ic_chat_search"
+        android:layout_gravity="end"
+        android:layout_marginTop="520dp"/>
+
+
+
 </FrameLayout>
