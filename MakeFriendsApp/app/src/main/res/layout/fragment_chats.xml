@@ -4,6 +4,35 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ChatsFragment">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:background="@color/grey"
+        android:gravity="center_horizontal" >
+
+        <EditText
+            android:id="@+id/chatsSearchBar"
+            android:layout_width="350dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@drawable/input_bubble"
+            android:drawableStart="@drawable/ic_baseline_search_24"
+            android:drawableLeft="@drawable/ic_baseline_search_24"
+            android:drawableTint="@color/grey"
+            android:fontFamily="@font/montserrat"
+            android:hint="Search conversations"
+            android:inputType="textPersonName"
+            android:lines="1"
+            android:paddingStart="15dp"
+            android:paddingLeft="15dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="15dp"
+            android:paddingRight="15dp"
+            android:paddingBottom="2dp"
+            android:textColor="@color/grey"
+            android:textSize="18sp" />
+
+    </RelativeLayout>
 
     <!-- TODO: Update blank fragment layout -->
     <TextView
@@ -11,6 +40,6 @@
         android:layout_height="wrap_content"
         android:text="CHATS"
         android:layout_gravity="center"
-        android:textSize="40sp" />
+        android:textSize="40sp"/>
 
 </FrameLayout>
