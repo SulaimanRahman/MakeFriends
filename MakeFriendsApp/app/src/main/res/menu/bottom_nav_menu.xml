@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/homeFragment"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_home_24"
+        android:title="Home"/>
+
+    <item
+        android:id="@+id/chatsFragment"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_chat_24"
+        android:title="Chats"/>
+
+    <item
+        android:id="@+id/friendsFragment"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_folder_shared_24"
+        android:title="Friends"/>
+
+    <item
+        android:id="@+id/settingsFragment"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_settings_24"
+        android:title="Settings"/>
+</menu>

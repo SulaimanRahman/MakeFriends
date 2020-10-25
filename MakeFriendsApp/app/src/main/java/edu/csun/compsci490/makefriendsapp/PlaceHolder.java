@@ -23,8 +23,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 
 public class PlaceHolder extends AppCompatActivity {
-
-    //TextView fullName,email,phone,displayMsg;
     TextView fullName, email, displayMsg;
     FirebaseFirestore firebaseFirestore;
     FirebaseAuth firebaseAuth;
@@ -36,7 +34,6 @@ public class PlaceHolder extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_place_holder);
         // initialize variables
-        //phone = findViewById(R.id.yourPhone);
         fullName = findViewById(R.id.yourName);
         email = findViewById(R.id.yourEmail);
         logOut = (Button) findViewById(R.id.btn_logOut);
@@ -76,7 +73,6 @@ public class PlaceHolder extends AppCompatActivity {
         documentReference.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-                //phone.setText(value.getString("Phone"));
                 fullName.setText(value.getString("First Name").concat(" ").concat(value.getString("Last Name")));
                 email.setText(value.getString("Email"));
             }
@@ -85,21 +81,10 @@ public class PlaceHolder extends AppCompatActivity {
         logOut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                finish();
                 startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                finish();
             }
         });
 
     }
-
-
-//    public void logOut(View view){
-//        FirebaseAuth.getInstance().signOut();
-//        //startActivity(new Intent(getApplicationContext(),MainActivity.class));
-//        finish();
-//    }
-
-
-
-
 }
