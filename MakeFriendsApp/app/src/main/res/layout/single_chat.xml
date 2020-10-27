@@ -6,19 +6,27 @@
     android:layout_height="wrap_content"
     android:background="@color/lightGrey">
 
-
-    <ImageView
+    <androidx.cardview.widget.CardView
         android:id="@+id/imgChatAvatar"
         android:layout_width="50dp"
         android:layout_height="50dp"
+        app:cardCornerRadius="50dp"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
-        android:src="@drawable/circle_chat_search_icon"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/doggo" />
+    </androidx.cardview.widget.CardView>
+
+
 
     <TextView
         android:id="@+id/tvChatName"
@@ -47,6 +55,8 @@
         android:fontFamily="@font/montserrat"
         android:text="chat preview"
         android:textSize="16sp"
+        android:maxLines="1"
+        android:ellipsize="end"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/tvChatName"

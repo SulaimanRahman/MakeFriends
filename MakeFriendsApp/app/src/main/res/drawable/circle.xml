@@ -5,7 +5,5 @@
     android:useLevel="false"
     android:thicknessRatio="2.1">
 
-    <solid android:color="@color/red1" />
-
-
+    <solid android:color="#4DD0E1" />
 </shape>
