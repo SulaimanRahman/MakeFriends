@@ -5,10 +5,7 @@
     android:useLevel="false"
     android:thicknessRatio="2.1">
 
-    <solid android:color="@color/lightGrey" />
+    <solid android:color="@color/red1" />
 
-    <stroke
-        android:color="@color/lightGrey"
-        android:width="10dp"/>
 
 </shape>
