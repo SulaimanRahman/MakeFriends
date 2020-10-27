@@ -11,12 +11,25 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
 
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        public CardView chatAvatar;
+        public TextView name, chatPreview;
+
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+
+            chatAvatar = itemView.findViewById(R.id.imgChatAvatar);
+            name = itemView.findViewById(R.id.tvChatName);
+            chatPreview = itemView.findViewById(R.id.tvChatPreview);
+        }
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-        View view = layoutInflater.inflate(R.layout.single_chat, parent, false);
+        View view = layoutInflater.inflate(R.layout.recycle_view_chat_item, parent, false);
         ViewHolder viewHolder = new ViewHolder(view);
         return viewHolder;
     }
@@ -31,16 +44,4 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
         return 10;
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
-        CardView chatAvatar;
-        TextView name, chatPreview;
-
-        public ViewHolder(@NonNull View itemView) {
-            super(itemView);
-
-            chatAvatar = itemView.findViewById(R.id.imgChatAvatar);
-            name = itemView.findViewById(R.id.tvChatName);
-            chatPreview = itemView.findViewById(R.id.tvChatPreview);
-        }
-    }
 }
