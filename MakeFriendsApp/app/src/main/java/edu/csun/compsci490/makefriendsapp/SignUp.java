@@ -69,7 +69,7 @@ public class SignUp extends AppCompatActivity {
                 final String firstName = mFirstName.getText().toString();
                 final String lastName = mLastName.getText().toString();
                 final String email = mEmail.getText().toString().trim();
-                String password = mPassword.getText().toString().trim();
+                final String password = mPassword.getText().toString().trim();
 
                 //final String fullName = mFullName.getText().toString();
                 //final String phoneNumber = mPhone.getText().toString();
@@ -115,13 +115,16 @@ public class SignUp extends AppCompatActivity {
                             });
 
                             userID = firebaseAuth.getCurrentUser().getUid();
-                            DocumentReference documentReference = firebaseFirestore.collection("users").document(userID);
+                            DocumentReference documentReference = firebaseFirestore.collection(email).document("Profile");
                             Map<String,Object> user = new HashMap<>();
 
                             // may need to edit these values on here and in the firebase console
                             user.put("First Name",firstName);
                             user.put("Last Name", lastName);
                             user.put("Email",email);
+                            user.put("Password", password);
+                            user.put("Biography", null);
+                            user.put("Profile Picture Uri", null);
                             //user.put("Phone",123456);
 
                             documentReference.set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -132,7 +135,8 @@ public class SignUp extends AppCompatActivity {
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    Log.d(TAG,"onFailure: "+e.getMessage());
+                                    //Log.d(TAG,"onFailure: " + e.getMessage());
+                                    Log.d(TAG,"Failed to save teh data");
                                 }
                             });
 
