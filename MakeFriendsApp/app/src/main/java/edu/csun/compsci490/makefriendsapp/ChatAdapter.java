@@ -18,6 +18,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
 
     public interface OnChatClickListener {
         void onChatClick(int position);
+        void onDeleteClick(int position);
     }
 
     public void setOnChatClickListener(OnChatClickListener listener){
@@ -31,12 +32,14 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public ImageView mChatImage;
         public TextView mName, mChatPreview;
+        public ImageView mDeleteIcon;
 
         public ViewHolder(@NonNull View itemView, final OnChatClickListener listener) {
             super(itemView);
             mChatImage = itemView.findViewById(R.id.chatImage);
             mName = itemView.findViewById(R.id.tvChatName);
             mChatPreview = itemView.findViewById(R.id.tvChatPreview);
+            mDeleteIcon = itemView.findViewById(R.id.icDelete);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -45,6 +48,18 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
                         int position = getAdapterPosition();
                         if(position != RecyclerView.NO_POSITION){
                             listener.onChatClick(position);
+                        }
+                    }
+                }
+            });
+
+            mDeleteIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(listener != null){
+                        int position = getAdapterPosition();
+                        if(position != RecyclerView.NO_POSITION){
+                            listener.onDeleteClick(position);
                         }
                     }
                 }

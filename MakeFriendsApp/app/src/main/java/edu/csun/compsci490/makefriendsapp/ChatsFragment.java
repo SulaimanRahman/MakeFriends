@@ -92,6 +92,11 @@ public class ChatsFragment extends Fragment {
             public void onChatClick(int position) {
                 changeChat(position);
             }
+
+            @Override
+            public void onDeleteClick(int position) {
+                deleteChat(position);
+            }
         });
 
         btnAdd.setOnClickListener(new View.OnClickListener() {

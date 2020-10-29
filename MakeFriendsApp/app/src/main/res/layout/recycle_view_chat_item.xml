@@ -103,7 +103,7 @@
         android:layout_marginRight="10dp"
         android:layout_marginBottom="4dp"
         android:background="@drawable/ic_baseline_delete_forever_24"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@id/tvChatPreview"
         app:layout_constraintEnd_toEndOf="parent" />
 
