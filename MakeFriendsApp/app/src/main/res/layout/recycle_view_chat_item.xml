@@ -4,18 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/lightGrey"
-    android:layout_marginBottom="5dp">
+    android:layout_marginBottom="7dp"
+    android:background="@color/lightGrey">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/imgChatAvatar"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        app:cardCornerRadius="50dp"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
+        app:cardCornerRadius="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -29,21 +29,17 @@
     </androidx.cardview.widget.CardView>
 
 
-
     <TextView
         android:id="@+id/tvChatName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
         android:fontFamily="@font/montserrat_bold"
         android:text="name"
         android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/tvChatPreview"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintEnd_toStartOf="@+id/notificationDot"
         app:layout_constraintStart_toEndOf="@+id/imgChatAvatar"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed" />
@@ -52,15 +48,51 @@
         android:id="@+id/tvChatPreview"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
+        android:ellipsize="end"
         android:fontFamily="@font/montserrat"
+        android:maxLines="1"
         android:text="chat preview"
         android:textSize="16sp"
-        android:maxLines="1"
-        android:ellipsize="end"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/icDelete"
         app:layout_constraintStart_toStartOf="@+id/tvChatName"
         app:layout_constraintTop_toBottomOf="@+id/tvChatName" />
+
+    <ImageView
+        android:id="@+id/notificationDot"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginBottom="7dp"
+        android:background="@drawable/circle"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/tvChatPreview"
+        app:layout_constraintEnd_toStartOf="@+id/icBlock" />
+
+    <ImageView
+        android:id="@+id/icBlock"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="17dp"
+        android:background="@drawable/ic_baseline_person_remove_alt_1_24"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageView
+        android:id="@+id/icDelete"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="4dp"
+        android:background="@drawable/ic_baseline_delete_forever_24"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/tvChatPreview"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
