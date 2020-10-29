@@ -104,17 +104,17 @@ public class MainActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
 
                         if(task.isSuccessful()){
-                            //userSingleton.setEmail(mEmail.getText().toString() + "@my.csun.edu");
+                            userSingleton.setEmail(mEmail.getText().toString() + "@my.csun.edu");
                             Toast.makeText(MainActivity.this,"Logged In Successfully!",Toast.LENGTH_SHORT).show();
                             Log.d("Main Activity", "Email: " + mEmail.getText().toString());
 //                            finish();
                             startActivity(new Intent(getApplicationContext(),MainNavigation.class));
 
-                            userSingleton.setEmail(mEmail.getText().toString() + "@my.csun.edu");
-                            Log.d("Main Activity", "Email: " + mEmail.getText().toString());
 
-                            Intent homePage = new Intent(getApplicationContext(), HomePage.class);
-                            startActivity(homePage);
+
+
+//                            Intent homePage = new Intent(getApplicationContext(), HomePage.class);
+//                            startActivity(homePage);
 
                             finish();
                         }
