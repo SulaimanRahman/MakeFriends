@@ -14,6 +14,7 @@
         <activity android:name=".MainNavigation"/>
         <activity android:name=".PlaceHolder" />
         <activity android:name=".SignUp" />
+        <activity android:name=".MessagingActivity" />
         <activity
             android:name=".SplashScreen"
             android:theme="@style/SplashTheme">
