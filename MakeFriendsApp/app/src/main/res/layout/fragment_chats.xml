@@ -40,25 +40,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        android:background="@android:color/holo_green_light"/>
+        android:background="@android:color/white"/>
 
-    <EditText
-        android:id="@+id/et_addChat"
-        android:layout_width="40dp"
-        android:layout_height="wrap_content"
-        android:textColor="@color/red1"
-        android:layout_marginTop="545dp"
-        android:layout_marginLeft="5dp"
-        android:inputType="number"/>
-
-    <EditText
-        android:id="@+id/et_deleteChat"
-        android:layout_width="40dp"
-        android:layout_height="wrap_content"
-        android:textColor="@color/red1"
-        android:layout_marginTop="545dp"
-        android:layout_marginLeft="155dp"
-        android:inputType="number"/>
 
     <Button
         android:id="@+id/btn_addChat"

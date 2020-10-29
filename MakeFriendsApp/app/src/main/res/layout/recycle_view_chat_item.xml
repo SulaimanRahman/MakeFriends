@@ -25,9 +25,21 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
-            android:src="@drawable/doggo" />
+            android:src="@drawable/ic_launcher_foreground" />
     </androidx.cardview.widget.CardView>
 
+    <TextView
+        android:id="@+id/tvAppMessage"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="80dp"
+        android:layout_marginLeft="80dp"
+        android:layout_marginBottom="24dp"
+        android:fontFamily="@font/montserrat_bold"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/tvChatName"
@@ -106,6 +118,8 @@
         android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@id/tvChatPreview"
         app:layout_constraintEnd_toEndOf="parent" />
+
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

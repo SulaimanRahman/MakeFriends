@@ -10,7 +10,8 @@ public class ChatItem {
         mChatPreview = chatPreview;
     }
 
-    public void clickAction(){
+    public void enterChat(){
+        // transition into messaging activity
         mName = "Go into chat activity";
     }
 
