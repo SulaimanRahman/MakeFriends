@@ -10,6 +10,10 @@ public class ChatItem {
         mChatPreview = chatPreview;
     }
 
+    public void clickAction(){
+        mName = "Go into chat activity";
+    }
+
     public int getImgResource() {
         return mImgResource;
     }

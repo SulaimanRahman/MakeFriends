@@ -14,6 +14,15 @@ import java.util.ArrayList;
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
 
     private ArrayList<ChatItem> mChatItems;
+    private OnChatClickListener mListener;
+
+    public interface OnChatClickListener {
+        void onChatClick(int position);
+    }
+
+    public void setOnChatClickListener(OnChatClickListener listener){
+        mListener = listener;
+    }
 
     public ChatAdapter(ArrayList<ChatItem> chatItems){
         mChatItems = chatItems;
@@ -23,11 +32,23 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
         public ImageView mChatImage;
         public TextView mName, mChatPreview;
 
-        public ViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView, final OnChatClickListener listener) {
             super(itemView);
             mChatImage = itemView.findViewById(R.id.chatImage);
             mName = itemView.findViewById(R.id.tvChatName);
             mChatPreview = itemView.findViewById(R.id.tvChatPreview);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(listener != null){
+                        int position = getAdapterPosition();
+                        if(position != RecyclerView.NO_POSITION){
+                            listener.onChatClick(position);
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -36,7 +57,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View view = layoutInflater.inflate(R.layout.recycle_view_chat_item, parent, false);
-        ViewHolder viewHolder = new ViewHolder(view);
+        ViewHolder viewHolder = new ViewHolder(view, mListener);
         return viewHolder;
     }
 

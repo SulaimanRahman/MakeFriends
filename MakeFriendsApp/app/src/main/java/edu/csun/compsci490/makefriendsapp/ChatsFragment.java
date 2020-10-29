@@ -85,10 +85,18 @@ public class ChatsFragment extends Fragment {
         recyclerView.setAdapter(chatAdapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
+        // build recycler view
         btnAdd = rootView.findViewById(R.id.btn_addChat);
         btnDelete = rootView.findViewById(R.id.btn_deleteChat);
         etAdd = rootView.findViewById(R.id.et_addChat);
         etDelete = rootView.findViewById(R.id.et_deleteChat);
+
+        chatAdapter.setOnChatClickListener(new ChatAdapter.OnChatClickListener() {
+            @Override
+            public void onChatClick(int position) {
+                changeChat(position);
+            }
+        });
 
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,6 +125,11 @@ public class ChatsFragment extends Fragment {
     public void deleteChat(int position){
         chatItems.remove(position);
         chatAdapter.notifyItemRemoved(position);
+    }
+
+    public void changeChat(int position){
+        chatItems.get(position).clickAction();
+        chatAdapter.notifyItemChanged(position);
     }
 
     private void createChatList() {
