@@ -22,7 +22,7 @@ public class ChatsFragment extends Fragment {
     private ArrayList<ChatItem> chatItems;
     private RecyclerView recyclerView;
     private ChatAdapter chatAdapter;
-    private Button btnAdd, btnDelete;
+    private Button btnAdd, btnDelete, btnFindFriends;
     private EditText etAdd, etDelete;
 
     // TODO: Rename parameter arguments, choose names that match
@@ -60,11 +60,6 @@ public class ChatsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        ArrayList<ChatItem> items = new ArrayList<>();
-//        items.add(new ChatItem(R.drawable.ic_baseline_home_24, "Home name", "home preview"));
-//        items.add(new ChatItem(R.drawable.ic_baseline_chat_24, "Chat name", "chat preview"));
-//        items.add(new ChatItem(R.drawable.ic_baseline_folder_shared_24, "Folder name", "folder preview"));
-
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -78,6 +73,7 @@ public class ChatsFragment extends Fragment {
 
         createChatList();
 
+        // build recycler view
         View rootView = inflater.inflate(R.layout.fragment_chats, container, false);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.chatRecyclerView);
         recyclerView.setHasFixedSize(true);
@@ -85,7 +81,7 @@ public class ChatsFragment extends Fragment {
         recyclerView.setAdapter(chatAdapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        // build recycler view
+        // intitialize members
         btnAdd = rootView.findViewById(R.id.btn_addChat);
         btnDelete = rootView.findViewById(R.id.btn_deleteChat);
         etAdd = rootView.findViewById(R.id.et_addChat);
@@ -118,6 +114,10 @@ public class ChatsFragment extends Fragment {
     }
 
     public void insertChat(int position){
+        if(chatItems.size()==1 && chatItems.get(0).getName() == ""){
+            chatItems.remove(0);
+            chatAdapter.notifyItemRemoved(0);
+        }
         chatItems.add(position, new ChatItem(R.drawable.ic_baseline_home_24, "Position: " + position, "home preview"));
         chatAdapter.notifyItemInserted(position);
     }
@@ -125,6 +125,11 @@ public class ChatsFragment extends Fragment {
     public void deleteChat(int position){
         chatItems.remove(position);
         chatAdapter.notifyItemRemoved(position);
+
+        if(chatItems.isEmpty()){
+            chatItems.add(new ChatItem(R.drawable.ic_baseline_home_24, "", "NO CONVERSATIONS YET"));
+            chatAdapter.notifyItemInserted(0);
+        }
     }
 
     public void changeChat(int position){
