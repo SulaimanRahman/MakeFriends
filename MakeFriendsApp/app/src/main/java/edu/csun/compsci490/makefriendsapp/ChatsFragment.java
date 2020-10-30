@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -17,7 +18,8 @@ public class ChatsFragment extends Fragment {
     private ArrayList<ChatItem> chatItems;
     private RecyclerView recyclerView;
     private ChatAdapter chatAdapter;
-    private Button btnAdd, btnDelete, btnFindFriends;
+    private Button btnAdd, btnDelete;
+    private ImageView btnFindFriends;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -40,6 +42,7 @@ public class ChatsFragment extends Fragment {
         // intitialize buttons
         btnAdd = rootView.findViewById(R.id.btn_addChat);
         btnDelete = rootView.findViewById(R.id.btn_deleteChat);
+        btnFindFriends = rootView.findViewById(R.id.btn_findFriends);
 
         chatAdapter.setOnChatClickListener(new ChatAdapter.OnChatClickListener() {
             @Override
