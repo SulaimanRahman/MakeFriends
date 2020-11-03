@@ -11,17 +11,29 @@
         android:id="@+id/myRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="85dp" />
+        android:layout_marginTop="70dp" />
 
     <EditText
-        android:id="@+id/searchBox"
-        android:layout_width="match_parent"
+        android:id="@+id/contactSearchBar"
+        android:layout_width="350dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:hint="Search..."
+        android:layout_marginTop="35dp"
+        android:layout_marginLeft="30dp"
+        android:background="@drawable/input_bubble"
+        android:drawableStart="@drawable/ic_baseline_search_24"
+        android:drawableLeft="@drawable/ic_baseline_search_24"
+        android:drawableTint="@color/grey"
+        android:textColor="#000"
+        android:hint="Search Contacts"
         android:inputType="textAutoComplete"
-        android:drawableStart="@android:drawable/ic_menu_search"
-        android:drawableLeft="@android:drawable/ic_menu_search" />
+        android:lines="1"
+        android:paddingStart="15dp"
+        android:paddingLeft="15dp"
+        android:paddingTop="2dp"
+        android:paddingEnd="15dp"
+        android:paddingRight="15dp"
+        android:paddingBottom="2dp"
+        android:textSize="18sp" />
 
     <TextView
         android:id="@+id/Title"
