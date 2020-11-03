@@ -11,7 +11,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainNavigation"/>
+        <activity android:name=".SearchActivity"></activity>
+        <activity android:name=".MainNavigation" />
         <activity android:name=".PlaceHolder" />
         <activity android:name=".SignUp" />
         <activity android:name=".MessagingActivity" />
@@ -27,11 +28,12 @@
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".HomePage" />
 
-        <activity android:name=".HomePage"></activity>
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
