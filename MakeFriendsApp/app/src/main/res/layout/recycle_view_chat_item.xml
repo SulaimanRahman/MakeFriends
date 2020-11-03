@@ -39,7 +39,7 @@
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:visibility="gone" />
+        android:visibility="" />
 
     <TextView
         android:id="@+id/tvChatName"
@@ -74,26 +74,32 @@
         android:id="@+id/notificationDot"
         android:layout_width="15dp"
         android:layout_height="15dp"
-        android:layout_marginEnd="15dp"
-        android:layout_marginRight="15dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
         android:layout_marginBottom="7dp"
         android:background="@drawable/circle"
-        android:visibility="gone"
+        android:backgroundTint="@android:color/holo_orange_light"
+        android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@id/tvChatPreview"
-        app:layout_constraintEnd_toStartOf="@+id/icBlock" />
+        app:layout_constraintEnd_toStartOf="@+id/icDelete" />
 
-    <ImageView
+    <TextView
         android:id="@+id/friendshipEndedNotification"
+        android:textColor="@color/white"
+        android:text="!"
+        android:textStyle="bold"
+        android:textSize="10sp"
+        android:gravity="center"
         android:layout_width="15dp"
         android:layout_height="15dp"
-        android:layout_marginEnd="15dp"
-        android:layout_marginRight="15dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
         android:layout_marginBottom="7dp"
         android:background="@drawable/circle"
         android:backgroundTint="@color/red2"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/tvChatPreview"
-        app:layout_constraintEnd_toStartOf="@+id/icBlock" />
+        app:layout_constraintEnd_toStartOf="@+id/icDelete" />
 
     <ImageView
         android:id="@+id/icBlock"
@@ -103,7 +109,7 @@
         android:layout_marginRight="10dp"
         android:layout_marginBottom="17dp"
         android:background="@drawable/ic_baseline_person_remove_alt_1_24"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
