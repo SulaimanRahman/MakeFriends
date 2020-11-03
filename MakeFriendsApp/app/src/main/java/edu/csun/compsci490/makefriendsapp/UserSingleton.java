@@ -27,14 +27,6 @@ public class UserSingleton {
 
     private String profile;
 
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
     public String getMajor() {
         return major;
     }
@@ -43,7 +35,7 @@ public class UserSingleton {
         this.major = major;
     }
 
-    private String fullName;
+    //private String fullName;
     private String major;
     private static String email;
     private static String password;

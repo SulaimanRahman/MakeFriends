@@ -44,11 +44,6 @@ public class FriendsFragment extends Fragment {
 
     private static final String TAG = "FriendFragment";
 
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference userRef = db.collection("user");
-    private contactsAdapter mAdapter;
-    private ArrayList<String> mNames = new ArrayList<>();
-    private ArrayList<String> mImageUrls = new ArrayList<>();
 
     public FriendsFragment() {
         // Required empty public constructor
@@ -90,94 +85,9 @@ public class FriendsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_friends,container,false);
 
-//        CollectionReference reference = db.collection("users");
-//        Query query =  reference.whereEqualTo("Email","comp490@my.csun.edu");
-//
-//        String test = query;
-//
 
-//        final DocumentReference docRef = db.collection("users").document("Email");
-//        //docRef.toString();
-//
-//        Toast.makeText(getContext(),docRef.toString(),Toast.LENGTH_LONG).show();
-//
-//
-//
-//        Log.d(TAG, "initImageBitmaps: preparing bitmaps.");
-//
-//        mImageUrls.add("https://c1.staticflickr.com/5/4636/25316407448_de5fbf183d_o.jpg");
-//        mNames.add("Havasu Falls");
-//
-//        mImageUrls.add("https://i.redd.it/tpsnoz5bzo501.jpg");
-//        mNames.add("lmao");
-//
-//        mImageUrls.add("https://i.redd.it/qn7f9oqu7o501.jpg");
-//        mNames.add("Portugal");
-//
-//        mImageUrls.add("https://i.redd.it/j6myfqglup501.jpg");
-//        mNames.add("Rocky Mountain National Park");
-//
-//
-//        mImageUrls.add("https://i.redd.it/0h2gm1ix6p501.jpg");
-//        mNames.add("Mahahual");
-//
-//        mImageUrls.add("https://i.redd.it/k98uzl68eh501.jpg");
-//        mNames.add("Frozen Lake");
-//
-//
-//        mImageUrls.add("https://i.redd.it/glin0nwndo501.jpg");
-//        mNames.add("White Sands Desert");
-//
-//        mImageUrls.add("https://i.redd.it/obx4zydshg601.jpg");
-//        mNames.add("Austrailia");
-//
-//        mImageUrls.add("https://i.imgur.com/ZcLLrkY.jpg");
-//        mNames.add("Washington");
-//
-//        Log.d(TAG, "initRecyclerView: init recyclerview.");
-//        RecyclerView recyclerView = view.findViewById(R.id.myRecyclerView);
-//        FriendsAdapter adapter = new FriendsAdapter(getContext(), mNames, mImageUrls);
-//        recyclerView.setAdapter(adapter);
-//        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        //setUpRecyclerView();
-//        Query query = userRef.orderBy("fullName",Query.Direction.DESCENDING);
-//
-//        FirestoreRecyclerOptions<UserSingleton> options= new FirestoreRecyclerOptions.Builder<UserSingleton>()
-//                .setQuery(query,UserSingleton.class)
-//                .build();
-//
-//
-//        mAdapter = new contactsAdapter(options);
-//        RecyclerView recyclerView = view.findViewById(R.id.myRecyclerView);
-//        recyclerView.setHasFixedSize(true);
-//        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-//        recyclerView.setAdapter(mAdapter);
-//
-//
-        FloatingActionButton myBtn = view.findViewById(R.id.addFriendBtn);
-        myBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                Intent intent = new Intent(getContext(),SearchActivity.class);
-                startActivity(intent);
-            }
-        });
         return view;
-
-
     }
 
-//    @Override
-//    public void onStart() {
-//        super.onStart();
-//        mAdapter.startListening();
-//    }
-//
-//    @Override
-//    public void onStop() {
-//        super.onStop();
-//        mAdapter.stopListening();
-//    }
 }

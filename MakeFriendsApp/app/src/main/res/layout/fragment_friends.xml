@@ -11,7 +11,17 @@
         android:id="@+id/myRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="125dp" />
+        android:layout_marginTop="85dp" />
+
+    <EditText
+        android:id="@+id/searchBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:hint="Search..."
+        android:inputType="textAutoComplete"
+        android:drawableStart="@android:drawable/ic_menu_search"
+        android:drawableLeft="@android:drawable/ic_menu_search" />
 
     <TextView
         android:id="@+id/Title"
@@ -19,15 +29,8 @@
         android:textSize="20sp"
         android:layout_width="80dp"
         android:layout_height="30dp"
-        android:text="Friends" />
+        android:text="Contacts" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/addFriendBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:clickable="true"
-        android:src="@drawable/ic_baseline_person_add_24" />
+
 
 </RelativeLayout>

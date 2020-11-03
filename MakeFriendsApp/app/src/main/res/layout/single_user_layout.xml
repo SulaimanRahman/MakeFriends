@@ -15,8 +15,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/profile_image"
-        android:text="Full Name: "
-        android:id="@+id/fullNameDisplay"
+        android:hint="firstName"
+        android:id="@+id/firstName"
         android:textColor="#000"
         android:layout_marginLeft="25dp"/>
 
@@ -29,5 +29,15 @@
         android:text="Major: "
         android:textColor="#000"
         android:layout_marginLeft="25dp"/>
+
+    <TextView
+        android:id="@+id/lastName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@id/firstName"
+        android:hint="lastName"
+        android:textColor="#000" />
 
 </RelativeLayout>
