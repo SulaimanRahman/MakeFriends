@@ -1,43 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/userContainer"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
     android:padding="15dp">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/profile_image"
-        android:layout_width="96dp"
-        android:layout_height="96dp"
-        android:src="@drawable/ic_baseline_account_circle_24"/>
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardview"
+        android:layout_width="216dp"
+        android:layout_height="121dp"
+        android:layout_gravity="center"
+        android:layout_margin="4dp"
+        android:elevation="3dp"
+        app:cardCornerRadius="25dp"
+        app:cardUseCompatPadding="true">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/profile_image"
-        android:hint="firstName"
-        android:id="@+id/firstName"
-        android:textColor="#000"
-        android:layout_marginLeft="25dp"/>
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/profile_image"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:src="@drawable/ic_baseline_account_circle_24" />
 
-    <TextView
-        android:id="@+id/userMajor"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/profile_image"
-        android:layout_marginTop="25dp"
-        android:text="Major: "
-        android:textColor="#000"
-        android:layout_marginLeft="25dp"/>
+        <TextView
+            android:id="@+id/firstName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="97dp"
+            android:hint="firstName"
+            android:textColor="#000" />
 
-    <TextView
-        android:id="@+id/lastName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_toRightOf="@id/firstName"
-        android:hint="lastName"
-        android:textColor="#000" />
+        <TextView
+            android:id="@+id/userMajor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="97dp"
+            android:layout_marginTop="50dp"
+            android:text="Major: "
+            android:textColor="#000" />
 
-</RelativeLayout>
+        <TextView
+            android:id="@+id/lastName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="97dp"
+            android:layout_marginTop="25dp"
+            android:hint="lastName"
+            android:textColor="#000" />
+    </androidx.cardview.widget.CardView>
+</LinearLayout>
