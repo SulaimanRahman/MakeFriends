@@ -39,7 +39,7 @@
         android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:visibility="" />
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/tvChatName"
