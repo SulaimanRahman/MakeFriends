@@ -9,12 +9,13 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-public class ChatsFragment extends Fragment {
+public class ChatsFragment extends Fragment{
     private ArrayList<ChatItem> chatItems;
     private RecyclerView recyclerView;
     private ChatAdapter chatAdapter;
@@ -39,10 +40,21 @@ public class ChatsFragment extends Fragment {
         recyclerView.setAdapter(chatAdapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
+
         // intitialize buttons
         btnAdd = rootView.findViewById(R.id.btn_addChat);
         btnDelete = rootView.findViewById(R.id.btn_deleteChat);
         btnFindFriends = rootView.findViewById(R.id.btn_findFriends);
+
+        btnFindFriends.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+                transaction.replace(R.id.fragment_layout, new SearchUsersFragment());
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
 
         chatAdapter.setOnChatClickListener(new ChatAdapter.OnChatClickListener() {
             @Override
@@ -70,14 +82,6 @@ public class ChatsFragment extends Fragment {
             }
         });
 
-        btnFindFriends.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // provide searching... screen
-                // and method for finding users
-                enterSearchUsersFragment();
-            }
-        });
 
         return rootView;
     }
@@ -107,10 +111,6 @@ public class ChatsFragment extends Fragment {
         Intent intent = new Intent();
         intent.setClass(getActivity(), MessagingActivity.class);
         getActivity().startActivity(intent);
-    }
-
-    public void enterSearchUsersFragment(){
-        //enter search users fragment or activity
     }
 
     private void createChatList() {

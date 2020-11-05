@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".SearchUsersFragment">
 
     <RelativeLayout
-        android:id="@+id/relativeLayout2"
+        android:id="@+id/relativeLayout"
         android:layout_width="match_parent"
         android:layout_height="65dp"
         android:background="@color/grey"
@@ -40,14 +40,14 @@
     </RelativeLayout>
 
     <ImageView
-        android:id="@+id/btn_findFriends"
+        android:id="@+id/img_searchFriends"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginTop="150dp"
         android:src="@drawable/circle_chat_search_icon"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/relativeLayout2" />
+        app:layout_constraintTop_toBottomOf="@+id/relativeLayout" />
 
     <TextView
         android:id="@+id/tv_searchBy"
@@ -60,7 +60,7 @@
         android:fontFamily="@font/montserrat"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_findFriends" />
+        app:layout_constraintTop_toBottomOf="@+id/img_searchFriends" />
     <TextView
         android:id="@+id/tv_Course"
         android:layout_width="wrap_content"
