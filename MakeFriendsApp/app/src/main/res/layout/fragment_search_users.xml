@@ -61,18 +61,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/img_searchFriends" />
-    <TextView
-        android:id="@+id/tv_Course"
+    <Spinner
+        android:id="@+id/spinner_Course"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Course"
+        android:prompt="@string/spinner_course_prompt"
         android:textColor="@color/colorPrimaryDark"
         android:textSize="18sp"
         android:layout_marginTop="10dp"
         android:fontFamily="@font/montserrat"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_searchBy" />
+        app:layout_constraintTop_toBottomOf="@id/tv_searchBy" />
     <TextView
         android:id="@+id/tv_interests"
         android:layout_width="wrap_content"
@@ -84,7 +84,7 @@
         android:fontFamily="@font/montserrat"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_Course" />
+        app:layout_constraintTop_toBottomOf="@+id/spinner_Course" />
     <TextView
         android:id="@+id/tv_location"
         android:layout_width="wrap_content"
