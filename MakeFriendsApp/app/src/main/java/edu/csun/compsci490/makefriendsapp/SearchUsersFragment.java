@@ -7,7 +7,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
@@ -66,6 +66,12 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_search_users, container, false);
 
+        // buttons
+        TextView interests, location, all;
+        interests = rootView.findViewById(R.id.tv_interests);
+        location = rootView.findViewById(R.id.tv_location);
+        all = rootView.findViewById(R.id.tv_all);
+
         Spinner spinner = (Spinner) rootView.findViewById(R.id.spinner_Course);
         List<String> courseOptions = new ArrayList<>();
         courseOptions.add(0, "Course");
@@ -90,11 +96,10 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
                 } else {
                     // on selected spinner item
                     String item = adapterView.getItemAtPosition(i).toString();
+                    // search based on which item/course was selected here
 
                     // show selected spinner item
-                    Toast.makeText(adapterView.getContext(), "Selected: " + item, Toast.LENGTH_SHORT).show();
-
-                    // search based on item/course selected
+                    // Toast.makeText(adapterView.getContext(), "Selected: " + item, Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -104,12 +109,45 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
             }
         });
 
+        interests.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // search for users which have interests similar to user
+
+                // show waiting screen
+
+                // if a user was found, start messaging activity with that user
+                // else show users not found screen
+            }
+        });
+        location.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // search for users which have location similar to user
+
+                // show waiting screen
+
+                // if a user was found, start messaging activity with that user
+                // else show users not found screen
+            }
+        });
+        all.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // search for users which have all similar to user
+
+                // show waiting screen
+
+                // if a user was found, start messaging activity with that user
+                // else show users not found screen
+            }
+        });
+
         // Inflate the layout for this fragment
         return rootView;
     }
 
     @Override
     public void onClick(View view) {
-
     }
 }
