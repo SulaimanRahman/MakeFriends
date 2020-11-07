@@ -18,6 +18,11 @@ public class MessageItem {
         mType = type;
     }
 
+    public MessageItem(String searchResultMessage, String type){
+        mMessageBody = searchResultMessage;
+        mType = type;
+    }
+
     public int getMessageImgResource() { return mImgResource; }
 
     public String getMessageName() { return mName; }

@@ -18,6 +18,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private Context mContext;
     private static final int MESSAGE_RECEIVED_TYPE = 0;
     private static final int MESSAGE_SENT_TYPE = 1;
+    private static final int RESULT_MESSAGE = 2;
 
     public MessageAdapter(Context context, ArrayList<MessageItem> messageItems){
         mContext = context;
@@ -31,12 +32,15 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         View view = null;
         // check here the viewType and return RecyclerView.ViewHolder based on view type
         if (viewType == MESSAGE_RECEIVED_TYPE) {
-            view = LayoutInflater.from(mContext).inflate(R.layout.messages_received, parent, false);
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_received_message, parent, false);
             return new ReceivedViewHolder(view);
         } else if (viewType == MESSAGE_SENT_TYPE) {
-            view = LayoutInflater.from(mContext).inflate(R.layout.messages_sent, parent, false);
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_sent_message, parent, false);
             return new SentViewHolder(view);
-        }else {
+        } else if (viewType == RESULT_MESSAGE){
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_result_message, parent, false);
+            return new ResultViewHolder(view);
+        } else {
             return  null;
         }
     }
@@ -54,6 +58,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             SentViewHolder sentViewHolder = (SentViewHolder) holder;
             sentViewHolder.messageBody.setText(mMessageItems.get(position).getMessageBody());
             sentViewHolder.messageTime.setText(mMessageItems.get(position).getMessageTime());
+        } else if(messageType == RESULT_MESSAGE){
+            ResultViewHolder resultViewHolder = (ResultViewHolder) holder;
+            resultViewHolder.messageBody.setText(mMessageItems.get(position).getMessageBody());
         }
     }
 
@@ -84,13 +91,26 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     }
 
+    class ResultViewHolder extends RecyclerView.ViewHolder {
+        public TextView messageBody, messageTime;
+        public ConstraintLayout parentLayout;
+
+        public ResultViewHolder(@NonNull View itemView) {
+            super(itemView);
+            messageBody = itemView.findViewById(R.id.result_message_body);
+        }
+
+    }
+
     @Override
     public int getItemViewType(int position){
-        int type;
+        int type = -1;
         if(mMessageItems.get(position).getMessageType() == "received"){
             type = 0;
-        } else {
+        } else if (mMessageItems.get(position).getMessageType() == "sent"){
             type = 1;
+        } else if (mMessageItems.get(position).getMessageType() == "result"){
+            type = 2;
         }
         return type;
     }

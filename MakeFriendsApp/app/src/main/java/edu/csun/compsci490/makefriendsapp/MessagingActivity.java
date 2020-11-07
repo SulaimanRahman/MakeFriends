@@ -45,6 +45,7 @@ public class MessagingActivity extends AppCompatActivity {
 
     private void retrieveConversation() {
         //initialize message items here
+        messageItems.add(new MessageItem("This message will explain why the user was linked with another user", "result"));
         messageItems.add(new MessageItem(R.drawable.ic_launcher_foreground, "John", "hello buddy", "11:52", "received"));
         messageItems.add(new MessageItem("whats up John", "11:54", "sent"));
         messageItems.add(new MessageItem(R.drawable.ic_launcher_foreground, "John", "nothing much just out here trying to makefriends bro", "11:58", "received"));
