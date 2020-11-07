@@ -6,10 +6,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="8dp">
+    android:paddingTop="8dp"
+    android:id="@+id/message_sent_parent_layout">
 
     <TextView
-        android:id="@+id/text_message_body"
+        android:id="@+id/sent_message_body"
         android:text="hello, hello!"
         android:background="@drawable/message_right_style"
         android:layout_width="wrap_content"
@@ -22,13 +23,13 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/text_message_time"
+        android:id="@+id/sent_message_time"
         android:text="11:40"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="10sp"
         android:layout_marginRight="4dp"
-        app:layout_constraintBottom_toBottomOf="@+id/text_message_body"
-        app:layout_constraintRight_toLeftOf="@+id/text_message_body" />
+        app:layout_constraintBottom_toBottomOf="@+id/sent_message_body"
+        app:layout_constraintRight_toLeftOf="@+id/sent_message_body" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
