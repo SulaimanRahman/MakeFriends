@@ -2,11 +2,14 @@ package edu.csun.compsci490.makefriendsapp;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,6 +24,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,10 +34,17 @@ public class MainActivity extends AppCompatActivity {
     ProgressBar progressBar;
     FirebaseAuth firebaseAuth;
     String userID;
+
+    private DatabaseManager databaseManager = new DatabaseManager();
+    private UserSingleton userSingleton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        userSingleton = UserSingleton.getInstance();
+        databaseManager = new DatabaseManager();
 
         Button button;
         button = (Button) findViewById(R.id.btn_signUp);
@@ -66,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         mLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 String email = mEmail.getText().toString().trim();
                 String password = mPassword.getText().toString().trim();
                 email += "@my.csun.edu";
@@ -90,13 +102,24 @@ public class MainActivity extends AppCompatActivity {
                 firebaseAuth.signInWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
+
                         if(task.isSuccessful()){
+                            userSingleton.setEmail(mEmail.getText().toString() + "@my.csun.edu");
                             Toast.makeText(MainActivity.this,"Logged In Successfully!",Toast.LENGTH_SHORT).show();
+                            Log.d("Main Activity", "Email: " + mEmail.getText().toString());
 //                            finish();
                             startActivity(new Intent(getApplicationContext(),MainNavigation.class));
+
+
+
+
+//                            Intent homePage = new Intent(getApplicationContext(), HomePage.class);
+//                            startActivity(homePage);
+
                             finish();
                         }
                         else{
+                            Log.d("Main Activity", "Email: " + mEmail.getText().toString());
                             Toast.makeText(MainActivity.this,"Error! "+ task.getException().getMessage(),Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -142,4 +165,5 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 }
