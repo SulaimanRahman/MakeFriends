@@ -45,8 +45,8 @@ public class ChatsFragment extends Fragment{
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         // intitialize buttons
-        btnAdd = rootView.findViewById(R.id.btn_addChat);
-        btnDelete = rootView.findViewById(R.id.btn_deleteChat);
+        //btnAdd = rootView.findViewById(R.id.btn_addChat);
+       // btnDelete = rootView.findViewById(R.id.btn_deleteChat);
 
         btnFindFriends = rootView.findViewById(R.id.btn_findFriends);
 
