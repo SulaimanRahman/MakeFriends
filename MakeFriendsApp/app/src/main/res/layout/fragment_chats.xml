@@ -42,29 +42,6 @@
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         android:background="@android:color/white"/>
 
-
-    <Button
-        android:id="@+id/btn_addChat"
-        android:layout_width="85dp"
-        android:layout_height="50dp"
-        android:layout_marginLeft="50dp"
-        android:layout_marginStart="50dp"
-        android:layout_marginTop="535dp"
-        android:background="@color/red1"
-        android:text="add chat"
-        android:textColor="@color/white" />
-
-    <Button
-        android:id="@+id/btn_deleteChat"
-        android:layout_width="85dp"
-        android:layout_height="50dp"
-        android:layout_marginLeft="200dp"
-        android:layout_marginStart="200dp"
-        android:layout_marginTop="535dp"
-        android:background="@color/red1"
-        android:text="delete chat"
-        android:textColor="@color/white" />
-
     <ImageView
         android:id="@+id/btn_findFriends"
         android:layout_width="75dp"

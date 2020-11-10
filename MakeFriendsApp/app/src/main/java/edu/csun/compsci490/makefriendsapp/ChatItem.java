@@ -4,9 +4,9 @@ public class ChatItem {
     private int mImgResource;
     private String mName, mChatPreview;
 
-    public ChatItem(int imageRes, String name, String chatPreview){
+    public ChatItem(int imageRes, String userName, String chatPreview){
         mImgResource = imageRes;
-        mName = name;
+        mName = userName;
         mChatPreview = chatPreview;
     }
 
