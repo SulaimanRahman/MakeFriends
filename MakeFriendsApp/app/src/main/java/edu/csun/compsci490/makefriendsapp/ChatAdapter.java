@@ -9,6 +9,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
@@ -79,7 +81,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ChatItem currentItem = mChatItems.get(position);
-        holder.mChatImage.setImageResource(currentItem.getImgResource());
+
+        Glide.with(holder.mChatImage.getContext())
+                .load(currentItem.getImgResource().toString())
+                .into(holder.mChatImage);
+        //holder.mChatImage.setImageResource(currentItem.getImgResource());
         holder.mName.setText(currentItem.getName());
         holder.mChatPreview.setText(currentItem.getChatPreview());
     }
