@@ -1,9 +1,6 @@
 package edu.csun.compsci490.makefriendsapp;
 
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -14,36 +11,43 @@ import java.util.ArrayList;
 public class MessagingActivity extends AppCompatActivity {
     RecyclerView messagesRecyclerView;
     MessageAdapter messageAdapter;
-    ArrayList<MessageItem> messageItems;
+    ArrayList<MessageItem> messageItems = new ArrayList<>();
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messaging);
-    }
 
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         retrieveConversation();
-
-        // build recycler view
-        final View rootView = inflater.inflate(R.layout.fragment_chats, container, false);
-        messagesRecyclerView = (RecyclerView) rootView.findViewById(R.id.chatRecyclerView);
+        messagesRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_messages);
         messagesRecyclerView.setHasFixedSize(true);
-        messageAdapter = new MessageAdapter(messageItems);
+        messageAdapter = new MessageAdapter(this, messageItems);
         messagesRecyclerView.setAdapter(messageAdapter);
         messagesRecyclerView.setItemAnimator(new DefaultItemAnimator());
-
-        return rootView;
     }
 
-    public void addMessage(int position){
+    // position will always be last since newest messages are added at bottom
+    public void addNewMessage(int position){
         // firebase methods go here
+        /*
+        for received messages
+        messageItems.add(new MessageItem(image, userName, messageBody, time, "received"));
+
+
+        for sent messages
+        messageItems.add(new MessageItem(messageBody, time, "received"));
+
+        be sure to notify adapter or insertions or deletions or data changes
+        messageAdapter.notify...
+        */
     }
 
     private void retrieveConversation() {
         //initialize message items here
-        messageItems = new ArrayList<>();
-        messageItems.add(new MessageItem(R.drawable.ic_launcher_foreground, "John", "hello buddy", "11:52"));
+        messageItems.add(new MessageItem("This message will explain why the user was linked with another user", "result"));
+        messageItems.add(new MessageItem(R.drawable.ic_launcher_foreground, "John", "hello buddy", "11:52", "received"));
+        messageItems.add(new MessageItem("whats up John", "11:54", "sent"));
+        messageItems.add(new MessageItem(R.drawable.ic_launcher_foreground, "John", "nothing much just out here trying to makefriends bro", "11:58", "received"));
     }
 }

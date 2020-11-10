@@ -5,20 +5,25 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import android.widget.Button;
+
 import android.widget.ImageView;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-public class ChatsFragment extends Fragment {
+public class ChatsFragment extends Fragment{
     private ArrayList<ChatItem> chatItems;
     private RecyclerView recyclerView;
     private ChatAdapter chatAdapter;
+
     private Button btnAdd, btnDelete;
+
     private ImageView btnFindFriends;
 
     @Override
@@ -42,7 +47,18 @@ public class ChatsFragment extends Fragment {
         // intitialize buttons
         btnAdd = rootView.findViewById(R.id.btn_addChat);
         btnDelete = rootView.findViewById(R.id.btn_deleteChat);
+
         btnFindFriends = rootView.findViewById(R.id.btn_findFriends);
+
+        btnFindFriends.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+                transaction.replace(R.id.fragment_layout, new SearchUsersFragment());
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
 
         chatAdapter.setOnChatClickListener(new ChatAdapter.OnChatClickListener() {
             @Override
@@ -53,28 +69,6 @@ public class ChatsFragment extends Fragment {
             @Override
             public void onDeleteClick(int position) {
                 deleteChat(position);
-            }
-        });
-
-        btnAdd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                insertChat(0);
-            }
-        });
-
-        btnDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                deleteChat(0);
-            }
-        });
-
-        btnFindFriends.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // provide searching... screen
-                // and method for finding users
             }
         });
 
