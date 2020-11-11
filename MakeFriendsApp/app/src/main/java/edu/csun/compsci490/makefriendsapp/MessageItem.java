@@ -1,10 +1,12 @@
 package edu.csun.compsci490.makefriendsapp;
 
+import android.net.Uri;
+
 public class MessageItem {
-    private int mImgResource;
+    private Uri mImgResource;
     private String mName, mMessageBody, mMessageTime, mType;
 
-    public MessageItem(int imageRes, String messengerName, String messageBody, String messageTime, String type){
+    public MessageItem(Uri imageRes, String messengerName, String messageBody, String messageTime, String type){
         mImgResource = imageRes;
         mName = messengerName;
         mMessageBody = messageBody;
@@ -23,7 +25,7 @@ public class MessageItem {
         mType = type;
     }
 
-    public int getMessageImgResource() { return mImgResource; }
+    public Uri getMessageImgResource() { return mImgResource; }
 
     public String getMessageName() { return mName; }
 

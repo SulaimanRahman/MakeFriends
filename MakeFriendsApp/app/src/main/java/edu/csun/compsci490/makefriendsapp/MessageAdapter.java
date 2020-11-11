@@ -50,7 +50,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         final int messageType = getItemViewType(position);
         if(messageType == MESSAGE_RECEIVED_TYPE){
             ReceivedViewHolder receivedViewHolder = (ReceivedViewHolder) holder;
-            receivedViewHolder.messageImage.setImageResource(mMessageItems.get(position).getMessageImgResource());
+            //receivedViewHolder.messageImage.setImageResource(mMessageItems.get(position).getMessageImgResource());
             receivedViewHolder.messageName.setText(mMessageItems.get(position).getMessageName());
             receivedViewHolder.messageBody.setText(mMessageItems.get(position).getMessageBody());
             receivedViewHolder.messageTime.setText(mMessageItems.get(position).getMessageTime());

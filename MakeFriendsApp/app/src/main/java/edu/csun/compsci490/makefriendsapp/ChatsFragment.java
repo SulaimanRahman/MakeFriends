@@ -138,13 +138,7 @@ public class ChatsFragment extends Fragment{
             write the code here that will create the chat bar and the picture circle in the
             beginning and use the variables above to get all the data for it.
              */
-            if (profilePicUri != null) {
-                chatItems.add(new ChatItem(profilePicUri, contactName, lastMessageKey + ": " + lastMessage));
-            } else {
-                //Uri newUri = "android.resource://edu.csun.compsci490.makefriendsapp/" + R.drawable.ic_launcher_foreground;
-                chatItems.add(new ChatItem(profilePicUri, contactName, lastMessageKey + ": " + lastMessage));
-            }
-
+            chatItems.add(new ChatItem(profilePicUri, contactName, lastMessageKey + ": " + lastMessage, "email"));
         }
 
 //        chatItems.add(new ChatItem(R.drawable.ic_launcher_foreground, "Home name", "home preview"));
@@ -206,16 +200,23 @@ public class ChatsFragment extends Fragment{
 
                     String firstName = data.get("First Name").toString();
                     String lastName = data.get("Last Name").toString();
-                    Uri uri = (Uri) data.get("Profile Picture Uri");
+                    String profilePicPath = data.get("Profile Picture Uri").toString();
 
                     String contactEmail = allContactsEmail.get(finalI).toString();
 
                     contactsNames.put(contactEmail, firstName + " " + lastName);
-                    contactsProfilePicUri.put(allContactsEmail.get(finalI).toString(), uri);
+                    databaseManager.getTheFileUriFromFirebaseStorage(profilePicPath, new FirebaseCallback() {
+                        @Override
+                        public void onCallback(Object value) {
+                            Uri uri = Uri.parse(value.toString());
+                            contactsProfilePicUri.put(allContactsEmail.get(finalI).toString(), uri);
+                            if (finalI == allContactsEmail.size() - 1) {
+                                getContactsLastMessage(allContactsEmail);
+                            }
+                        }
+                    });
 
-                    if (finalI == allContactsEmail.size() - 1) {
-                        getContactsLastMessage(allContactsEmail);
-                    }
+
                 }
             });
         }
