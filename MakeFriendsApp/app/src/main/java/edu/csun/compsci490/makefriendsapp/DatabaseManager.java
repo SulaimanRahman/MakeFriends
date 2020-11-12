@@ -454,4 +454,9 @@ public class DatabaseManager {
         });
     }
 
+    public DocumentReference getDocumentReference(String documentPath) {
+        DocumentReference documentReference = db.document(documentPath);
+        return documentReference;
+    }
+
 }

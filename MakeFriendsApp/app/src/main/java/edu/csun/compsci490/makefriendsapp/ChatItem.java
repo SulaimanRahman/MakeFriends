@@ -1,13 +1,25 @@
 package edu.csun.compsci490.makefriendsapp;
 
-public class ChatItem {
-    private int mImgResource;
-    private String mName, mChatPreview;
+import android.net.Uri;
 
-    public ChatItem(int imageRes, String userName, String chatPreview){
+public class ChatItem {
+    private Uri mImgResource;
+    private String mName, mChatPreview;
+    private String contactEmail;
+
+    public ChatItem(Uri imageRes, String userName, String chatPreview, String contactEmail){
         mImgResource = imageRes;
         mName = userName;
         mChatPreview = chatPreview;
+        this.contactEmail = contactEmail;
+    }
+
+    public String getContactEmail() {
+        return contactEmail;
+    }
+
+    public void setContactEmail(String contactEmail) {
+        this.contactEmail = contactEmail;
     }
 
     public void enterChat(){
@@ -15,7 +27,7 @@ public class ChatItem {
         mName = "Go into chat activity";
     }
 
-    public int getImgResource() {
+    public Uri getImgResource() {
         return mImgResource;
     }
 
