@@ -1,6 +1,7 @@
 package edu.csun.compsci490.makefriendsapp;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -25,6 +26,7 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -44,6 +46,13 @@ public class FriendsFragment extends Fragment {
 
     private static final String TAG = "FriendFragment";
 
+    private RecyclerView contactsRecyclerView;
+
+    private DatabaseManager databaseManager;
+    private UserSingleton userSingleton;
+    private String userEmail;
+    private ArrayList allContactsEmails;
+    private HashMap<String, HashMap<String, Object>> contactsData;
 
     public FriendsFragment() {
         // Required empty public constructor
@@ -85,9 +94,141 @@ public class FriendsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_friends,container,false);
 
+        contactsRecyclerView = view.findViewById(R.id.myRecyclerView);
+
+        databaseManager = new DatabaseManager();
+        userSingleton = UserSingleton.getInstance();
+        userEmail = userSingleton.getEmail();
+        allContactsEmails = new ArrayList();
+        contactsData = new HashMap<>();
 
 
         return view;
+    }
+
+    public void getAllContacts() {
+        String documentPath = userEmail + "/Contacts";
+        databaseManager.getFieldValue(documentPath, "All Users", new FirebaseCallback() {
+            @Override
+            public void onCallback(Object value) {
+                if (value == null) {
+                    //failed to get data;
+                    return;
+                }
+
+                allContactsEmails = (ArrayList) value;
+
+                removeTheBlockedUsersAndContinueWithTheProcess(allContactsEmails);
+            }
+        });
+    }
+
+    public void removeTheBlockedUsersAndContinueWithTheProcess(final ArrayList allContactsEmails) {
+        String documentPath = userEmail + "/Blocked";
+        databaseManager.getAllDocumentDataInHashMap(documentPath, new FirebaseCallback() {
+            @Override
+            public void onCallback(Object value) {
+                if (value == null) {
+                    //failed to get the data
+                    return;
+                }
+
+                HashMap<String, Object> data = (HashMap) value;
+
+                for (int i = 0; i < data.size(); i++) {
+                    String key = "Blocked" + (i + 1);
+                    allContactsEmails.remove(data.get(key));
+                }
+
+                getAllTheContactsDataAndPicturesUrisAndContinueWithTheProcess(allContactsEmails);
+
+            }
+        });
+    }
+
+    public void getAllTheContactsDataAndPicturesUrisAndContinueWithTheProcess(final ArrayList allContactsEmails) {
+
+        for (int i = 0; i < allContactsEmails.size(); i++) {
+            String documentPath = allContactsEmails.get(i).toString() + "/Profile";
+
+            databaseManager.getAllDocumentDataInHashMap(documentPath, new FirebaseCallback() {
+                @Override
+                public void onCallback(Object value) {
+                    if (value == null) {
+                        //failed to get the data
+                        return;
+                    }
+
+                    HashMap<String, Object> data = new HashMap<>();
+                    String email = data.get("Email").toString();
+
+                    contactsData.put(email, data);
+
+                    Uri uri = null;
+                    if (data.get("Profile Picture Uri") != null) {
+                        uri = (Uri) data.get("Profile Picture Uri");
+                    }
+
+                    /*
+                    below this comment, write all that code that sets creates the contact bubble and
+                    use the uri, if uri is null then show no picture icon, and if the uri is not
+                    null, then use that uri to show the picture
+                     */
+
+
+                }
+            });
+        }
+    }
+
+    //when the user is clicked on the contact to bring up their data:
+    public void getTheContactData(String contactEmail) {
+        HashMap<String, Object> contactData = contactsData.get(contactEmail);
+        String firstName = contactData.get("First Name").toString();
+        String lastName = contactData.get("Last Name").toString();
+        String biography = contactData.get("Biography").toString();
+        String profilePictureUri = contactData.get("Profile Picture Uri").toString();
+
+        String documentPath = contactEmail + "/More Info";
+
+        databaseManager.getFieldValue(documentPath, "Interest Array", new FirebaseCallback() {
+            @Override
+            public void onCallback(Object value) {
+                if (value == null) {
+                    //failed to get the data
+                    return;
+                }
+
+                ArrayList interest = (ArrayList) value;
+
+                /*
+                use the variables defined above and the interests array to show the contact profile.
+                write the code of displaying the data on the profile below this comment
+                 */
+
+            }
+        });
+    }
+
+    //When search is clicked
+    public void getTheSearchResult() {//I think this is wrong
+        ArrayList<String> contactsNames = new ArrayList();
+
+        for (int i = 0; i < contactsData.size(); i++) {
+            String contactEmail = allContactsEmails.get(i).toString();
+            String firstName = contactsData.get(contactEmail).get("First Name").toString();
+            String lastName = contactsData.get(contactEmail).get("Last Name").toString();
+            contactsNames.add(firstName + " " + lastName);
+        }
+
+        String searchText = null;//instead of null, write searchTextField.getText();
+
+        for (int i = 0; i < contactsNames.size(); i++) {
+            if (contactsNames.get(i).contains(searchText)) {
+                //add contactsName.get(i) in the list under the search bar.
+            }
+        }
+
     }
 
 }

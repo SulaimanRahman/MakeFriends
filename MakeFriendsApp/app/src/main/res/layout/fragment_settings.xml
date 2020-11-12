@@ -17,7 +17,7 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:
+
         android:background="#BCBCBC"
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme" />
@@ -34,7 +34,9 @@
         android:ems="10"
         android:hint="Search Conversations"
         android:fontFamily="@font/montserrat"
-        android:inputType="textPersonName" />
+        android:inputType="textPersonName"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="6dp" />
 
     <TextView
         android:id="@+id/notification"
@@ -49,7 +51,9 @@
         android:text=" Notifications"
         android:textColor="#373737"
         android:textSize="16sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="1dp" />
 
     <TextView
         android:id="@+id/icon_badge_text"
@@ -60,7 +64,9 @@
         android:layout_marginStart="35dp"
         android:layout_marginTop="119dp"
         android:fontFamily="@font/montserrat"
-        android:text="App icon badge" />
+        android:text="App icon badge"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="35dp" />
 
     <TextView
         android:id="@+id/sys_notif"
@@ -116,7 +122,8 @@
         android:text=" Privacy"
         android:textColor="#373737"
         android:textStyle="bold"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:layout_alignParentRight="true" />
 
     <TextView
         android:id="@+id/textView6"
@@ -209,7 +216,9 @@
         android:textColor="#373737"
         android:textStyle="bold"
         android:textSize="16sp"
-        android:text=" Security" />
+        android:text=" Security"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="1dp" />
 
     <TextView
         android:id="@+id/pass_text1"
@@ -316,6 +325,8 @@
         android:background="#373737"
         android:text="Deactivate account"
         android:fontFamily="@font/montserrat"
-        android:textColor="#FFFFFF" />
+        android:textColor="#FFFFFF"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="7dp" />
 
 </RelativeLayout>

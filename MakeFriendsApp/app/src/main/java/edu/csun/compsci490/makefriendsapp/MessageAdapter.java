@@ -11,6 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 
 public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
@@ -50,6 +52,9 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         final int messageType = getItemViewType(position);
         if(messageType == MESSAGE_RECEIVED_TYPE){
             ReceivedViewHolder receivedViewHolder = (ReceivedViewHolder) holder;
+            Glide.with(((ReceivedViewHolder) holder).messageImage.getContext())
+                    .load(mMessageItems.get(position).getMessageImgResource().toString())
+                    .into(((ReceivedViewHolder) holder).messageImage);
             //receivedViewHolder.messageImage.setImageResource(mMessageItems.get(position).getMessageImgResource());
             receivedViewHolder.messageName.setText(mMessageItems.get(position).getMessageName());
             receivedViewHolder.messageBody.setText(mMessageItems.get(position).getMessageBody());

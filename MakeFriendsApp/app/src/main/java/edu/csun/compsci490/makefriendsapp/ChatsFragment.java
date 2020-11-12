@@ -1,7 +1,6 @@
 package edu.csun.compsci490.makefriendsapp;
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,14 +10,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -31,8 +29,11 @@ public class ChatsFragment extends Fragment{
 
     private ImageView btnFindFriends;
 
+    private ProgressBar progressBar;
+
     private DatabaseManager databaseManager;
     private UserSingleton userSingleton;
+    private ChatSingleton chatSingleton;
     private HashMap<String, String> contactsNames;
     private HashMap<String, Uri> contactsProfilePicUri;
     private HashMap<String, String> contactsLastMessageKey;
@@ -46,19 +47,26 @@ public class ChatsFragment extends Fragment{
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // build recycler view
+        final View rootView = inflater.inflate(R.layout.fragment_chats, container, false);
+
         databaseManager = new DatabaseManager();
         userSingleton = UserSingleton.getInstance();
+        chatSingleton = chatSingleton.getInstance();
         contactsNames = new HashMap<>();
         contactsProfilePicUri = new HashMap<>();
         contactsLastMessageKey = new HashMap<>();
         contactsLastMessage = new HashMap<>();
 
+        progressBar = rootView.findViewById(R.id.fragment_chats_progress_bar);
+        progressBar.setVisibility(View.VISIBLE);
+
         getAllContactsEmails();
 
         //createChatList();
 
-        // build recycler view
-        final View rootView = inflater.inflate(R.layout.fragment_chats, container, false);
+
+
         recyclerView = (RecyclerView) rootView.findViewById(R.id.chatRecyclerView);
         recyclerView.setHasFixedSize(true);
 //        chatAdapter = new ChatAdapter(chatItems);
@@ -123,7 +131,7 @@ public class ChatsFragment extends Fragment{
         getActivity().startActivity(intent);
     }
 
-    private void createChatList(ArrayList<String> allContactsEmail) {
+    private void createChatList(final ArrayList<String> allContactsEmail) {
         chatItems = new ArrayList<>();
 
         for (int i = 0; i < allContactsEmail.size(); i++) {
@@ -138,7 +146,7 @@ public class ChatsFragment extends Fragment{
             write the code here that will create the chat bar and the picture circle in the
             beginning and use the variables above to get all the data for it.
              */
-            chatItems.add(new ChatItem(profilePicUri, contactName, lastMessageKey + ": " + lastMessage, "email"));
+            chatItems.add(new ChatItem(profilePicUri, contactName, lastMessage, email));
         }
 
 //        chatItems.add(new ChatItem(R.drawable.ic_launcher_foreground, "Home name", "home preview"));
@@ -148,10 +156,14 @@ public class ChatsFragment extends Fragment{
         chatAdapter = new ChatAdapter(chatItems);
         recyclerView.setAdapter(chatAdapter);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-
+        progressBar.setVisibility(View.GONE);
         chatAdapter.setOnChatClickListener(new ChatAdapter.OnChatClickListener() {
             @Override
             public void onChatClick(int position) {
+                chatSingleton.setContactEmail(chatItems.get(position).getContactEmail());
+                chatSingleton.setContactName(chatItems.get(position).getName());
+                chatSingleton.setContactProfilePicUri(chatItems.get(position).getImgResource());
+
                 enterMessagingActivity();
             }
 
