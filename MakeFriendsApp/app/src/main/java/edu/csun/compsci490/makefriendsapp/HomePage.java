@@ -1,17 +1,13 @@
 package edu.csun.compsci490.makefriendsapp;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,6 +29,7 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
     private EditText biographyTextField;
     private Button saveButton;
 
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_home);
@@ -51,6 +48,7 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
         profilePicture.setOnClickListener(this);
         //biographyTextField.setOnClickListener(this);
         saveButton.setOnClickListener(this);
+
     }
 
     @Override
