@@ -97,7 +97,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         firstAndLastName = view.findViewById(R.id.firstAndLastName);
         profilePicture = view.findViewById(R.id.profilePicture);
-        biographyTextField = view.findViewById(R.id.biographyTextField);
+        biographyTextField = view.findViewById(R.id.FPbioField);
         saveButton = view.findViewById(R.id.saveButton);
 
         getUserFirstNameLastNameBiographyAndProfilePicture();

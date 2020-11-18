@@ -1,5 +1,8 @@
 package edu.csun.compsci490.makefriendsapp;
 
+import android.net.Uri;
+import android.widget.ImageView;
+
 public class UserSingleton {
 
     private static UserSingleton userSingleton = new UserSingleton();
@@ -27,6 +30,16 @@ public class UserSingleton {
 
     private String profile;
 
+    public Uri getUserProfileImg() {
+        return userProfileImg;
+    }
+
+    public void setUserProfileImg(Uri userProfileImg) {
+        this.userProfileImg = userProfileImg;
+    }
+
+    private Uri userProfileImg;
+
     public String getMajor() {
         return major;
     }
@@ -35,11 +48,38 @@ public class UserSingleton {
         this.major = major;
     }
 
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
     //private String fullName;
+    private String firstName;
+    private String lastName;
     private String major;
     private static String email;
     private static String password;
 
+//    public String getUserImg() {
+//        return userImg;
+//    }
+
+//    public void setUserImg(String userImg) {
+//        this.userImg = userImg;
+//    }
+
+    //private String userImg;
     private UserSingleton() {}
 
     public static UserSingleton getInstance() {

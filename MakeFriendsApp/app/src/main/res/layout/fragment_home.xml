@@ -48,7 +48,7 @@
         android:textSize="16sp" />
 
     <EditText
-        android:id="@+id/biographyTextField"
+        android:id="@+id/FPbioField"
         android:layout_width="274dp"
         android:layout_height="156dp"
         android:layout_alignParentTop="true"

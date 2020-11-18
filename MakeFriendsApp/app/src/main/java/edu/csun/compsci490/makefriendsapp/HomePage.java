@@ -1,17 +1,13 @@
 package edu.csun.compsci490.makefriendsapp;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -43,7 +39,7 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
 
         firstAndLastName = findViewById(R.id.firstAndLastName);
         profilePicture = findViewById(R.id.profilePicture);
-        biographyTextField = findViewById(R.id.biographyTextField);
+        biographyTextField = findViewById(R.id.FPbioField);
         saveButton = findViewById(R.id.saveButton);
 
         getUserFirstNameLastNameBiographyAndProfilePicture();
