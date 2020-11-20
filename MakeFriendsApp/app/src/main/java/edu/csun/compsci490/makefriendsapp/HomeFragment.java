@@ -20,7 +20,11 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
@@ -45,11 +49,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private DatabaseManager databaseManager;
     private UserSingleton userSingleton;
     private String userEmail;
+    private FirebaseAuth firebaseAuth;
 
     private TextView firstAndLastName;
     private ImageView profilePicture;
     private EditText biographyTextField;
     private Button saveButton;
+    private ImageButton logoutBtn;
 
     private ImageButton btnAddScheduleRow, btnRemoveScheduleRow;
     private TableLayout tableLayout;
@@ -104,11 +110,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         databaseManager = new DatabaseManager();
         userSingleton = UserSingleton.getInstance();
         userEmail = userSingleton.getEmail();
+        firebaseAuth = FirebaseAuth.getInstance();
 
         firstAndLastName = view.findViewById(R.id.firstAndLastName);
         profilePicture = view.findViewById(R.id.profilePicture);
-        biographyTextField = view.findViewById(R.id.biographyTextField);
+        biographyTextField = view.findViewById(R.id.FPbioField);
         saveButton = view.findViewById(R.id.saveButton);
+        logoutBtn = view.findViewById(R.id.btn_logOut);
 
         getUserFirstNameLastNameBiographyAndProfilePicture();
 
@@ -128,8 +136,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             }
         });
         saveButton.setOnClickListener(this);
+
         btnAddScheduleRow.setOnClickListener(this);
         btnRemoveScheduleRow.setOnClickListener(this);
+
         return view;
     }
 
@@ -145,6 +155,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             case R.id.saveButton:
                 saveBiography();
                 break;
+
             case R.id.btn_addSchedule:
                 if(tableLayout.getChildCount() < 7){
                     addTableRow();
@@ -158,6 +169,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 } else {
                     Toast.makeText(getContext(),"No courses to remove",Toast.LENGTH_SHORT).show();
                 }
+                break;
         }
     }
 
@@ -459,6 +471,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         });
     }
 
-
+    public void logUserOut(){
+        firebaseAuth.signOut();
+        startActivity(new Intent(getContext(), MainActivity.class));
+        getActivity().finish();
+    }
 
 }

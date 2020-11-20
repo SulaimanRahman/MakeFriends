@@ -110,8 +110,8 @@ public class ChatsFragment extends Fragment{
             chatAdapter.notifyItemRemoved(0);
         }
         // insert new chat with new person at position 0 (top)
-       // chatItems.add(position, new ChatItem(R.drawable.ic_launcher_foreground, "Inserted chat", "home preview"));
-        chatAdapter.notifyItemInserted(position);
+        chatItems.add(position, new ChatItem(R.drawable.ic_baseline_account_circle_24,"UseR HAS BEEN FouNd!"));
+        //chatAdapter.notifyItemInserted(position);
     }
 
     public void deleteChat(int position){
@@ -147,6 +147,7 @@ public class ChatsFragment extends Fragment{
             beginning and use the variables above to get all the data for it.
              */
             chatItems.add(new ChatItem(profilePicUri, contactName, lastMessage, email));
+            insertChat(0);
         }
 
 //        chatItems.add(new ChatItem(R.drawable.ic_launcher_foreground, "Home name", "home preview"));
@@ -160,6 +161,8 @@ public class ChatsFragment extends Fragment{
         chatAdapter.setOnChatClickListener(new ChatAdapter.OnChatClickListener() {
             @Override
             public void onChatClick(int position) {
+                /* still need to handle event when app message item like "user found", "chat ended" etc is clicked
+                * also how item is replaced or removed */
                 chatSingleton.setContactEmail(chatItems.get(position).getContactEmail());
                 chatSingleton.setContactName(chatItems.get(position).getName());
                 chatSingleton.setContactProfilePicUri(chatItems.get(position).getImgResource());
@@ -172,7 +175,6 @@ public class ChatsFragment extends Fragment{
                 deleteChat(position);
             }
         });
-
     }
 
     //when the chat is clicked in the navigation bar
@@ -274,6 +276,4 @@ public class ChatsFragment extends Fragment{
         createChatList(allContactsEmail);
 
     }
-
-
 }
