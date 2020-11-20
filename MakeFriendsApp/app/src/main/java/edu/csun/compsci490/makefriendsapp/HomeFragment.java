@@ -133,7 +133,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             }
         });
         saveButton.setOnClickListener(this);
-
+        logoutBtn.setOnClickListener(this);
         btnAddScheduleRow.setOnClickListener(this);
         btnRemoveScheduleRow.setOnClickListener(this);
 
@@ -166,6 +166,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 } else {
                     Toast.makeText(getContext(),"No courses to remove",Toast.LENGTH_SHORT).show();
                 }
+                break;
+            case R.id.btn_logOut:
+                logUserOut();
                 break;
         }
     }
