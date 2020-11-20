@@ -20,9 +20,6 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -114,7 +111,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         firstAndLastName = view.findViewById(R.id.firstAndLastName);
         profilePicture = view.findViewById(R.id.profilePicture);
-        biographyTextField = view.findViewById(R.id.FPbioField);
+        biographyTextField = view.findViewById(R.id.biographyTextField);
         saveButton = view.findViewById(R.id.saveButton);
         logoutBtn = view.findViewById(R.id.btn_logOut);
 
