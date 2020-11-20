@@ -3,18 +3,22 @@ package edu.csun.compsci490.makefriendsapp;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -46,6 +50,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private ImageView profilePicture;
     private EditText biographyTextField;
     private Button saveButton;
+
+    private ImageButton btnAddScheduleRow, btnRemoveScheduleRow;
+    private TableLayout tableLayout;
+    private TableRow tr;
+    //private TextView sectionCell, courseCell, courseNumCell;
+    private EditText sectionCell, courseCell, courseNumCell;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -102,10 +112,24 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         getUserFirstNameLastNameBiographyAndProfilePicture();
 
+        tableLayout = view.findViewById(R.id.tableLayout);
+        tr = view.findViewById(R.id.tr1);
+        btnAddScheduleRow = view.findViewById(R.id.btn_addSchedule);
+        btnRemoveScheduleRow = view.findViewById(R.id.btn_removeSchedule);
+
         profilePicture.setOnClickListener(this);
         //biographyTextField.setOnClickListener(this);
+        biographyTextField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if(!hasFocus){
+                    saveBiography();
+                }
+            }
+        });
         saveButton.setOnClickListener(this);
-
+        btnAddScheduleRow.setOnClickListener(this);
+        btnRemoveScheduleRow.setOnClickListener(this);
         return view;
     }
 
@@ -121,7 +145,81 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             case R.id.saveButton:
                 saveBiography();
                 break;
+            case R.id.btn_addSchedule:
+                if(tableLayout.getChildCount() < 7){
+                    addTableRow();
+                } else {
+                    Toast.makeText(getContext(),"Schedule is limited to 6 courses",Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case R.id.btn_removeSchedule:
+                if(tableLayout.getChildCount() > 1){
+                    removeTableRow();
+                } else {
+                    Toast.makeText(getContext(),"No courses to remove",Toast.LENGTH_SHORT).show();
+                }
         }
+    }
+
+    private void removeTableRow() {
+        tableLayout.removeViewAt(tableLayout.getChildCount()-1);
+    }
+
+    private void addTableRow() {
+        tr = new TableRow(getContext());
+        sectionCell = new EditText(getContext());
+        courseCell = new EditText(getContext());
+        courseNumCell = new EditText(getContext());
+        TableLayout.LayoutParams tableParams = new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT, 1f);
+        TableRow.LayoutParams rowParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, .25f);
+        tr.setLayoutParams(tableParams);
+
+        sectionCell.setTextSize(16);
+        sectionCell.setGravity(Gravity.CENTER);
+        sectionCell.setPadding(10,10,10,10);
+        sectionCell.setLayoutParams(rowParams);
+        sectionCell.setGravity(Gravity.CENTER);
+        rowParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, .50f);
+        sectionCell.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                // save user section here
+                Toast.makeText(getContext(),"section saved to firestore",Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        courseCell.setTextSize(16);
+        courseCell.setGravity(Gravity.CENTER);
+        courseCell.setPadding(10,10,10,10);
+        courseCell.setGravity(Gravity.CENTER);
+        courseCell.setLayoutParams(rowParams);
+        courseCell.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                // save user course here
+                Toast.makeText(getContext(),"course saved to firestore",Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        rowParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, .25f);
+        courseNumCell.setTextSize(16);
+        courseNumCell.setGravity(Gravity.CENTER);
+        courseNumCell.setPadding(10,10,10,10);
+        courseNumCell.setGravity(Gravity.CENTER);
+        courseNumCell.setLayoutParams(rowParams);
+        courseNumCell.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                // save user course # here
+                Toast.makeText(getContext(),"course# saved to firestore",Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        tr.addView(sectionCell);
+        tr.addView(courseCell);
+        tr.addView(courseNumCell);
+
+        tableLayout.addView(tr);
     }
 
     @Override
