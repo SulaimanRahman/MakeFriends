@@ -3,6 +3,7 @@ package edu.csun.compsci490.makefriendsapp;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -179,7 +180,7 @@ public class ChatsFragment extends Fragment{
 
     //when the chat is clicked in the navigation bar
     public void getAllContactsEmails() {
-
+        Log.d("ChatsFragment", "getAllContactsEmails");
         String documentPath = userSingleton.getEmail() + "/Contacts";
         databaseManager.getFieldValue(documentPath, "All Users", new FirebaseCallback() {
             @Override
@@ -189,15 +190,15 @@ public class ChatsFragment extends Fragment{
                     return;
                 }
 
-                ArrayList allContactsEmail = (ArrayList) value;
+                ArrayList<String> allContactsEmail = (ArrayList) value;
 
                 getContactsNamesAndProfilePicUri(allContactsEmail);
             }
         });
     }
 
-    public void getContactsNamesAndProfilePicUri(final ArrayList allContactsEmail) {
-
+    public void getContactsNamesAndProfilePicUri(final ArrayList<String> allContactsEmail) {
+        Log.d("ChatsFragment", "getContactsNamesAndProfilePicUri");
         for (int i = 0; i < allContactsEmail.size(); i++) {
             String documentPath = allContactsEmail.get(i) + "/Profile";
 
@@ -237,7 +238,7 @@ public class ChatsFragment extends Fragment{
     }
 
     public void getContactsLastMessage(final ArrayList<String> allContactsEmail) {
-
+        Log.d("ChatsFragment", "getContactsLastMessage");
         for (int i = 0; i < allContactsEmail.size(); i++) {
             String documentPath = userSingleton.getEmail() + "/Contacts/" +
                     allContactsEmail.get(i) + "/Chat";

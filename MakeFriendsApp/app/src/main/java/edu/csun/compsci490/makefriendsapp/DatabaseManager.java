@@ -329,15 +329,20 @@ public class DatabaseManager {
         });
     }
 
-    public void getAllDocumentDataInHashMap(String documentPath, final FirebaseCallback firebaseCallback) {
+    public void getAllDocumentDataInHashMap(final String documentPath, final FirebaseCallback firebaseCallback) {
         DocumentReference documentReference = db.document(documentPath);
         documentReference.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
-                HashMap<String, Object> data = new HashMap();
-                data.putAll(documentSnapshot.getData());
-                Log.d(TAG, "Getting all the document data in Hash Map successful");
-                firebaseCallback.onCallback(data);
+                if (documentSnapshot.exists()) {
+                    HashMap<String, Object> data = new HashMap();
+                    data.putAll(documentSnapshot.getData());
+                    Log.d(TAG, "Getting all the document data in Hash Map successful");
+                    firebaseCallback.onCallback(data);
+                } else {
+                    Log.d(TAG, documentPath + " doese not exists");
+                }
+
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override

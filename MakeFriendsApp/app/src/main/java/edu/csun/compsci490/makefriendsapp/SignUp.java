@@ -37,6 +37,7 @@ public class SignUp extends AppCompatActivity {
     ProgressBar progressBar;
     String userID;
     FirebaseFirestore firebaseFirestore;
+    DatabaseManager databaseManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +55,8 @@ public class SignUp extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         progressBar = findViewById(R.id.progressBar);
         firebaseFirestore = FirebaseFirestore.getInstance();
+
+        databaseManager = new DatabaseManager();
 
         // THIS CAUSES APP CRASH
 //        if(firebaseAuth.getCurrentUser() != null){
@@ -123,9 +126,11 @@ public class SignUp extends AppCompatActivity {
                             user.put("Last Name", lastName);
                             user.put("Email",email);
                             user.put("Password", password);
-                            user.put("Biography", null);
-                            user.put("Profile Picture Uri", null);
+                            user.put("Biography", "null");
+                            user.put("Profile Picture Uri", "null");
                             //user.put("Phone",123456);
+                            String documentPath = "Default/All Users";
+                            databaseManager.createNewField(documentPath, userID, email);
 
                             documentReference.set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override

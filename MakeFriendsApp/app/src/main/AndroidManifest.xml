@@ -32,6 +32,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".HomePage" />
+        <activity android:name=".ServerPage"/>
 
         <meta-data
             android:name="preloaded_fonts"
