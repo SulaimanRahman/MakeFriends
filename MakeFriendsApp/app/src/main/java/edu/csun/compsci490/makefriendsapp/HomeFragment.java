@@ -8,6 +8,9 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -60,6 +63,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     //private TextView sectionCell, courseCell, courseNumCell;
     private EditText sectionCell, courseCell, courseNumCell;
 
+    private AutoCompleteTextView interestSearchBar;
+    private String[] autoCompleteData;
+
     public HomeFragment() {
         // Required empty public constructor
         Log.d("HomeFagment", "worked constructor");
@@ -103,7 +109,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-
         databaseManager = new DatabaseManager();
         userSingleton = UserSingleton.getInstance();
         userEmail = userSingleton.getEmail();
@@ -122,6 +127,23 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         btnAddScheduleRow = view.findViewById(R.id.btn_addSchedule);
         btnRemoveScheduleRow = view.findViewById(R.id.btn_removeSchedule);
 
+        autoCompleteData = new String[]{"blue", "green", "yellow", "orange", "red", "purple"};
+        interestSearchBar = view.findViewById(R.id.interestSearchBar);
+        interestSearchBar.setAdapter(new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, autoCompleteData));
+
+        interestSearchBar.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                // add data array element to the interest grid with bubble bg
+                // clear autocomplete text view
+                Toast.makeText(getContext(), autoCompleteData[i], Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
         profilePicture.setOnClickListener(this);
         //biographyTextField.setOnClickListener(this);
         biographyTextField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
