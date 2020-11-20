@@ -29,6 +29,7 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
     private EditText biographyTextField;
     private Button saveButton;
 
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_home);
@@ -47,6 +48,7 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
         profilePicture.setOnClickListener(this);
         //biographyTextField.setOnClickListener(this);
         saveButton.setOnClickListener(this);
+
     }
 
     @Override
