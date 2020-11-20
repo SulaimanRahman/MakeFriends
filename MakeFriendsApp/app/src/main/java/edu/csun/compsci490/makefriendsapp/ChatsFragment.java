@@ -161,6 +161,8 @@ public class ChatsFragment extends Fragment{
         chatAdapter.setOnChatClickListener(new ChatAdapter.OnChatClickListener() {
             @Override
             public void onChatClick(int position) {
+                /* still need to handle event when app message item like "user found", "chat ended" etc is clicked
+                * also how item is replaced or removed */
                 chatSingleton.setContactEmail(chatItems.get(position).getContactEmail());
                 chatSingleton.setContactName(chatItems.get(position).getName());
                 chatSingleton.setContactProfilePicUri(chatItems.get(position).getImgResource());
@@ -173,7 +175,6 @@ public class ChatsFragment extends Fragment{
                 deleteChat(position);
             }
         });
-
     }
 
     //when the chat is clicked in the navigation bar
