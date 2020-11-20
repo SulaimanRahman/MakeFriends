@@ -13,7 +13,7 @@ import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 
-public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
+public class ChatAdapter extends RecyclerView.Adapter {
 
     private static ArrayList<ChatItem> mChatItems;
     private OnChatClickListener mListener;
@@ -21,6 +21,14 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
     public interface OnChatClickListener {
         void onChatClick(int position);
         void onDeleteClick(int position);
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if(mChatItems.get(position).isAppMessage()){
+            return 0;
+        }
+        return 1;
     }
 
     public void setOnChatClickListener(OnChatClickListener listener){
@@ -31,12 +39,58 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
         mChatItems = chatItems;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+
+    @NonNull
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+        View view;
+        if( viewType == 0){
+            view = layoutInflater.inflate(R.layout.app_message_item, parent, false);
+            return new AppMessageViewHolder(view);
+        }
+        view = layoutInflater.inflate(R.layout.recycle_view_chat_item, parent, false);
+        return new ChatViewHolder(view, mListener);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        ChatItem currentItem = mChatItems.get(position);
+
+        if(currentItem.isAppMessage()){
+            // bind to appMessageVH
+            AppMessageViewHolder appMessageViewHolder = (AppMessageViewHolder)holder;
+//            ((AppMessageViewHolder) holder).mAppMessageUserImage.setImageResource(R.drawable.ic_baseline_account_circle_24);
+//            ((AppMessageViewHolder) holder).mAppMessage.setText("USER FOUND!");
+        } else {
+            // bind to chatVH
+            ChatViewHolder chatViewHolder = (ChatViewHolder)holder;
+            if (currentItem.getImgResource() == null) {
+                ((ChatViewHolder) holder).mChatImage.setImageResource(R.drawable.ic_launcher_foreground);
+            } else {
+                Glide.with(((ChatViewHolder) holder).mChatImage.getContext())
+                        .load(currentItem.getImgResource().toString())
+                        .into(((ChatViewHolder) holder).mChatImage);
+            }
+
+            //holder.mChatImage.setImageResource(currentItem.getImgResource());
+            ((ChatViewHolder) holder).mName.setText(currentItem.getName());
+            ((ChatViewHolder) holder).mChatPreview.setText(currentItem.getChatPreview());
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        return mChatItems.size();
+    }
+
+    /************************************************************************************/
+    class ChatViewHolder extends RecyclerView.ViewHolder {
         public ImageView mChatImage;
         public TextView mName, mChatPreview;
         public ImageView mDeleteIcon;
 
-        public ViewHolder(@NonNull View itemView, final OnChatClickListener listener) {
+        public ChatViewHolder(@NonNull View itemView, final OnChatClickListener listener) {
             super(itemView);
             mChatImage = itemView.findViewById(R.id.chatImage);
             mName = itemView.findViewById(R.id.tvChatName);
@@ -78,36 +132,16 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder>{
         }
     }
 
-    @NonNull
-    @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-        View view = layoutInflater.inflate(R.layout.recycle_view_chat_item, parent, false);
-        ViewHolder viewHolder = new ViewHolder(view, mListener);
-        return viewHolder;
-    }
+    class AppMessageViewHolder extends RecyclerView.ViewHolder {
+        ImageView mAppMessageUserImage, mAppMessageIcon;
+        TextView mAppMessage;
 
-    @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        ChatItem currentItem = mChatItems.get(position);
-
-        if (currentItem.getImgResource() == null) {
-            holder.mChatImage.setImageResource(R.drawable.ic_launcher_foreground);
-        } else {
-            Glide.with(holder.mChatImage.getContext())
-                    .load(currentItem.getImgResource().toString())
-                    .into(holder.mChatImage);
+        public AppMessageViewHolder(@NonNull View itemView) {
+            super(itemView);
+            mAppMessageUserImage = itemView.findViewById(R.id.app_message_userImage);
+            mAppMessage = itemView.findViewById(R.id.app_message);
+            mAppMessageIcon = itemView.findViewById(R.id.app_message_icon);
         }
-
-        //holder.mChatImage.setImageResource(currentItem.getImgResource());
-        holder.mName.setText(currentItem.getName());
-        holder.mChatPreview.setText(currentItem.getChatPreview());
-
-    }
-
-    @Override
-    public int getItemCount() {
-        return mChatItems.size();
     }
 
 }
