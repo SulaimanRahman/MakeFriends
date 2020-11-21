@@ -24,6 +24,9 @@ public class FriendsAdapter extends FirestoreRecyclerAdapter<UserSingleton, Frie
 
     @Override
     protected void onBindViewHolder(@NonNull userViewHolder userViewHolder, int i, @NonNull UserSingleton userSingleton) {
+
+        //userSingleton user;
+
         userViewHolder.lastName.setText(userSingleton.getLastName());
         userViewHolder.firstName.setText(userSingleton.getFirstName());
         userViewHolder.userMajor.setText(userSingleton.getMajor());
