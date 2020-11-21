@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 //import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -47,7 +48,10 @@ public class FriendsFragment extends Fragment {
     private static final String TAG = "FriendFragment";
 
     private RecyclerView contactsRecyclerView;
-
+    private ContactsAdapter mAdapter;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference contactRef;
+    private DocumentReference userDocRef;
     private DatabaseManager databaseManager;
     private UserSingleton userSingleton;
     private String userEmail;
@@ -101,6 +105,8 @@ public class FriendsFragment extends Fragment {
         userEmail = userSingleton.getEmail();
         allContactsEmails = new ArrayList();
         contactsData = new HashMap<>();
+        userDocRef = db.collection(userEmail).document("Contacts");
+        getAllContacts();
 
 
         return view;

@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,12 +17,14 @@ import com.bumptech.glide.Glide;
 
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.MyViewHolder> {
 
     private Context mContext;
-    private static List<Contact> mData;
+    private List<UserSingleton> mData;
 
-    public ContactsAdapter(Context mContext, List<Contact> mData) {
+    public ContactsAdapter(Context mContext, List<UserSingleton> mData) {
         this.mContext = mContext;
         this.mData = mData;
     }
@@ -29,19 +32,21 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.MyView
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v;
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.single_user_layout,parent,false);
 
-        LayoutInflater inflater = LayoutInflater.from(mContext);
-        v = inflater.inflate(R.layout.fragment_friends, parent, false);
-
-        return new MyViewHolder(v);
+        return new MyViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-//        Glide.with(mContext)
-//                .load("https://image.tmdb.org/t/p/w500" + mData.get(position).getImg())
-//                .into(holder.img);
+    public void onBindViewHolder(@NonNull MyViewHolder userViewHolder, int position) {
+
+        UserSingleton user = mData.get(position);
+
+        userViewHolder.lastName.setText(user.getLastName());
+        userViewHolder.firstName.setText(user.getFirstName());
+        userViewHolder.userMajor.setText(user.getMajor());
+        Glide.with(mContext).load(user.getUserProfileImg()).into(userViewHolder.userImg);
+        //userViewHolder.userImg.setImageURI(user.getUserProfileImg());
     }
 
     @Override
@@ -52,30 +57,20 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.MyView
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
-        ImageView img;
+        private ImageView userImg;
+        TextView firstName;
+        TextView lastName;
+        TextView userMajor;
+        //CircleImageView userImg;
         //MovieSingleton movieSingleton = MovieSingleton.getInstance();
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            //img = itemView.findViewById(R.id.movieImage);
-
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    int position = getAdapterPosition();
-//                    Log.d("Adaptery", "Position: " + position);
-//                    Log.d("Adaptery", "Id: " + mData.get(position).getId());
-//                    String id = mData.get(position).getId();
-//                    movieSingleton.setMovieId(id);
-//                    movieSingleton.setMovieModelClass((MovieModelClass)mData.get(position));
-//                    AppCompatActivity activity = (AppCompatActivity) view.getContext();
-//                    Fragment myFragment = new MovieProfileFragment();
-//                    activity.getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, myFragment).commit();
-
-
-                }
-            });
+            firstName = itemView.findViewById(R.id.firstName);
+            lastName = itemView.findViewById(R.id.lastName);
+            userImg = itemView.findViewById(R.id.profile_image);
+            userMajor = itemView.findViewById(R.id.userMajor);
         }
 
     }
