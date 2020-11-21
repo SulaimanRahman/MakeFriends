@@ -46,6 +46,7 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     implementation 'com.google.firebase:firebase-core:18.0.0'
     implementation 'com.google.android:flexbox:2.0.1'
+    implementation "com.github.skydoves:balloon:1.2.5"
 
     // Import the BoM for the Firebase platform
     implementation platform('com.google.firebase:firebase-bom:26.1.0')

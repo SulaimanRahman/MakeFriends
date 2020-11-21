@@ -21,12 +21,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.skydoves.balloon.Balloon;
+import com.skydoves.balloon.BalloonAnimation;
+import com.skydoves.balloon.OnBalloonClickListener;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,6 +74,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private String[] autoCompleteData;
     private ArrayList<String> defaultInterests = new ArrayList<>();
     private FlexboxLayout interestBubbleParent;
+    private Button interestBubble;
+    private Balloon balloon;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -134,6 +142,23 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         interestSearchBar = view.findViewById(R.id.interestSearchBar);
         getAllDefaultInterests();
         interestSearchBar.setAdapter(new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_spinner_dropdown_item, defaultInterests));
+
+        balloon = new Balloon.Builder(getActivity().getApplicationContext())
+                .setArrowVisible(false)
+                .setIconDrawable(ContextCompat.getDrawable(getActivity().getApplicationContext(), R.drawable.ic_baseline_remove_circle_24))
+                .setIconSize(20)
+                .setIconSpace(0)
+                .setBalloonAnimation(BalloonAnimation.ELASTIC)
+                .setLifecycleOwner(getActivity())
+                .build();
+
+        // add listeners
+        balloon.setOnBalloonClickListener(new OnBalloonClickListener() {
+            @Override
+            public void onBalloonClick(@NotNull View view) {
+                Toast.makeText(getActivity().getApplicationContext(), interestBubble.getText() + " balloon clicked!", Toast.LENGTH_LONG).show();
+            }
+        });
 
         // if user clicks outside the searchbar the text inside clears
         interestSearchBar.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -529,16 +554,24 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     public void addInterestBubble(String interest){
         // if interest does not already exist in the current users interests on firebase then, add tv
         // else clear input
-        TextView addition = new TextView(getActivity().getApplicationContext());
-        addition.setText(interest);
-        addition.setTextSize(16);
-        addition.setTextColor(getResources().getColor(R.color.white));
-        addition.setBackgroundResource(R.drawable.interest_bubble);
-        addition.setPadding(25,10,25,10);
-        FlexboxLayout.LayoutParams params = new FlexboxLayout.LayoutParams(FlexboxLayout.LayoutParams.WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
+        interestBubble = new Button(getActivity().getApplicationContext());
+        interestBubble.setText(interest);
+        interestBubble.setTextSize(16);
+        interestBubble.setTextColor(getResources().getColor(R.color.white));
+        interestBubble.setBackgroundResource(R.drawable.interest_bubble);
+//        addition.setPadding(25,0,25,0);
+        FlexboxLayout.LayoutParams params = new FlexboxLayout.LayoutParams(FlexboxLayout.LayoutParams.WRAP_CONTENT, 80);
         params.setMargins(10,5,10,15);
-        addition.setLayoutParams(params);
-        interestBubbleParent.addView(addition);
+        interestBubble.setLayoutParams(params);
+        interestBubbleParent.addView(interestBubble);
+
+        interestBubble.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                balloon.showAlignRight(view, -35, -30);
+            }
+        });
+
         // add interest to users interest on firebase
     }
 
