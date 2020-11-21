@@ -168,6 +168,7 @@
             android:drawableTint="@color/grey"
             android:hint="Search Interests"
             android:inputType="text"
+            android:imeOptions="actionDone"
             android:lines="1"
             android:paddingStart="15dp"
             android:paddingLeft="15dp"

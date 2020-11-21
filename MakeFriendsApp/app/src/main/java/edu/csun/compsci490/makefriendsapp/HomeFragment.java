@@ -5,9 +5,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -169,6 +171,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                         interestSearchBar.setText(""); // clear your TextView
                     }
                 }
+            }
+        });
+
+        interestSearchBar.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+                if(EditorInfo.IME_ACTION_DONE == actionId && !textView.getText().toString().isEmpty()){
+                    addInterestBubble(textView.getText().toString());
+                }
+                return false;
             }
         });
 
