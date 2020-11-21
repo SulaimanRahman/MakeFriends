@@ -24,6 +24,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.google.android.flexbox.FlexboxLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 
@@ -66,6 +67,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private AutoCompleteTextView interestSearchBar;
     private String[] autoCompleteData;
     private ArrayList<String> defaultInterests = new ArrayList<>();
+    private FlexboxLayout interestBubbleParent;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -127,11 +129,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         tr = view.findViewById(R.id.tr1);
         btnAddScheduleRow = view.findViewById(R.id.btn_addSchedule);
         btnRemoveScheduleRow = view.findViewById(R.id.btn_removeSchedule);
+        interestBubbleParent = view.findViewById(R.id.flexbox_interestBubbleParent);
 
         interestSearchBar = view.findViewById(R.id.interestSearchBar);
         getAllDefaultInterests();
-        interestSearchBar.setAdapter(new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_dropdown_item, defaultInterests));
+        interestSearchBar.setAdapter(new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_spinner_dropdown_item, defaultInterests));
 
+        // if user clicks outside the searchbar the text inside clears
         interestSearchBar.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean hasFocus) {
@@ -143,20 +147,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             }
         });
 
-//        interestSearchBar.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-//                // add data array element to the interest grid with bubble bg
-//                // clear autocomplete text view
-//                interestSearchBar.setText("");
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> adapterView) {
-//
-//            }
-//        });
-
         // do stuff after item in interest search is clicked
         interestSearchBar.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -164,7 +154,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 //                // hides the keyboard after an item is clicked
 //                InputMethodManager in = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 //                in.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
-                interestSearchBar.setText("");
+
+                //Toast.makeText(getContext(), adapterView.getItemAtPosition(i).toString(), Toast.LENGTH_LONG).show();
+                addInterestBubble(adapterView.getItemAtPosition(i).toString());
+                interestSearchBar.setText(""); // clear your TextView
             }
         });
 
@@ -246,10 +239,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         tr.setLayoutParams(tableParams);
 
         sectionCell.setTextSize(16);
-        sectionCell.setGravity(Gravity.CENTER);
-        sectionCell.setPadding(10,10,10,10);
+        sectionCell.setGravity(Gravity.CENTER_HORIZONTAL);
+        sectionCell.setPadding(10,0,10,15);
         sectionCell.setLayoutParams(rowParams);
-        sectionCell.setGravity(Gravity.CENTER);
         rowParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, .50f);
         sectionCell.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -260,9 +252,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         });
 
         courseCell.setTextSize(16);
-        courseCell.setGravity(Gravity.CENTER);
-        courseCell.setPadding(10,10,10,10);
-        courseCell.setGravity(Gravity.CENTER);
+        sectionCell.setGravity(Gravity.CENTER_HORIZONTAL);
+        courseCell.setPadding(10,0,10,15);
         courseCell.setLayoutParams(rowParams);
         courseCell.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -274,9 +265,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         rowParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, .25f);
         courseNumCell.setTextSize(16);
-        courseNumCell.setGravity(Gravity.CENTER);
-        courseNumCell.setPadding(10,10,10,10);
-        courseNumCell.setGravity(Gravity.CENTER);
+        sectionCell.setGravity(Gravity.CENTER_HORIZONTAL);
+        courseNumCell.setPadding(10,0,10,15);
         courseNumCell.setLayoutParams(rowParams);
         courseNumCell.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -536,4 +526,24 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         getActivity().finish();
     }
 
+    public void addInterestBubble(String interest){
+        // if interest does not already exist in the current users interests on firebase then, add tv
+        // else clear input
+        TextView addition = new TextView(getActivity().getApplicationContext());
+        addition.setText(interest);
+        addition.setTextSize(16);
+        addition.setTextColor(getResources().getColor(R.color.white));
+        addition.setBackgroundResource(R.drawable.interest_bubble);
+        addition.setPadding(25,10,25,10);
+        FlexboxLayout.LayoutParams params = new FlexboxLayout.LayoutParams(FlexboxLayout.LayoutParams.WRAP_CONTENT, FlexboxLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(10,5,10,15);
+        addition.setLayoutParams(params);
+        interestBubbleParent.addView(addition);
+        // add interest to users interest on firebase
+    }
+
+    public void removeInterestBubble(String interest){
+        // remove interest from users interest on firebase
+        // remove textview which contains interest from flexbox layout (interestBubbleParent)
+    }
 }

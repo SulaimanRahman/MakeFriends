@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".HomeFragment">
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -230,6 +229,87 @@
                     android:gravity="center_horizontal"/>
             </TableRow>
         </TableLayout>
+
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/flexbox_interestBubbleParent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            app:flexWrap="wrap"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/interestSearchBar">
+
+<!--            <TextView-->
+<!--                android:id="@+id/textview1"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Short Interest"-->
+<!--                android:textSize="16sp"-->
+<!--                android:background="@drawable/input_bubble"-->
+<!--                android:backgroundTint="@color/red1"-->
+<!--                android:textColor="@color/white"-->
+<!--                android:fontFamily="@font/montserrat"-->
+<!--                android:paddingLeft="10dp"-->
+<!--                android:paddingStart="10dp"-->
+<!--                android:paddingEnd="10dp"-->
+<!--                android:paddingRight="10dp"-->
+<!--                android:paddingBottom="5dp"-->
+<!--                android:paddingTop="5dp"-->
+<!--                android:layout_marginTop="5dp"-->
+<!--                android:layout_marginBottom="5dp"-->
+<!--                android:layout_marginLeft="10dp"-->
+<!--                android:layout_marginStart="10dp"-->
+<!--                android:layout_marginRight="10dp"-->
+<!--                android:layout_marginEnd="10dp"/>-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/textview2"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Medium Interest"-->
+<!--                android:background="@drawable/input_bubble"-->
+<!--                android:backgroundTint="@color/red1"-->
+<!--                android:textColor="@color/white"-->
+<!--                android:textSize="16sp"-->
+<!--                android:fontFamily="@font/montserrat"-->
+<!--                android:paddingLeft="10dp"-->
+<!--                android:paddingStart="10dp"-->
+<!--                android:paddingEnd="10dp"-->
+<!--                android:paddingRight="10dp"-->
+<!--                android:paddingBottom="5dp"-->
+<!--                android:paddingTop="5dp"-->
+<!--                android:layout_marginTop="5dp"-->
+<!--                android:layout_marginBottom="5dp"-->
+<!--                android:layout_marginLeft="10dp"-->
+<!--                android:layout_marginStart="10dp"-->
+<!--                android:layout_marginRight="10dp"-->
+<!--                android:layout_marginEnd="10dp"/>-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/textview3"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Really really long interest"-->
+<!--                android:textSize="16sp"-->
+<!--                android:background="@drawable/input_bubble"-->
+<!--                android:backgroundTint="@color/red1"-->
+<!--                android:textColor="@color/white"-->
+<!--                android:fontFamily="@font/montserrat"-->
+<!--                android:paddingLeft="10dp"-->
+<!--                android:paddingStart="10dp"-->
+<!--                android:paddingEnd="10dp"-->
+<!--                android:paddingRight="10dp"-->
+<!--                android:paddingBottom="5dp"-->
+<!--                android:paddingTop="5dp"-->
+<!--                android:layout_marginTop="5dp"-->
+<!--                android:layout_marginBottom="5dp"-->
+<!--                android:layout_marginLeft="10dp"-->
+<!--                android:layout_marginStart="10dp"-->
+<!--                android:layout_marginRight="10dp"-->
+<!--                android:layout_marginEnd="10dp"/>-->
+        </com.google.android.flexbox.FlexboxLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
 
