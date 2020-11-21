@@ -65,6 +65,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     private AutoCompleteTextView interestSearchBar;
     private String[] autoCompleteData;
+    private ArrayList<String> defaultInterests = new ArrayList<>();
 
     public HomeFragment() {
         // Required empty public constructor
@@ -127,23 +128,46 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         btnAddScheduleRow = view.findViewById(R.id.btn_addSchedule);
         btnRemoveScheduleRow = view.findViewById(R.id.btn_removeSchedule);
 
-        autoCompleteData = new String[]{"blue", "green", "yellow", "orange", "red", "purple"};
         interestSearchBar = view.findViewById(R.id.interestSearchBar);
-        interestSearchBar.setAdapter(new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, autoCompleteData));
+        getAllDefaultInterests();
+        interestSearchBar.setAdapter(new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_dropdown_item, defaultInterests));
 
-        interestSearchBar.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        interestSearchBar.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                // add data array element to the interest grid with bubble bg
-                // clear autocomplete text view
-                Toast.makeText(getContext(), autoCompleteData[i], Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
+            public void onFocusChange(View view, boolean hasFocus) {
+                if (!hasFocus) {
+                    if (!defaultInterests.contains(interestSearchBar.getText().toString())){
+                        interestSearchBar.setText(""); // clear your TextView
+                    }
+                }
             }
         });
+
+//        interestSearchBar.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+//                // add data array element to the interest grid with bubble bg
+//                // clear autocomplete text view
+//                interestSearchBar.setText("");
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> adapterView) {
+//
+//            }
+//        });
+
+        // do stuff after item in interest search is clicked
+        interestSearchBar.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+//                // hides the keyboard after an item is clicked
+//                InputMethodManager in = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+//                in.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
+                interestSearchBar.setText("");
+            }
+        });
+
         profilePicture.setOnClickListener(this);
         //biographyTextField.setOnClickListener(this);
         biographyTextField.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -158,6 +182,19 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         logoutBtn.setOnClickListener(this);
         btnAddScheduleRow.setOnClickListener(this);
         btnRemoveScheduleRow.setOnClickListener(this);
+
+//        String[] interestData = {"Programming", "Web Development", "Computer Science", "Linear Algebra", "Android Development",
+//                                "iOS development", "Linux", "Gaming", "Working Out", "Hiking",
+//                                "Embedded Systems", "Machine Learning", "Cooking", "Tennis", "Dodgers",
+//                                "Internet of Things", "Java Language", "Cooking", "Baseball", "Basketball", "Soccer",
+//                                "Volleyball"};
+//
+//        // helper code to populate db w interests
+//        int dataLength = interestData.length;
+//        for(int i = 0; i < dataLength; i++){
+//            databaseManager.updateTheField("Default/All Interests", "Interest" + (i+1), interestData[i]);
+//        }
+//
 
         return view;
     }
@@ -376,6 +413,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 for (int i = 0; i < interests.size(); i++) {
                     String interest = interests.get(i);
                     // write the interest in the appropriate place in the GUI
+                    // insert each interest as a textview into a grid at bottom of the home frag
                 }
             }
         });
@@ -465,7 +503,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     }
 
     public void getAllDefaultInterests() {
-        String documentPath = "Default/Default Interests";
+        String documentPath = "Default/All Interests";
 
         databaseManager.getAllDocumentDataInHashMap(documentPath, new FirebaseCallback() {
             @Override
@@ -475,12 +513,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     return;
                 }
 
-                ArrayList interests = new ArrayList();
-
+                ArrayList<String> interests = new ArrayList();
                 HashMap<String, Object> data = (HashMap) value;
                 for (int i = 0; i < data.size(); i++) {
                     String key = "Interest" + (i + 1);
-                    interests.add(data.get(key));
+                    interests.add(data.get(key).toString());
                 }
 
                 /*
@@ -488,7 +525,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 when the user is searching for the interests or maybe load this everytime the user
                 comes to the homepage
                  */
-
+                defaultInterests.addAll(interests);
             }
         });
     }

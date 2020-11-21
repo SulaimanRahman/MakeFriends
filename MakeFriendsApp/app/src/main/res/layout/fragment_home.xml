@@ -13,7 +13,7 @@
         android:focusableInTouchMode="true"
         android:clickable="true"
         android:focusable="true"
-        android:paddingBottom="200dp">
+        android:paddingBottom="250dp">
 
         <ImageButton
             android:id="@+id/btn_logOut"
@@ -180,7 +180,8 @@
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView4"/>
+            app:layout_constraintTop_toBottomOf="@+id/textView4"
+            />
 
         <TableLayout
             android:id="@+id/tableLayout"
