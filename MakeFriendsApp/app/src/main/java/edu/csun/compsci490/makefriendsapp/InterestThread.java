@@ -199,7 +199,7 @@ public class InterestThread extends Thread {
                 DocumentSnapshot snapshot = (DocumentSnapshot) value;
 
                 if (snapshot.getData().size() == 0) {//if no ones in the list
-                    checkIfUser1IsLookingForAnyUserOrOnlyInterestMatch();//-----------------------------------------------------------
+                    checkIfUser1IsLookingForAnyUserOrOnlyInterestMatch();
                 } else {
                     getSecondUserFromTheListToCompareWithAndLockIt(snapshot);
                 }
@@ -218,6 +218,7 @@ public class InterestThread extends Thread {
         ArrayList<String> secondUserContacts = new ArrayList<>();
 
         comparingSize = keys.size();
+
         for (int i = 0; i < keys.size(); i++) {
             try {
                 comparingSem.acquire();
@@ -227,22 +228,42 @@ public class InterestThread extends Thread {
 
                 comparingCurrentSize = i;
                 user2UID = keys.get(i);
+
                 databaseManager.getFieldValue(allUsersDocumentPath, user2UID, new FirebaseCallback() {
                     @Override
                     public void onCallback(Object value) {
                         user2Email = value.toString();
 
+                        interestUserProcessedTextView.setText("Comparing " + user1Email + " and " + user2Email);
                         user2Value = snapshot.get(user2UID).toString();
 
-                        String documentPath = user2Email + "/More Info";
-                        String fieldName = "Can Cancel Searching";
+                        final String documentPath = user2Email + "/More Info";
+                        final String fieldName = "Can Cancel Searching";
 
                         //locking user2
                         databaseManager.updateTheField(documentPath, fieldName, "false");
 
-                        interestUserProcessedTextView.setText("Comparing " + user1Email + " and " + user2Email);
+                        //checking if user wants to cancel the searching
+                        String user2MoreInfoDocPath = user2Email + "More Info";
+                        String cancelingFieldName = "Canceling";
 
-                        checkIfUser2IsAlreadyAContactWithUser1();
+
+                        databaseManager.getFieldValue(user2MoreInfoDocPath, cancelingFieldName, new FirebaseCallback() {
+                            @Override
+                            public void onCallback(Object value) {
+                                String status = value.toString();
+                                if (status.equals("true")) {//user 2 wants to cancel the search
+                                    //unlocking user2
+                                    databaseManager.updateTheField(documentPath, fieldName, "true");
+                                    comparingSem.release();
+                                } else {
+                                    checkIfUser2IsAlreadyAContactWithUser1();
+                                }
+                            }
+                        });
+
+
+
                     }
                 });
             } catch (InterruptedException e) {

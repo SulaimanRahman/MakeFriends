@@ -14,6 +14,20 @@
         android:clickable="true"
         android:focusable="true" >
 
+        <ImageButton
+            android:id="@+id/btn_logOut"
+            android:layout_marginLeft="10dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/button"
+            android:backgroundTint="@color/colorPrimaryRed"
+            android:rotation="180"
+            android:src="@drawable/ic_baseline_exit_to_app_24"
+            android:tint="@color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <TextView
             android:id="@+id/firstAndLastName"
             android:layout_width="wrap_content"
@@ -216,5 +230,3 @@
         </TableLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>
-
-
