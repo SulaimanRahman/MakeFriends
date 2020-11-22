@@ -173,11 +173,11 @@ public class InterestThread extends Thread {
 
                 user1Value = snapshot.get(user1UID).toString();
 
-                String user1MoreInfoDoc = user1Email + "/More Info";
+                String user1CanCancelSearchingDocPath = user1Email + "/Search Canceling";
                 String fieldName = "Can Cancel Searching";
 
                 //locking user1
-                databaseManager.updateTheField(user1MoreInfoDoc, fieldName, "false");
+                databaseManager.updateTheField(user1CanCancelSearchingDocPath, fieldName, "false");
 
                 //removing user1 from the queue
                 String interestQueueDocPath = "Connecting/Interest Queue";
@@ -237,7 +237,7 @@ public class InterestThread extends Thread {
                         interestUserProcessedTextView.setText("Comparing " + user1Email + " and " + user2Email);
                         user2Value = snapshot.get(user2UID).toString();
 
-                        final String documentPath = user2Email + "/More Info";
+                        final String documentPath = user2Email + "/Search Canceling";
                         final String fieldName = "Can Cancel Searching";
 
                         //locking user2
@@ -296,7 +296,7 @@ public class InterestThread extends Thread {
                     for (int i = 0; i < user1ContactsList.size(); i++) {
                         if (user1ContactsList.get(i).equals(user2Email)) {//user2 is already a contact with user1
                             //unlocking user2
-                            String user2MoreInfoDocPath = user2Email + "/More Info";
+                            String user2MoreInfoDocPath = user2Email + "/Search Canceling";
                             String searchingFieldName = "Can Cancel Searching";
                             databaseManager.updateTheField(user2MoreInfoDocPath, searchingFieldName, "true");
 
@@ -331,7 +331,7 @@ public class InterestThread extends Thread {
                     for (int i = 0; i < blockedUsers.size(); i++) {
                         if (blockedUsers.get(i).equals(user2Email)) {//user2 has been blocked by user1
                             //unlocking user2
-                            String user2MoreInfoDocPath = user2Email + "/More Info";
+                            String user2MoreInfoDocPath = user2Email + "/Search Canceling";
                             String searchingFieldName = "Can Cancel Searching";
                             databaseManager.updateTheField(user2MoreInfoDocPath, searchingFieldName, "true");
 
@@ -395,7 +395,7 @@ public class InterestThread extends Thread {
             }
             if (i == user1Interests.size() - 1) {
                 //unlock user 2
-                String documentPath = user2Email + "/More Info";
+                String documentPath = user2Email + "/Search Canceling";
                 String fieldName = "Can Cancel Searching";
                 databaseManager.updateTheField(documentPath, fieldName, "true");
                 comparingSem.release();
@@ -437,7 +437,7 @@ public class InterestThread extends Thread {
     private void unlockUser1() {
         Log.d(TAG, "unlockUser1()");
 
-        String user1DocumentPath = user1Email + "/More Info";
+        String user1DocumentPath = user1Email + "/Search Canceling";
         // user2DocumentPath = user1Email + "/More Info";
         String fieldName = "Can Cancel Searching";
         databaseManager.updateTheField(user1DocumentPath, fieldName, "true");
@@ -510,14 +510,15 @@ public class InterestThread extends Thread {
 
         //unlocking Both users variables
         String user1MoreInfoDocumentPath = user1Email + "/More Info";
+        String user1CanCancelSearchingDocPath = user1Email + "/Search Canceling";
         String user2MoreInfoDocumentPath = user2Email + "/More Info";
-
+        String user2CanCancelSearchingDocPath = user2Email + "/Search Canceling";
         //unlocking user1
-        databaseManager.updateTheField(user1MoreInfoDocumentPath, "Can Cancel Searching", "true");
+        databaseManager.updateTheField(user1CanCancelSearchingDocPath, "Can Cancel Searching", "true");
         databaseManager.updateTheField(user1MoreInfoDocumentPath, "Done Searching", "true");
 
         //unlocking user2
-        databaseManager.updateTheField(user2MoreInfoDocumentPath, "Can Cancel Searching", "true");
+        databaseManager.updateTheField(user2CanCancelSearchingDocPath, "Can Cancel Searching", "true");
         databaseManager.updateTheField(user2MoreInfoDocumentPath, "Done Searching", "true");
 
         interestUserProcessedTextView.setText("Starting all over");
