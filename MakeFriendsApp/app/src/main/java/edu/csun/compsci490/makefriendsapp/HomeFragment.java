@@ -73,7 +73,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private EditText sectionCell, courseCell, courseNumCell;
 
     private AutoCompleteTextView interestSearchBar;
-    private String[] autoCompleteData;
     private ArrayList<String> defaultInterests = new ArrayList<>();
     private FlexboxLayout interestBubbleParent;
     private Button interestBubble;
@@ -145,22 +144,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         getAllDefaultInterests();
         interestSearchBar.setAdapter(new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_spinner_dropdown_item, defaultInterests));
 
-        balloon = new Balloon.Builder(getActivity().getApplicationContext())
-                .setArrowVisible(false)
-                .setIconDrawable(ContextCompat.getDrawable(getActivity().getApplicationContext(), R.drawable.ic_baseline_remove_circle_24))
-                .setIconSize(20)
-                .setIconSpace(0)
-                .setBalloonAnimation(BalloonAnimation.ELASTIC)
-                .setLifecycleOwner(getActivity())
-                .build();
 
-        // add listeners
-        balloon.setOnBalloonClickListener(new OnBalloonClickListener() {
-            @Override
-            public void onBalloonClick(@NotNull View view) {
-                Toast.makeText(getActivity().getApplicationContext(), interestBubble.getText() + " balloon clicked!", Toast.LENGTH_LONG).show();
-            }
-        });
 
         // if user clicks outside the searchbar the text inside clears
         interestSearchBar.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -174,11 +158,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             }
         });
 
+        // allows user to add a custom interest
         interestSearchBar.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
                 if(EditorInfo.IME_ACTION_DONE == actionId && !textView.getText().toString().isEmpty()){
                     addInterestBubble(textView.getText().toString());
+                    interestSearchBar.setText("");
                 }
                 return false;
             }
@@ -192,9 +178,28 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 //                InputMethodManager in = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 //                in.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
 
-                //Toast.makeText(getContext(), adapterView.getItemAtPosition(i).toString(), Toast.LENGTH_LONG).show();
+                //get whatever autocomplete text was selected and add it to a bubble
                 addInterestBubble(adapterView.getItemAtPosition(i).toString());
-                interestSearchBar.setText(""); // clear your TextView
+                // clear your TextView
+                interestSearchBar.setText("");
+            }
+        });
+
+        // implementation "com.github.skydoves:balloon:1.2.5"
+        // balloon is the minus button which pops up after clicking an interest
+        balloon = new Balloon.Builder(getActivity().getApplicationContext())
+                .setArrowVisible(false)
+                .setIconDrawable(ContextCompat.getDrawable(getActivity().getApplicationContext(), R.drawable.ic_baseline_remove_circle_24))
+                .setIconSize(20)
+                .setIconSpace(0)
+                .setBalloonAnimation(BalloonAnimation.ELASTIC)
+                .setLifecycleOwner(getActivity())
+                .build();
+        // add listener to remove the clicked interest bubble
+        balloon.setOnBalloonClickListener(new OnBalloonClickListener() {
+            @Override
+            public void onBalloonClick(@NotNull View view) {
+                removeInterestBubble(interestBubble);
             }
         });
 
@@ -213,19 +218,18 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         btnAddScheduleRow.setOnClickListener(this);
         btnRemoveScheduleRow.setOnClickListener(this);
 
-//        String[] interestData = {"Programming", "Web Development", "Computer Science", "Linear Algebra", "Android Development",
-//                                "iOS development", "Linux", "Gaming", "Working Out", "Hiking",
-//                                "Embedded Systems", "Machine Learning", "Cooking", "Tennis", "Dodgers",
-//                                "Internet of Things", "Java Language", "Cooking", "Baseball", "Basketball", "Soccer",
-//                                "Volleyball"};
-//
-//        // helper code to populate db w interests
-//        int dataLength = interestData.length;
-//        for(int i = 0; i < dataLength; i++){
-//            databaseManager.updateTheField("Default/All Interests", "Interest" + (i+1), interestData[i]);
-//        }
-//
+        /* //this code cane be used to populate the interests on the firebase db
+        String[] interestData = {"Programming", "Web Development", "Computer Science", "Linear Algebra", "Android Development",
+                                "iOS development", "Linux", "Gaming", "Working Out", "Hiking",
+                                "Embedded Systems", "Machine Learning", "Cooking", "Tennis", "Dodgers",
+                                "Internet of Things", "Java Language", "Cooking", "Baseball", "Basketball", "Soccer",
+                                "Volleyball"};
 
+        // helper code to populate db w interests
+        int dataLength = interestData.length;
+        for(int i = 0; i < dataLength; i++){
+            databaseManager.updateTheField("Default/All Interests", "Interest" + (i+1), interestData[i]);
+        }*/
         return view;
     }
 
@@ -262,10 +266,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+    // removes a row from the schedule table
     private void removeTableRow() {
         tableLayout.removeViewAt(tableLayout.getChildCount()-1);
     }
 
+    // adds a row to the schedule
     private void addTableRow() {
         tr = new TableRow(getContext());
         sectionCell = new EditText(getContext());
@@ -283,32 +289,32 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         sectionCell.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                // save user section here
+                // TODO: save user section to firebase here
                 Toast.makeText(getContext(),"section saved to firestore",Toast.LENGTH_SHORT).show();
             }
         });
 
         courseCell.setTextSize(16);
-        sectionCell.setGravity(Gravity.CENTER_HORIZONTAL);
+        courseCell.setGravity(Gravity.CENTER_HORIZONTAL);
         courseCell.setPadding(10,0,10,15);
         courseCell.setLayoutParams(rowParams);
         courseCell.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                // save user course here
+                // TODO: save user course to firebase here
                 Toast.makeText(getContext(),"course saved to firestore",Toast.LENGTH_SHORT).show();
             }
         });
 
         rowParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, .25f);
         courseNumCell.setTextSize(16);
-        sectionCell.setGravity(Gravity.CENTER_HORIZONTAL);
+        courseCell.setGravity(Gravity.CENTER_HORIZONTAL);
         courseNumCell.setPadding(10,0,10,15);
         courseNumCell.setLayoutParams(rowParams);
         courseNumCell.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                // save user course # here
+                // TODO: save user course# to firebase here
                 Toast.makeText(getContext(),"course# saved to firestore",Toast.LENGTH_SHORT).show();
             }
         });
@@ -411,9 +417,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     String semester = documents.get(i).get("Semester").toString();
                     String year = documents.get(i).get("Year").toString();
 
-                    /*
-                    set the data in the list under user schedule
-                     */
+                    // TODO: add user schedule in dynamic table
+                    
                 }
 
             }
@@ -439,8 +444,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
                 for (int i = 0; i < interests.size(); i++) {
                     String interest = interests.get(i);
-                    // write the interest in the appropriate place in the GUI
-                    // insert each interest as a textview into a grid at bottom of the home frag
+                    // TODO: add each user interest in an interest bubble
                 }
             }
         });
@@ -564,8 +568,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     }
 
     public void addInterestBubble(String interest){
-        // if interest does not already exist in the current users interests on firebase then, add tv
-        // else clear input
+        // TODO: if interest does not already exist in the current users interests on firebase then,
+        // add tv else clear input
+
+
         interestBubble = new Button(getActivity().getApplicationContext());
         interestBubble.setText(interest);
         interestBubble.setTextSize(16);
@@ -581,14 +587,18 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onClick(View view) {
                 balloon.showAlignRight(view, -35, -30);
+                interestBubble = (Button) view;
             }
         });
-
-        // add interest to users interest on firebase
+        // TODO: add interest to users interest on firebase
     }
 
-    public void removeInterestBubble(String interest){
-        // remove interest from users interest on firebase
-        // remove textview which contains interest from flexbox layout (interestBubbleParent)
+    public void removeInterestBubble(Button interest){
+        // TODO:remove interest from users interest on firebase
+
+
+        // remove textview/bubble which contains interest from flexbox layout (interestBubbleParent)
+        interestBubbleParent.removeView(interest);
+        balloon.dismiss();
     }
 }
