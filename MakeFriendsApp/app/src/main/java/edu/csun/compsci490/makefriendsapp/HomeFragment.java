@@ -110,7 +110,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         firebaseAuth = FirebaseAuth.getInstance();
 
         firstAndLastName = view.findViewById(R.id.firstAndLastName);
-        profilePicture = view.findViewById(R.id.profilePicture);
+        profilePicture = view.findViewById(R.id.profile_image);
         biographyTextField = view.findViewById(R.id.biographyTextField);
         saveButton = view.findViewById(R.id.saveButton);
         logoutBtn = view.findViewById(R.id.btn_logOut);
@@ -144,7 +144,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.profilePicture:
+            case R.id.profile_image:
                 Intent getProfilePictureURI = new Intent(Intent.ACTION_GET_CONTENT);
                 getProfilePictureURI.setType("*/*");
                 startActivityForResult(getProfilePictureURI, 1);
