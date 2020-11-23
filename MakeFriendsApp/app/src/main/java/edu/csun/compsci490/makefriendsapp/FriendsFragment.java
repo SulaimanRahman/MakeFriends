@@ -127,7 +127,6 @@ public class FriendsFragment extends Fragment {
         contactsData = new HashMap<>();
         searchQuery = view.findViewById(R.id.contactSearchBar);
         gettingEmails();
-        test = view.findViewById(R.id.textView);
 
         setOnClickListener(userData);
         mAdapter = new ContactsAdapter(getContext(),userData,listener);
