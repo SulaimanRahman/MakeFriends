@@ -127,7 +127,6 @@ public class FriendsFragment extends Fragment {
         contactsData = new HashMap<>();
         searchQuery = view.findViewById(R.id.contactSearchBar);
         gettingEmails();
-        test = view.findViewById(R.id.textView);
 
         setOnClickListener(userData);
         mAdapter = new ContactsAdapter(getContext(),userData,listener);
@@ -178,24 +177,18 @@ public class FriendsFragment extends Fragment {
 
     public void gettingData(final List<String> emails){
         for(int i = 0; i < emails.size();i++) {
-            //test2.setText(please.get(i));
             db.collection(emails.get(i)).document("Profile")
                     .get()
                     .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                         @Override
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
                             if (documentSnapshot != null) {
-                                //UserSingleton user = new UserSingleton();
                                 Contact user = new Contact();
-                                //user.setFirstName(documentSnapshot.getString("First Name"));
-                                //test2.setText(allEmails.get(0));
-                                //user.setLastName(documentSnapshot.getString("Last Name"));
                                 String name = documentSnapshot.getString("First Name") +" "+ documentSnapshot.getString("Last Name");
                                 user.setContactName(name);
                                 user.setUserImg(documentSnapshot.getString("Profile Picture Uri"));
                                 user.setContactBio(documentSnapshot.getString("Biography"));
                                 user.setContactMajor("Computer Science");
-                                //test2.setText(user.getUserImg());
 
                                 userData.add(user);
 
@@ -225,9 +218,6 @@ public class FriendsFragment extends Fragment {
                         DocumentSnapshot document = task.getResult();
                         allEmails = (List<String>) document.get("All Users");
                         gettingData(allEmails);
-                        String size = Integer.toString(allEmails.size());
-                        test.setText(size);
-                        Log.d(TAG, size);
                     }
                 });
     }
