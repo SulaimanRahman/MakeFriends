@@ -92,7 +92,6 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.MyView
         @Override
         public void onClick(View view) {
             listener.onClick(view,getAdapterPosition());
-            notifyDataSetChanged();
         }
     }
 }
