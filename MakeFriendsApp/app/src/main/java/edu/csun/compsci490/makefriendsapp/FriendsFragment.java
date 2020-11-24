@@ -119,46 +119,39 @@ public class FriendsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_friends,container,false);
 
-        contactsRecyclerView = view.findViewById(R.id.myRecyclerView);
         databaseManager = new DatabaseManager();
         userSingleton = UserSingleton.getInstance();
         userEmail = userSingleton.getEmail();
         allContactsEmails = new ArrayList();
         contactsData = new HashMap<>();
         searchQuery = view.findViewById(R.id.contactSearchBar);
+        contactsRecyclerView = view.findViewById(R.id.myRecyclerView);
         gettingEmails();
-
         setOnClickListener(userData);
-        mAdapter = new ContactsAdapter(getContext(),userData,listener);
+
         contactsRecyclerView.setHasFixedSize(true);
         contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mAdapter = new ContactsAdapter(getActivity(), userData, listener);
         contactsRecyclerView.setAdapter(mAdapter);
-        searchQuery.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-            }
+            searchQuery.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                }
 
-            }
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-            @Override
-            public void afterTextChanged(Editable editable) {
-//                if(editable.toString().isEmpty()){
-//                    setOnClickListener(userData);
-//                    mAdapter = new ContactsAdapter(getContext(),userData,listener);
-//                    contactsRecyclerView.setHasFixedSize(true);
-//                    contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-//                    contactsRecyclerView.setAdapter(mAdapter);
-//                }
-//                else{
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
                     filter(editable.toString());
-                //}
+                }
 
-            }
-        });
+            });
+
         return view;
     }
     private void filter(String query){
@@ -201,7 +194,6 @@ public class FriendsFragment extends Fragment {
                     }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                     Toast.makeText(getContext(), "WAH DAH FAK?", Toast.LENGTH_SHORT).show();
                     // Log.d("Tag",e.toString());
                     data = "Failed";
                 }
@@ -216,9 +208,19 @@ public class FriendsFragment extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         DocumentSnapshot document = task.getResult();
-                        allEmails = (List<String>) document.get("All Users");
-                        gettingData(allEmails);
-                    }
+
+                            String test = document.get("All Users").toString();
+                            //Object test = document.get("All Users");
+                            if(!test.equals("none")) {
+                                //Toast.makeText(getContext(), "we cool", Toast.LENGTH_LONG).show();
+                                allEmails = (List<String>) document.get("All Users");
+                                    if(!allEmails.get(0).equals("")) {
+                                        gettingData(allEmails);
+                                    }
+                                }
+                            }
+
+
                 });
     }
 

@@ -11,32 +11,31 @@
         android:id="@+id/FPprofile_image"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_marginStart="50dp"
-        android:layout_marginLeft="50dp"
-        android:layout_marginTop="80dp"
+        android:layout_marginStart="128dp"
+        android:layout_marginLeft="128dp"
+        android:layout_marginTop="112dp"
+        app:layout_constraintBottom_toTopOf="@+id/FPbioField"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
         tools:srcCompat="@tools:sample/avatars" />
-
 
     <TextView
         android:id="@+id/FPFullName"
         android:layout_width="wrap_content"
         android:layout_height="20dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="80dp"
+        android:layout_marginStart="160dp"
+        android:layout_marginLeft="160dp"
+        android:layout_marginTop="60dp"
         android:hint="FullName"
-        app:layout_constraintStart_toEndOf="@+id/FPprofile_image"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/FPbioField"
         android:layout_width="274dp"
         android:layout_height="156dp"
-        android:layout_marginStart="50dp"
-        android:layout_marginLeft="50dp"
-        android:layout_marginBottom="300dp"
+        android:layout_marginBottom="268dp"
         android:background="@color/lightGrey"
         android:ems="10"
         android:hint="User Bio Goes here..."
@@ -46,14 +45,17 @@
         android:textColor="#000"
         android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/FPInterest"
         android:layout_width="100dp"
-        android:layout_marginLeft="30dp"
         android:layout_height="20dp"
+        android:layout_marginTop="76dp"
+        android:layout_marginEnd="145dp"
+        android:layout_marginRight="145dp"
         android:hint="interests"
-        app:layout_constraintStart_toEndOf="@+id/FPprofile_image"
-        app:layout_constraintTop_toBottomOf="@+id/FPFullName" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/FPbioField" />
 </androidx.constraintlayout.widget.ConstraintLayout>
