@@ -39,7 +39,7 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
         userEmail = userSingleton.getEmail();
 
         firstAndLastName = findViewById(R.id.firstAndLastName);
-        profilePicture = findViewById(R.id.profilePicture);
+        profilePicture = findViewById(R.id.profile_image);
         biographyTextField = findViewById(R.id.FPbioField);
         saveButton = findViewById(R.id.saveButton);
 
@@ -54,7 +54,7 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.profilePicture:
+            case R.id.profile_image:
                 Intent getProfilePictureURI = new Intent(Intent.ACTION_GET_CONTENT);
                 getProfilePictureURI.setType("*/*");
                 startActivityForResult(getProfilePictureURI, 1);

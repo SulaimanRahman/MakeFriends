@@ -1,6 +1,7 @@
 package edu.csun.compsci490.makefriendsapp;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,19 +15,22 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import de.hdodenhof.circleimageview.CircleImageView;
-
 public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.MyViewHolder> {
 
     private Context mContext;
-    private List<UserSingleton> mData;
-
-    public ContactsAdapter(Context mContext, List<UserSingleton> mData) {
+    private List<Contact> mData;
+    private RecyclerviewClickListener listener;
+    StorageReference storageReference;
+    public ContactsAdapter(Context mContext, List<Contact> mData, RecyclerviewClickListener listener) {
         this.mContext = mContext;
         this.mData = mData;
+        this.listener = listener;
     }
 
     @NonNull
@@ -38,40 +42,56 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.MyView
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder userViewHolder, int position) {
+    public void onBindViewHolder(@NonNull final MyViewHolder userViewHolder, int position) {
 
-        UserSingleton user = mData.get(position);
-
-        userViewHolder.lastName.setText(user.getLastName());
-        userViewHolder.firstName.setText(user.getFirstName());
-        userViewHolder.userMajor.setText(user.getMajor());
-        Glide.with(mContext).load(user.getUserProfileImg()).into(userViewHolder.userImg);
-        //userViewHolder.userImg.setImageURI(user.getUserProfileImg());
+        Contact user = mData.get(position);
+        storageReference = FirebaseStorage.getInstance().getReference().child(user.getUserImg());
+        storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Glide.with(mContext)
+                        .load(uri.toString())
+                        .placeholder(R.drawable.ic_baseline_account_circle_24)
+                        .into(userViewHolder.userImg);
+            }
+        });
+        userViewHolder.fullName.setText(user.getContactName());
+        userViewHolder.userMajor.setText(user.getContactMajor());
+        //userViewHolder.userMajor.setText(user.getMajor());
     }
-
     @Override
     public int getItemCount() {
         return mData.size();
     }
 
+    public void filterList(ArrayList<Contact> filteredList){
+        mData = filteredList;
+        notifyDataSetChanged();
+    }
 
-    public static class MyViewHolder extends RecyclerView.ViewHolder {
+    public interface RecyclerviewClickListener{
+        void onClick(View view,int pos);
+    }
+
+
+    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private ImageView userImg;
-        TextView firstName;
-        TextView lastName;
-        TextView userMajor;
-        //CircleImageView userImg;
-        //MovieSingleton movieSingleton = MovieSingleton.getInstance();
+        private TextView fullName;
+        private TextView userMajor;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            firstName = itemView.findViewById(R.id.firstName);
-            lastName = itemView.findViewById(R.id.lastName);
+            fullName = itemView.findViewById(R.id.fullName);
             userImg = itemView.findViewById(R.id.profile_image);
             userMajor = itemView.findViewById(R.id.userMajor);
+            itemView.setOnClickListener(this);
         }
 
+        @Override
+        public void onClick(View view) {
+            listener.onClick(view,getAdapterPosition());
+        }
     }
 }
