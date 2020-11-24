@@ -127,10 +127,29 @@ public class SignUp extends AppCompatActivity {
                             user.put("Email",email);
                             user.put("Password", password);
                             user.put("Biography", "null");
-                            user.put("Profile Picture Uri", "null");
+                            user.put("Profile Picture Uri", "Default/BlankProfilePic");
                             //user.put("Phone",123456);
+
                             String documentPath = "Default/All Users";
                             databaseManager.createNewField(documentPath, userID, email);
+
+                            String userMoreInfoDocPath = email + "/More Info";
+                            databaseManager.createDocument(userMoreInfoDocPath, "Canceling", "false");
+                            databaseManager.createNewField(userMoreInfoDocPath, "Done Searching", "false");
+                            databaseManager.createNewField(userMoreInfoDocPath, "Interest Array", "none");
+                            databaseManager.createNewField(userMoreInfoDocPath, "Location", "none");
+                            databaseManager.createNewField(userMoreInfoDocPath, "Searching For", "none");
+                            databaseManager.createNewField(userMoreInfoDocPath, "User Is In Queue", "none");
+
+                            String profileSettingsDocPath = email + "/Profile Page Settings";
+                            databaseManager.createDocument(profileSettingsDocPath, "Can Edit Interests", "true");
+
+                            String contactsDocPath = email + "/Contacts";
+                            databaseManager.createDocument(contactsDocPath, "All Users", "none");
+                            databaseManager.createNewField(contactsDocPath, "Blocked Users", "none");
+
+                            String searchCancelingDocPath = email + "/Search Canceling";
+                            databaseManager.createDocument(searchCancelingDocPath, "Can Cancel Searching", "true");
 
                             documentReference.set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
@@ -145,9 +164,7 @@ public class SignUp extends AppCompatActivity {
                                 }
                             });
 
-                            Toast.makeText(SignUp.this,"Your Account has been Sucessfully Created!",Toast.LENGTH_SHORT).show();
-
-
+                            Toast.makeText(SignUp.this,"Your Account has been Successfully Created!",Toast.LENGTH_SHORT).show();
 
                             startActivity(new Intent(getApplicationContext(), MainNavigation.class));
                         }

@@ -210,7 +210,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
     }
 
     public void setActionListenerToCanCancelSearching(DocumentSnapshot snapshot) {
-        snapshot.getReference().addSnapshotListener(new EventListener<DocumentSnapshot>() {
+        snapshot.getReference().addSnapshotListener(getActivity(), new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
                 String fieldName = "Can Cancel Searching";
@@ -274,15 +274,16 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         databaseManager.getFieldValue(interestsDocPath, "Interest Array", new FirebaseCallback() {
             @Override
             public void onCallback(Object value) {
-                try {//try to see if user does have interests by assigning the object to an arrayList
+                String dbValue = value.toString();
+                if (dbValue.equals("none")) {//user don't have any interests
+                    unlockAllSearchingPossibilities();
+                    Log.d(TAG, "User don't have any interests");
+                    Toast.makeText(getContext(), "Please add interests in the home page", Toast.LENGTH_SHORT).show();
+                } else {//user has interests saved
                     ArrayList<String> interest = (ArrayList) value;
                     Log.d(TAG, "User does have interests");
                     toggleInterestIcon();
                     lockEditingInterests();//because we don't want the user to delete all the interests cause that will create errors
-                } catch (Exception e) {//user don't have any interests
-                    unlockAllSearchingPossibilities();
-                    Log.d(TAG, "User don't have any interests");
-                    Toast.makeText(getContext(), "Please add interests in the home page", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -367,7 +368,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
     private void resetEverythingInTheDB() {
         //enabling interest Editing
         String profileSettingsDocPath = userEmail + "/Profile Page Settings";
-        String enablingInterestFieldName = "Can Edit Interest";
+        String enablingInterestFieldName = "Can Edit Interests";
         databaseManager.updateTheField(profileSettingsDocPath, enablingInterestFieldName, "true");
 
         //resetting things in user More Info document

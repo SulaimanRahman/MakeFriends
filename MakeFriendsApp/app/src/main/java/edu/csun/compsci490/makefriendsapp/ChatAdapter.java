@@ -1,5 +1,9 @@
 package edu.csun.compsci490.makefriendsapp;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,20 +11,34 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
+import androidx.core.app.NotificationCompat;
 import androidx.recyclerview.widget.RecyclerView;
+import android.app.NotificationManager;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ChatAdapter extends RecyclerView.Adapter {
 
     private static ArrayList<ChatItem> mChatItems;
     private OnChatClickListener mListener;
+    private UserSingleton userSingleton;
+    private DatabaseManager databaseManager;
 
     public interface OnChatClickListener {
         void onChatClick(int position);
         void onDeleteClick(int position);
+
+        void onBlockingClick(int position, ImageView icBlock);
     }
 
     @Override
@@ -37,8 +55,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     public ChatAdapter(ArrayList<ChatItem> chatItems){
         mChatItems = chatItems;
+        userSingleton = UserSingleton.getInstance();
+        databaseManager = new DatabaseManager();
+
     }
 
+//    public Context getContext() {
+//        return this.getContext();
+//    }
 
     @NonNull
     @Override
@@ -50,12 +74,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
             return new AppMessageViewHolder(view);
         }
         view = layoutInflater.inflate(R.layout.recycle_view_chat_item, parent, false);
+
         return new ChatViewHolder(view, mListener);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        ChatItem currentItem = mChatItems.get(position);
+    public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, int position) {
+        final ChatItem currentItem = mChatItems.get(position);
 
         if(currentItem.isAppMessage()){
             // bind to appMessageVH
@@ -66,16 +91,146 @@ public class ChatAdapter extends RecyclerView.Adapter {
             // bind to chatVH
             ChatViewHolder chatViewHolder = (ChatViewHolder)holder;
             if (currentItem.getImgResource() == null) {
-                ((ChatViewHolder) holder).mChatImage.setImageResource(R.drawable.ic_launcher_foreground);
+                if (currentItem.getContactEmail() == null) {
+                    ((ChatViewHolder) holder).mChatImage.setVisibility(View.INVISIBLE);
+                    ((ChatViewHolder) holder).imgChatAvator.setVisibility(View.INVISIBLE);
+                    ((ChatViewHolder) holder).mDeleteIcon.setVisibility(View.INVISIBLE);
+                    ((ChatViewHolder) holder).icBlock.setVisibility(View.INVISIBLE);
+                    ((ChatViewHolder) holder).notificationDot.setVisibility(View.INVISIBLE);
+                    ((ChatViewHolder) holder).mName.setText(currentItem.getName());
+                    ((ChatViewHolder) holder).mChatPreview.setText(currentItem.getChatPreview());
+                } else {
+                    ((ChatViewHolder) holder).mChatImage.setImageResource(R.drawable.ic_launcher_foreground);
+
+                    ((ChatViewHolder) holder).mName.setText(currentItem.getName());
+                    ((ChatViewHolder) holder).mChatPreview.setText(currentItem.getChatPreview());
+
+                    if (currentItem.isConversationEnded()) {
+                        if (currentItem.isUserBlocked()) {
+                            ((ChatViewHolder) holder).icBlock.setVisibility(View.INVISIBLE);
+                        }
+                    }
+                    if (currentItem.isAllMessagesBeenRead()) {
+                        ((ChatViewHolder) holder).notificationDot.setVisibility(View.INVISIBLE);
+                    } else {
+                        ((ChatViewHolder) holder).notificationDot.setVisibility(View.VISIBLE);
+                    }
+                }
+
             } else {
                 Glide.with(((ChatViewHolder) holder).mChatImage.getContext())
                         .load(currentItem.getImgResource().toString())
                         .into(((ChatViewHolder) holder).mChatImage);
+                ((ChatViewHolder) holder).mName.setText(currentItem.getName());
+                ((ChatViewHolder) holder).mChatPreview.setText(currentItem.getChatPreview());
+
+                if (currentItem.isConversationEnded()) {
+                    if (currentItem.isUserBlocked()) {
+                        ((ChatViewHolder) holder).icBlock.setVisibility(View.INVISIBLE);
+                    }
+                }
+
+                if (currentItem.isAllMessagesBeenRead()) {
+                    ((ChatViewHolder) holder).notificationDot.setVisibility(View.INVISIBLE);
+                } else {
+                    ((ChatViewHolder) holder).notificationDot.setVisibility(View.VISIBLE);
+                }
+
             }
 
             //holder.mChatImage.setImageResource(currentItem.getImgResource());
-            ((ChatViewHolder) holder).mName.setText(currentItem.getName());
-            ((ChatViewHolder) holder).mChatPreview.setText(currentItem.getChatPreview());
+
+            try {
+                //adding action listener to last message
+                String contactChatDocPath = userSingleton.getEmail() + "/Contacts/" + currentItem.getContactEmail() + "/Chat";
+                databaseManager.getDocumentReference(contactChatDocPath).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException error) {
+                        if (error != null) {
+                            Log.d("Chat Adapter", "Something went wrong: listen failed. ", error);
+                        }
+
+                        if (snapshot != null && snapshot.exists()) {
+                            HashMap<String, Object> data = (HashMap) snapshot.getData();
+
+                            ArrayList<String> dataKeys = new ArrayList<>();
+                            dataKeys.addAll(data.keySet());
+
+                            int totalKeys = dataKeys.size();
+                            String lastKey = "";
+                            for (int i = 0; i < dataKeys.size(); i++) {
+                                if (dataKeys.get(i).contains("Me" + (totalKeys - 1)) || dataKeys.get(i).contains("Recipient" + (totalKeys - 1))) {
+                                    lastKey = dataKeys.get(i);
+                                    break;
+                                } else if (dataKeys.get(i).equals("Note0")) {
+                                    lastKey = dataKeys.get(i);
+                                }
+                            }
+
+                            if (lastKey.equals("Note0")) {
+                                ((ChatViewHolder) holder).mChatPreview.setText("Friendship Found!");
+                            } else {
+                                ((ChatViewHolder) holder).mChatPreview.setText(data.get(lastKey).toString());
+                            }
+//                            NotificationCompat.Builder builder = new NotificationCompat.Builder(getContext())
+//                                    .setSmallIcon(R.drawable.launcher_icon2)
+//                                    .setContentTitle(currentItem.getName())
+//                                    .setContentText("New message");
+//
+//                            NotificationManager notificationManager = (NotificationManager) getContext().getSystemService(getContext().NOTIFICATION_SERVICE);
+//                            notificationManager.notify(0, builder.build());
+
+                            //((ChatViewHolder) holder).notificationDot.setVisibility(View.VISIBLE);
+
+                        }
+                    }
+                });
+
+                //adding action listener to contact more info
+                String moreInfoChatDocPath = userSingleton.getEmail() + "/Contacts/" + currentItem.getContactEmail() + "/More Info";
+                databaseManager.getDocumentReference(moreInfoChatDocPath).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException error) {
+                        if (error != null) {
+                            Log.d("Chat Adapter", "Something went wrong: listen failed. ", error);
+                        }
+
+                        if (snapshot != null && snapshot.exists()) {
+                            String conversationEndedStatus = snapshot.get("Conversation Ended").toString();
+                            String conversationEndedByMeStatus = snapshot.get("Conversation Ended From My Side").toString();
+                            String userBlockedStatus = snapshot.get("Blocked User").toString();
+                            String otherUserDeactivatedAccount = snapshot.get("OtherUserDeactivatedAccount").toString();
+                            String allMessagesBeenRead = snapshot.get("All Messages Been Read").toString();
+
+
+
+                            if (conversationEndedStatus.equals("true")) {
+                                ((ChatViewHolder) holder).mChatPreview.setText("This conversation has ended");
+                                ((ChatViewHolder) holder).notificationDot.setVisibility(View.VISIBLE);
+                            }
+
+
+
+                            if (otherUserDeactivatedAccount.equals("true")) {
+                                ((ChatViewHolder) holder).notificationDot.setVisibility(View.VISIBLE);
+                                ((ChatViewHolder) holder).mChatPreview.setText("User has deactivated their account");
+                            }
+
+                            if (allMessagesBeenRead.equals("false")){
+                                ((ChatViewHolder) holder).notificationDot.setVisibility(View.VISIBLE);
+                            }
+
+                            if (allMessagesBeenRead.equals("true")){
+                                ((ChatViewHolder) holder).notificationDot.setVisibility(View.INVISIBLE);
+                            }
+
+                        }
+                    }
+                });
+
+            } catch (Exception e) {
+                Log.d("Chat Adapter", "Thear are no Contacts for this user to set listeners to");
+            }
         }
     }
 
@@ -88,7 +243,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
     class ChatViewHolder extends RecyclerView.ViewHolder {
         public ImageView mChatImage;
         public TextView mName, mChatPreview;
-        public ImageView mDeleteIcon;
+        public ImageView mDeleteIcon, icBlock, notificationDot;
+        public CardView imgChatAvator;
+
+
 
         public ChatViewHolder(@NonNull View itemView, final OnChatClickListener listener) {
             super(itemView);
@@ -96,6 +254,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
             mName = itemView.findViewById(R.id.tvChatName);
             mChatPreview = itemView.findViewById(R.id.tvChatPreview);
             mDeleteIcon = itemView.findViewById(R.id.icDelete);
+            icBlock = itemView.findViewById(R.id.icBlock);
+            notificationDot = itemView.findViewById(R.id.notificationDot);
+            imgChatAvator = itemView.findViewById(R.id.imgChatAvatar);
+
+
 
             final ChatSingleton chatSingleton = ChatSingleton.getInstance();
 
@@ -111,8 +274,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         chatSingleton.setContactEmail(mChatItems.get(position).getContactEmail());
                         chatSingleton.setContactName(mChatItems.get(position).getName());
                         chatSingleton.setContactProfilePicUri(mChatItems.get(position).getImgResource());
-
-
+                        chatSingleton.setConversationEnded(mChatItems.get(position).isConversationEnded());
+                        chatSingleton.setConversationEndedByMe(mChatItems.get(position).isConversationEndedByMe());
+                        chatSingleton.setUserBlocked(mChatItems.get(position).isUserBlocked());
+                        chatSingleton.setOtherUserAccountDeactivated(mChatItems.get(position).isOtherUserAccountDeactivated());
 
                     }
                 }
@@ -126,10 +291,24 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         if(position != RecyclerView.NO_POSITION){
                             listener.onDeleteClick(position);
                         }
+
+                    }
+                }
+            });
+            
+            icBlock.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (listener != null) {
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION) {
+                            listener.onBlockingClick(position, icBlock);
+                        }
                     }
                 }
             });
         }
+
     }
 
     class AppMessageViewHolder extends RecyclerView.ViewHolder {
