@@ -211,9 +211,8 @@ public class FriendsFragment extends Fragment {
 
                             String test = document.get("All Users").toString();
                             //Object test = document.get("All Users");
-                            //Toast.makeText(getContext(), "we cool", Toast.LENGTH_LONG).show();
                             if(!test.equals("none")) {
-                                Toast.makeText(getContext(), "we cool", Toast.LENGTH_LONG).show();
+                                //Toast.makeText(getContext(), "we cool", Toast.LENGTH_LONG).show();
                                 allEmails = (List<String>) document.get("All Users");
                                     if(!allEmails.get(0).equals("")) {
                                         gettingData(allEmails);
