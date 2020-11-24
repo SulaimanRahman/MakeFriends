@@ -1,3 +1,6 @@
+
+/* I THINK WE CAN REMOVE THIS FILE -eddie*/
+
 package edu.csun.compsci490.makefriendsapp;
 
 import android.content.Intent;
@@ -304,3 +307,4 @@ public class HomePage extends AppCompatActivity implements View.OnClickListener 
 
 
 }
+
