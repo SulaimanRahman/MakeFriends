@@ -35,8 +35,10 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
         <activity android:name=".ContactProfilePage"/>
         <activity android:name=".HomePage" />
+
         <activity android:name=".ServerPage"/>
 
         <meta-data

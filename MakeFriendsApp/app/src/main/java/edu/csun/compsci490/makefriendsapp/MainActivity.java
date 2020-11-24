@@ -127,7 +127,6 @@ public class MainActivity extends AppCompatActivity {
                             }
 //                            Intent homePage = new Intent(getApplicationContext(), HomePage.class);
 //                            startActivity(homePage);
-
                             finish();
                         }
                         else{
