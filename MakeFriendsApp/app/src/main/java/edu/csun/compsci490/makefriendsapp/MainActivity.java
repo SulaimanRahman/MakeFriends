@@ -123,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
                                 startActivity(serverPage);
                             } else {
                                 startActivity(new Intent(getApplicationContext(),MainNavigation.class));
+
                             }
 //                            Intent homePage = new Intent(getApplicationContext(), HomePage.class);
 //                            startActivity(homePage);

@@ -66,13 +66,13 @@ public class InterestThread extends Thread {
 
     private ArrayList<String> UserUIDsAlreadyCompareWith = new ArrayList<>();
 
-    private Semaphore comparingSem = new Semaphore(1);
+    private Semaphore comparingSem;
     private int comparingSize, comparingCurrentSize;
 
     public InterestThread(TextView interestThreadStatusTextView, TextView interestUserProcessedTextView, Context context, Semaphore sem) {
         this.interestThreadStatusTextView = interestThreadStatusTextView;
         this.interestUserProcessedTextView = interestUserProcessedTextView;
-        realtimeDatabaseManager = new RealtimeDatabaseManager();
+
         order = "running";
         databaseManager = new DatabaseManager();
         this.sem = sem;
@@ -84,6 +84,8 @@ public class InterestThread extends Thread {
         status = "Running";
         interestFoundStatus = "Not Found";
         addActionListenerToInterestQueue();
+        comparingSem = new Semaphore(1);
+        Log.d(TAG, "number of comparing Sem from constructor: " + comparingSem.availablePermits());
     }
 
     private void addActionListenerToInterestQueue() {
@@ -106,17 +108,19 @@ public class InterestThread extends Thread {
     @Override
     public void run() {
         super.run();
+        //comparingSem.release();
         Log.d(TAG, "Starting Run()");
+        Log.d(TAG, "number of comparing Sem from run: " + comparingSem.availablePermits());
         //while (status.equals("Keep running") || status.equals("Waiting")) {
         if (status.equalsIgnoreCase("Waiting")) {
             //do nothing
             interestThreadStatusTextView.setText("Waiting from run()");
             //Log.d(TAG, "Waiting");
         } else {
-            Log.d(TAG, "In the while loop, status: " + status);
+            Log.d(TAG, "Status: " + status);
             try {
                 sem.acquire();
-                Log.d(TAG, "In the while loop, sem acquired");
+                Log.d(TAG, "From Run() sem acquired");
                 checkIfTheresAnyOneInTheQueue();
                 //lock.wait();
             } catch (InterruptedException e) {
@@ -134,7 +138,7 @@ public class InterestThread extends Thread {
     private void checkIfTheresAnyOneInTheQueue() {
         Log.d(TAG, "checkIfTheresAnyOneInTheQueue");
         interestThreadStatusTextView.setText("Processing");
-        interestThreadStatusTextView.setBackground(greenColor);
+        interestThreadStatusTextView.setTextColor(greenColor.getColor());
 
         String interestDocPath = "Connecting/Interest Queue";
 
@@ -147,8 +151,8 @@ public class InterestThread extends Thread {
                     //no ones in the queue
                     status = "Waiting";
                     interestThreadStatusTextView.setText("Waiting");
-                    interestThreadStatusTextView.setBackground(redColor);
-                    interestUserProcessedTextView.setText("No one's in the queue From Line 98");
+                    interestThreadStatusTextView.setTextColor(redColor.getColor());
+                    interestUserProcessedTextView.setText("No one's in the queue from checkIfTheresAnyOneInTheQueue()");
                 } else {
                     getFirstPersonInTheQueueAndLockIt(snapshot);
                 }
@@ -159,12 +163,13 @@ public class InterestThread extends Thread {
     private void getFirstPersonInTheQueueAndLockIt(final DocumentSnapshot snapshot) {
         Log.d(TAG, "getFirstPersonInTheQueueAndLockIt");
 
-        ArrayList<String> keys = new ArrayList<String>();
+        ArrayList<String> keys = new ArrayList<>();
         keys.addAll(snapshot.getData().keySet());
 
         user1UID = keys.get(0);
 
         String allUsersDocumentPath = "Default/All Users";
+        //getting user1 email
         databaseManager.getFieldValue(allUsersDocumentPath, user1UID, new FirebaseCallback() {
             @Override
             public void onCallback(Object value) {
@@ -173,11 +178,11 @@ public class InterestThread extends Thread {
 
                 user1Value = snapshot.get(user1UID).toString();
 
-                String user1MoreInfoDoc = user1Email + "/More Info";
+                String user1CanCancelSearchingDocPath = user1Email + "/Search Canceling";
                 String fieldName = "Can Cancel Searching";
 
                 //locking user1
-                databaseManager.updateTheField(user1MoreInfoDoc, fieldName, "false");
+                databaseManager.updateTheField(user1CanCancelSearchingDocPath, fieldName, "false");
 
                 //removing user1 from the queue
                 String interestQueueDocPath = "Connecting/Interest Queue";
@@ -199,9 +204,12 @@ public class InterestThread extends Thread {
                 DocumentSnapshot snapshot = (DocumentSnapshot) value;
 
                 if (snapshot.getData().size() == 0) {//if no ones in the list
-                    checkIfUser1IsLookingForAnyUserOrOnlyInterestMatch();//-----------------------------------------------------------
+                    checkIfUser1IsLookingForAnyUserOrOnlyInterestMatch();
                 } else {
+                    //comparingSem.release();
+                    //Log.d(TAG, "Number of comparing Sem " + comparingSem.getQueueLength());
                     getSecondUserFromTheListToCompareWithAndLockIt(snapshot);
+
                 }
             }
         });
@@ -209,40 +217,70 @@ public class InterestThread extends Thread {
 
     private void getSecondUserFromTheListToCompareWithAndLockIt(final DocumentSnapshot snapshot) {
         Log.d(TAG, "getSecondUserFromTheListToCompareWithAndLockIt");
-
+        //Log.d(TAG, "Working 212");
         ArrayList<String> keys = new ArrayList<>();
+        //Log.d(TAG, "Working 214");
         keys.addAll(snapshot.getData().keySet());
-
+        //Log.d(TAG, "Working 215");
         String allUsersDocumentPath = "Default/All Users";
 
         ArrayList<String> secondUserContacts = new ArrayList<>();
 
         comparingSize = keys.size();
+        //Log.d(TAG, "Working 221");
         for (int i = 0; i < keys.size(); i++) {
             try {
+                //Log.d(TAG, "Working 224");
+                Log.d(TAG, "Number of comparing Sem " + comparingSem.availablePermits());
+                //comparingSem.release();
                 comparingSem.acquire();
                 if (interestFoundStatus.equals("Not Found") == false) {
+                    Log.d(TAG, "Interest found status is true");
                     break;
                 }
 
                 comparingCurrentSize = i;
                 user2UID = keys.get(i);
+
+                //getting user2 email
                 databaseManager.getFieldValue(allUsersDocumentPath, user2UID, new FirebaseCallback() {
                     @Override
                     public void onCallback(Object value) {
                         user2Email = value.toString();
 
+                        interestUserProcessedTextView.setText("Comparing " + user1Email + " and " + user2Email);
                         user2Value = snapshot.get(user2UID).toString();
 
-                        String documentPath = user2Email + "/More Info";
-                        String fieldName = "Can Cancel Searching";
+                        final String documentPath = user2Email + "/Search Canceling";
+                        final String fieldName = "Can Cancel Searching";
 
                         //locking user2
                         databaseManager.updateTheField(documentPath, fieldName, "false");
 
-                        interestUserProcessedTextView.setText("Comparing " + user1Email + " and " + user2Email);
+                        //checking if user wants to cancel the searching
+                        String user2MoreInfoDocPath = user2Email + "/More Info";
+                        String cancelingFieldName = "Canceling";
 
-                        checkIfUser2IsAlreadyAContactWithUser1();
+                        //Log.d(TAG, "Working 250");
+                        databaseManager.getFieldValue(user2MoreInfoDocPath, cancelingFieldName, new FirebaseCallback() {
+                            @Override
+                            public void onCallback(Object value) {
+                                String status = value.toString();
+                                //Log.d(TAG, "Working 255");
+                                if (status.equals("true")) {//user 2 wants to cancel the search
+                                    //unlocking user2
+                                    //Log.d(TAG, "Working 258");
+                                    databaseManager.updateTheField(documentPath, fieldName, "true");
+                                    comparingSem.release();
+                                } else {
+                                    //Log.d(TAG, "Working 262");
+                                    checkIfUser2IsAlreadyAContactWithUser1();
+                                }
+                            }
+                        });
+
+
+
                     }
                 });
             } catch (InterruptedException e) {
@@ -262,6 +300,7 @@ public class InterestThread extends Thread {
     }
 
     private void checkIfUser2IsAlreadyAContactWithUser1() {
+        Log.d(TAG, "checkIfUser2IsAlreadyAContactWithUser1");
         //checking if this user already a contact with user1 or not
         final String user1ContactsDocPath = user1Email + "/Contacts";
         String fieldName = "All Users";
@@ -269,16 +308,21 @@ public class InterestThread extends Thread {
         databaseManager.getFieldValue(user1ContactsDocPath, fieldName, new FirebaseCallback() {
             @Override
             public void onCallback(Object value) {
-                if (value.getClass().isArray()) {//user has contacts
+
+                String dbValue = value.toString();
+
+                if (dbValue.equals("none")) {//user don't have any contacts
+                    checkIfUser2IsBlockedByUser1();
+                } else {//user has contacts
                     ArrayList<String> user1ContactsList = (ArrayList) value;
 
                     for (int i = 0; i < user1ContactsList.size(); i++) {
                         if (user1ContactsList.get(i).equals(user2Email)) {//user2 is already a contact with user1
                             //unlocking user2
-                            String user2MoreInfoDocPath = user2Email + "/More Info";
+                            String user2MoreInfoDocPath = user2Email + "/Search Canceling";
                             String searchingFieldName = "Can Cancel Searching";
                             databaseManager.updateTheField(user2MoreInfoDocPath, searchingFieldName, "true");
-
+                            interestUserProcessedTextView.setText("User 2 is already a contact with user 1");
                             //try next person in the list o compare with
                             comparingSem.release();
                             break;
@@ -288,32 +332,34 @@ public class InterestThread extends Thread {
                             checkIfUser2IsBlockedByUser1();
                         }
                     }
-
-
-                } else {//user don't have any contacts
-                    checkIfUser2IsBlockedByUser1();
                 }
             }
         });
     }
 
     private void checkIfUser2IsBlockedByUser1() {
+        Log.d(TAG, "checkIfUser2IsBlockedByUser1");
         String user1ContactsDocPath = user1Email + "/Contacts";
         final String blockedUsersFieldName = "Blocked Users";
 
         databaseManager.getFieldValue(user1ContactsDocPath, blockedUsersFieldName, new FirebaseCallback() {
             @Override
             public void onCallback(Object value) {
-                if (value.getClass().isArray()) {//user1 has blocked some users
+
+                String dbValue = value.toString();
+
+                if (dbValue.equals("none")) {//user 1 has not blocked anyone
+                    getFirstUserInterests();
+                } else {//user1 has blocked some users
                     ArrayList<String> blockedUsers = (ArrayList) value;
 
                     for (int i = 0; i < blockedUsers.size(); i++) {
                         if (blockedUsers.get(i).equals(user2Email)) {//user2 has been blocked by user1
                             //unlocking user2
-                            String user2MoreInfoDocPath = user2Email + "/More Info";
+                            String user2MoreInfoDocPath = user2Email + "/Search Canceling";
                             String searchingFieldName = "Can Cancel Searching";
                             databaseManager.updateTheField(user2MoreInfoDocPath, searchingFieldName, "true");
-
+                            interestUserProcessedTextView.setText("User 2 is blocked by user 1");
                             //try next person in the list o compare with
                             comparingSem.release();
                             break;
@@ -323,8 +369,6 @@ public class InterestThread extends Thread {
                             getFirstUserInterests();
                         }
                     }
-                } else {//user 1 has not blocked anyone
-                    getFirstUserInterests();
                 }
             }
         });
@@ -374,14 +418,17 @@ public class InterestThread extends Thread {
             }
             if (i == user1Interests.size() - 1) {
                 //unlock user 2
-                String documentPath = user2Email + "/More Info";
+                String documentPath = user2Email + "/Search Canceling";
                 String fieldName = "Can Cancel Searching";
                 databaseManager.updateTheField(documentPath, fieldName, "true");
-                comparingSem.release();
+                interestFoundStatus = "Not Found";
+                if (comparingCurrentSize == comparingSize - 1) {//no interest match with any of the users
+                    checkIfUser1IsLookingForAnyUserOrOnlyInterestMatch();
+                } else {
+                    comparingSem.release();
+                }
             }
-            if (comparingCurrentSize == comparingSize - 1) {//no interest match with any of the users
-                checkIfUser1IsLookingForAnyUserOrOnlyInterestMatch();
-            }
+
         }
 
 
@@ -394,6 +441,7 @@ public class InterestThread extends Thread {
             String courseDocPath = "Connecting/Course Queue";
             interestUserProcessedTextView.setText("Moving " + user1Email + " to Course Queue");
             databaseManager.createNewField(courseDocPath, user1UID, user1Value);
+            databaseManager.updateTheField(user1Email + "/More Info", "User Is In Queue", "Course Queue");
             unlockUser1();
         } else {
             interestUserProcessedTextView.setText("Adding user to interest list");
@@ -416,12 +464,13 @@ public class InterestThread extends Thread {
     private void unlockUser1() {
         Log.d(TAG, "unlockUser1()");
 
-        String user1DocumentPath = user1Email + "/More Info";
+        String user1DocumentPath = user1Email + "/Search Canceling";
         // user2DocumentPath = user1Email + "/More Info";
         String fieldName = "Can Cancel Searching";
         databaseManager.updateTheField(user1DocumentPath, fieldName, "true");
         //databaseManager.updateTheField(user2DocumentPath, fieldName, "false");
         interestUserProcessedTextView.setText("Starting all over");
+        comparingSem.release();
         sem.release();
         run();
     }
@@ -429,6 +478,10 @@ public class InterestThread extends Thread {
     private void connectUser1AndUser2() {
         Log.d(TAG, "connectUser1AndUser2");
         interestUserProcessedTextView.setText("Connecting users");
+        setUpUser1();
+    }
+
+    private void setUpUser1() {
         final String message = "You two have been linked because you both like " + interestMatched + "!";
 
         final String user1ContactsDocumentPath = user1Email + "/Contacts";
@@ -436,6 +489,52 @@ public class InterestThread extends Thread {
         final String user1ChatTimeDocumentPath = user1Email + "/Contacts/" + user2Email + "/Chat Time";
         final String user1MoreInfoDocumentPath = user1Email + "/Contacts/" + user2Email + "/More Info";
 
+        final String contactsFieldName = "All Users";
+
+        Date todaysDate = new Date();
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm a");
+        final String time = dateFormat.format(todaysDate);
+
+        databaseManager.getFieldValue(user1ContactsDocumentPath, contactsFieldName, new FirebaseCallback() {
+            @Override
+            public void onCallback(Object value) {
+                String dbValue = value.toString();
+                if (dbValue.equals("none")) {
+                    ArrayList<String> contacts = new ArrayList<>();
+                    contacts.add(user2Email);
+                    databaseManager.updateTheField(user1ContactsDocumentPath, contactsFieldName, contacts);
+
+                    databaseManager.createDocument(user1ChatDocumentPath, "Note0", message);
+                    databaseManager.createDocument(user1ChatTimeDocumentPath, "Time0", time);
+                    databaseManager.createDocument(user1MoreInfoDocumentPath, "Conversation Ended", "false");
+                    databaseManager.createNewField(user1MoreInfoDocumentPath, "OtherUserDeactivatedAccount", "false");
+                    databaseManager.createNewField(user1MoreInfoDocumentPath, "Blocked User", "false");
+                    databaseManager.createNewField(user1MoreInfoDocumentPath, "Conversation Ended From My Side", "false");
+                    databaseManager.createNewField(user1MoreInfoDocumentPath, "All Messages Been Read", "false");
+
+                } else {
+                    List<String> contacts = (ArrayList) value;
+                    contacts.add(user2Email);
+                    databaseManager.updateTheField(user1ContactsDocumentPath, contactsFieldName, contacts);
+
+                    databaseManager.createDocument(user1ChatDocumentPath, "Note0", message);
+                    databaseManager.createDocument(user1ChatTimeDocumentPath, "Time0", time);
+                    databaseManager.createDocument(user1MoreInfoDocumentPath, "Conversation Ended", "false");
+                    databaseManager.createNewField(user1MoreInfoDocumentPath, "OtherUserDeactivatedAccount", "false");
+                    databaseManager.createNewField(user1MoreInfoDocumentPath, "Blocked User", "false");
+                    databaseManager.createNewField(user1MoreInfoDocumentPath, "Conversation Ended From My Side", "false");
+                    databaseManager.createNewField(user1MoreInfoDocumentPath, "All Messages Been Read", "false");
+
+                }
+
+                setUpUser2();
+            }
+        });
+
+    }
+
+    private void setUpUser2() {
+        final String message = "You two have been linked because you both like " + interestMatched + "!";
         final String user2ContactsDocumentPath = user2Email + "/Contacts";
         final String user2ChatDocumentPath = user2Email + "/Contacts/" + user1Email + "/Chat";
         final String user2ChatTimeDocumentPath = user2Email + "/Contacts/" + user1Email + "/Chat Time";
@@ -447,56 +546,60 @@ public class InterestThread extends Thread {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm a");
         final String time = dateFormat.format(todaysDate);
 
-        databaseManager.getFieldValue(user1ContactsDocumentPath, contactsFieldName, new FirebaseCallback() {
-            @Override
-            public void onCallback(Object value) {
-
-                List<String> contacts = (ArrayList) value;
-                contacts.add(user2Email);
-                databaseManager.updateTheField(user1ContactsDocumentPath, contactsFieldName, contacts);
-
-                databaseManager.createDocument(user1ChatDocumentPath, "Note0", message);
-                databaseManager.createDocument(user1ChatTimeDocumentPath, "Time0", time);
-                databaseManager.createDocument(user1MoreInfoDocumentPath, "Conversation Ended", "false");
-                databaseManager.createNewField(user1MoreInfoDocumentPath, "OtherUserDeactivatedAccount", "false");
-            }
-        });
-
         databaseManager.getFieldValue(user2ContactsDocumentPath, contactsFieldName, new FirebaseCallback() {
             @Override
             public void onCallback(Object value) {
-                List<String> contacts = new ArrayList<>();
-                contacts.addAll((List)value);
-                contacts.add(user1Email);
-                databaseManager.updateTheField(user2ContactsDocumentPath, contactsFieldName, contacts);
+                String dbValue = value.toString();
+                if (dbValue.equals("none")) {
+                    ArrayList<String> contacts = new ArrayList<>();
+                    contacts.add(user1Email);
+                    databaseManager.updateTheField(user2ContactsDocumentPath, contactsFieldName, contacts);
 
-                databaseManager.createDocument(user2ChatDocumentPath, "Note0", message);
-                databaseManager.createDocument(user2ChatTimeDocumentPath, "Time0", time);
-                databaseManager.createDocument(user2MoreInfoDocumentPath, "Conversation Ended", "false");
-                databaseManager.createNewField(user2MoreInfoDocumentPath, "OtherUserDeactivatedAccount", "false");
+                    databaseManager.createDocument(user2ChatDocumentPath, "Note0", message);
+                    databaseManager.createDocument(user2ChatTimeDocumentPath, "Time0", time);
+                    databaseManager.createDocument(user2MoreInfoDocumentPath, "Conversation Ended", "false");
+                    databaseManager.createNewField(user2MoreInfoDocumentPath, "OtherUserDeactivatedAccount", "false");
+                    databaseManager.createNewField(user2MoreInfoDocumentPath, "Blocked User", "false");
+                    databaseManager.createNewField(user2MoreInfoDocumentPath, "Conversation Ended From My Side", "false");
+                    databaseManager.createNewField(user2MoreInfoDocumentPath, "All Messages Been Read", "false");
+
+                } else {
+                    List<String> contacts = (ArrayList) value;
+                    contacts.add(user1Email);
+                    databaseManager.updateTheField(user2ContactsDocumentPath, contactsFieldName, contacts);
+
+                    databaseManager.createDocument(user2ChatDocumentPath, "Note0", message);
+                    databaseManager.createDocument(user2ChatTimeDocumentPath, "Time0", time);
+                    databaseManager.createDocument(user2MoreInfoDocumentPath, "Conversation Ended", "false");
+                    databaseManager.createNewField(user2MoreInfoDocumentPath, "OtherUserDeactivatedAccount", "false");
+                    databaseManager.createNewField(user2MoreInfoDocumentPath, "Blocked User", "false");
+                    databaseManager.createNewField(user2MoreInfoDocumentPath, "Conversation Ended From My Side", "false");
+                    databaseManager.createNewField(user2MoreInfoDocumentPath, "All Messages Been Read", "false");
+
+                }
+                removeUsers2FromInterestAndUnlockBothUsers();
             }
         });
-
-        removeUsers2FromInterestAndUnlockBothUsers();
     }
 
     private void removeUsers2FromInterestAndUnlockBothUsers() {
         Log.d(TAG, "removeUsers2FromInterestAndUnlockBothUsers");
         interestUserProcessedTextView.setText("Connecting complete, removing users from the Interest list");
-        //removing the user2 from interest list
-        //databaseManager.deleteField("Connecting/Interest", user1UID);
+        //removing the user1 and 2 from interest list
+        databaseManager.deleteField("Connecting/Interest", user1UID);
         databaseManager.deleteField("Connecting/Interest", user2UID);
 
         //unlocking Both users variables
         String user1MoreInfoDocumentPath = user1Email + "/More Info";
+        String user1CanCancelSearchingDocPath = user1Email + "/Search Canceling";
         String user2MoreInfoDocumentPath = user2Email + "/More Info";
-
+        String user2CanCancelSearchingDocPath = user2Email + "/Search Canceling";
         //unlocking user1
-        databaseManager.updateTheField(user1MoreInfoDocumentPath, "Can Cancel Searching", "true");
+        databaseManager.updateTheField(user1CanCancelSearchingDocPath, "Can Cancel Searching", "true");
         databaseManager.updateTheField(user1MoreInfoDocumentPath, "Done Searching", "true");
 
         //unlocking user2
-        databaseManager.updateTheField(user2MoreInfoDocumentPath, "Can Cancel Searching", "true");
+        databaseManager.updateTheField(user2CanCancelSearchingDocPath, "Can Cancel Searching", "true");
         databaseManager.updateTheField(user2MoreInfoDocumentPath, "Done Searching", "true");
 
         interestUserProcessedTextView.setText("Starting all over");

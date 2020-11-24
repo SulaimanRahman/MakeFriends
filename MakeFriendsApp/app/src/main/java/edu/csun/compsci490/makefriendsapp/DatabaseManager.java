@@ -407,6 +407,8 @@ public class DatabaseManager {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Log.d(TAG, "Failed to delete the field");
+                e.printStackTrace();
+
             }
         });
     }

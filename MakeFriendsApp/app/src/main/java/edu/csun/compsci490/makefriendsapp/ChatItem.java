@@ -10,18 +10,31 @@ public class ChatItem {
     private String mAppMessage;
     private int mAppMessageImage;
 
+    private boolean isConversationEnded;
+    private boolean isConversationEndedByMe;
+
+    private boolean isUserBlocked;
+    private boolean isOtherUserAccountDeactivated;
+
+    private boolean allMessagesBeenRead;
+
     public ChatItem(int imageRes, String appMessage){
         mAppMessageImage = imageRes;
         mAppMessage = appMessage;
         mItemType = true;
     }
 
-    public ChatItem(Uri imageRes, String userName, String chatPreview, String contactEmail){
+    public ChatItem(Uri imageRes, String userName, String chatPreview, String contactEmail, boolean isConversationEnded, boolean isConversationEndedByMe, boolean isUserBlocked, boolean isOtherUserAccountDeactivated, boolean allMessagesBeenRead){
         mImgResource = imageRes;
         mName = userName;
         mChatPreview = chatPreview;
         this.contactEmail = contactEmail;
         mItemType = false;
+        this.isConversationEnded = isConversationEnded;
+        this.isConversationEndedByMe = isConversationEndedByMe;
+        this.isUserBlocked = isUserBlocked;
+        this.isOtherUserAccountDeactivated = isOtherUserAccountDeactivated;
+        this.allMessagesBeenRead = allMessagesBeenRead;
     }
 
     public String getContactEmail() {
@@ -55,5 +68,45 @@ public class ChatItem {
             return true;
         }
         return false;
+    }
+
+    public boolean isConversationEnded() {
+        return isConversationEnded;
+    }
+
+    public boolean isConversationEndedByMe() {
+        return isConversationEndedByMe;
+    }
+
+    public void setConversationEnded(boolean conversationEnded) {
+        isConversationEnded = conversationEnded;
+    }
+
+    public void setConversationEndedByMe(boolean conversationEndedByMe) {
+        isConversationEndedByMe = conversationEndedByMe;
+    }
+
+    public boolean isUserBlocked() {
+        return isUserBlocked;
+    }
+
+    public boolean isOtherUserAccountDeactivated() {
+        return isOtherUserAccountDeactivated;
+    }
+
+    public void setUserBlocked(boolean userBlocked) {
+        isUserBlocked = userBlocked;
+    }
+
+    public void setOtherUserAccountDeactivated(boolean otherUserAccountDeactivated) {
+        isOtherUserAccountDeactivated = otherUserAccountDeactivated;
+    }
+
+    public boolean isAllMessagesBeenRead() {
+        return allMessagesBeenRead;
+    }
+
+    public void setAllMessagesBeenRead(boolean allMessagesBeenRead) {
+        this.allMessagesBeenRead = allMessagesBeenRead;
     }
 }

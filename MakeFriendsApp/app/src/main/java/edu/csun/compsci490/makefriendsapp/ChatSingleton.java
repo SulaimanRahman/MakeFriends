@@ -8,6 +8,12 @@ public class ChatSingleton {
     private Uri contactProfilePicUri;
     private String contactName;
 
+    private boolean isConversationEnded;
+    private boolean isConversationEndedByMe;
+
+    private boolean isUserBlocked;
+    private boolean isOtherUserAccountDeactivated;
+
     private ChatSingleton() {}
 
     public static ChatSingleton getInstance() {
@@ -36,5 +42,37 @@ public class ChatSingleton {
 
     public void setContactName(String contactName) {
         this.contactName = contactName;
+    }
+
+    public boolean isConversationEnded() {
+        return isConversationEnded;
+    }
+
+    public boolean isConversationEndedByMe() {
+        return isConversationEndedByMe;
+    }
+
+    public void setConversationEnded(boolean conversationEnded) {
+        isConversationEnded = conversationEnded;
+    }
+
+    public void setConversationEndedByMe(boolean conversationEndedByMe) {
+        isConversationEndedByMe = conversationEndedByMe;
+    }
+
+    public boolean isUserBlocked() {
+        return isUserBlocked;
+    }
+
+    public boolean isOtherUserAccountDeactivated() {
+        return isOtherUserAccountDeactivated;
+    }
+
+    public void setUserBlocked(boolean userBlocked) {
+        isUserBlocked = userBlocked;
+    }
+
+    public void setOtherUserAccountDeactivated(boolean otherUserAccountDeactivated) {
+        isOtherUserAccountDeactivated = otherUserAccountDeactivated;
     }
 }

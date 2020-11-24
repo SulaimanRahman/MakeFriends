@@ -107,15 +107,19 @@ public class MessagingActivity extends AppCompatActivity {
 
                 String documentPath = userEmail + "/Contacts/" + contactEmail + "/Chat";
                 String timeDocumentPath = userEmail + "/Contacts/" + contactEmail + "/Chat Time";
+                String moreInfoDocPath = userEmail + "/Contacts/" + contactEmail + "/More Info";
                 int numberOfMessages = messageItems.size() - 1;
                 databaseManager.createNewField(documentPath, "Me" + numberOfMessages, message);
                 databaseManager.createNewField(timeDocumentPath, "Time" + numberOfMessages, time);
+                databaseManager.updateTheField(moreInfoDocPath, "All Messages Been Read", "true");
 
                 //saving the data at the contact database
                 String contactDocumentPath = contactEmail + "/Contacts/" + userEmail + "/Chat";
                 String contactTimeDocumentPath = contactEmail + "/Contacts/" + userEmail + "/Chat Time";
+                String contactMoreInfoDocPath = contactEmail + "/Contacts/" + userEmail + "/More Info";
                 databaseManager.createNewField(contactDocumentPath, "Recipient" + numberOfMessages, message);
                 databaseManager.createNewField(contactTimeDocumentPath, "Time" + numberOfMessages, time);
+                databaseManager.updateTheField(contactMoreInfoDocPath, "All Messages Been Read", "false");
 
                 messageAdapter.notifyDataSetChanged();
                 chatBoxEditText.setText("");
@@ -247,28 +251,44 @@ public class MessagingActivity extends AppCompatActivity {
     }
 
     private void checkIfConversationHasEndedOrAccountDeactivated() {
-        String documentPath = userEmail + "/Contacts/" + contactEmail + "/More Info";
 
-        databaseManager.getAllDocumentDataInHashMap(documentPath, new FirebaseCallback() {
-            @Override
-            public void onCallback(Object value) {
-                HashMap<String, String> data = (HashMap) value;
+        if (chatSingleton.isConversationEnded()) {
+            messageItems.add(new MessageItem("This Conversation has been ended", "result"));
+            chatBoxEditText.setEnabled(false);
+            sendButton.setEnabled(false);
+            loadEverythingToTheGUI();
+        } else if (chatSingleton.isOtherUserAccountDeactivated()) {
+            messageItems.add(new MessageItem("The recipient has deleted their account", "result"));
+            chatBoxEditText.setEnabled(false);
+            sendButton.setEnabled(false);
+            loadEverythingToTheGUI();
+        } else {
+            loadEverythingToTheGUI();
+        }
 
-                if (data.get("Conversation Ended").equals("true")) {
-                    messageItems.add(new MessageItem("This Conversation has been ended", "result"));
-                    chatBoxEditText.setEnabled(false);
-                    sendButton.setEnabled(false);
-                    loadEverythingToTheGUI();
-                } else if (data.get("OtherUserDeactivatedAccount").equals("true")) {
-                    messageItems.add(new MessageItem("The recipient has deleted their account", "result"));
-                    chatBoxEditText.setEnabled(false);
-                    sendButton.setEnabled(false);
-                    loadEverythingToTheGUI();
-                } else {
-                    loadEverythingToTheGUI();
-                }
-            }
-        });
+
+//        String documentPath = userEmail + "/Contacts/" + contactEmail + "/More Info";
+//
+//        databaseManager.getAllDocumentDataInHashMap(documentPath, new FirebaseCallback() {
+//            @Override
+//            public void onCallback(Object value) {
+//                HashMap<String, String> data = (HashMap) value;
+//
+//                if (data.get("Conversation Ended").equals("true")) {
+//                    messageItems.add(new MessageItem("This Conversation has been ended", "result"));
+//                    chatBoxEditText.setEnabled(false);
+//                    sendButton.setEnabled(false);
+//                    loadEverythingToTheGUI();
+//                } else if (data.get("OtherUserDeactivatedAccount").equals("true")) {
+//                    messageItems.add(new MessageItem("The recipient has deleted their account", "result"));
+//                    chatBoxEditText.setEnabled(false);
+//                    sendButton.setEnabled(false);
+//                    loadEverythingToTheGUI();
+//                } else {
+//                    loadEverythingToTheGUI();
+//                }
+//            }
+//        });
     }
     private void loadEverythingToTheGUI() {
         messagesRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_messages);
@@ -277,16 +297,21 @@ public class MessagingActivity extends AppCompatActivity {
         messagesRecyclerView.setAdapter(messageAdapter);
         messagesRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
+        //set all the messages been viewed:
+        String documentPath = userSingleton.getEmail() + "/Contacts/" + chatSingleton.getContactEmail() + "/More Info";
+        databaseManager.updateTheField(documentPath, "All Messages Been Read", "true");
+
         progressBar.setVisibility(View.GONE);
 
+        messagesRecyclerView.scrollToPosition(messageItems.size() - 1);
         setActionListenerToDatabase();
 
     }
 
     public void setActionListenerToDatabase() {
-        String documentPath = userEmail + "/Contacts/" + contactEmail + "/Chat";
+        String chatDocumentPath = userEmail + "/Contacts/" + contactEmail + "/Chat";
 
-        databaseManager.getDocumentReference(documentPath).addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
+        databaseManager.getDocumentReference(chatDocumentPath).addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException error) {
                 if (error != null) {
@@ -335,6 +360,37 @@ public class MessagingActivity extends AppCompatActivity {
             }
         });
 
+        final String contactMoreInfoDocPath = userEmail + "/Contacts/" + contactEmail + "/More Info";
+        databaseManager.getDocumentReference(contactMoreInfoDocPath).addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot snapshot, @Nullable FirebaseFirestoreException error) {
+                if (error != null) {
+                    Log.d(TAG, "Something went wrong: listen failed. ", error);
+                }
+
+                if (snapshot != null && snapshot.exists()) {
+                    HashMap<String, Object> data = (HashMap) snapshot.getData();
+
+                    if (data.get("Conversation Ended").equals("true")) {
+                        messageItems.add(new MessageItem("This Conversation has been ended", "result"));
+                        chatBoxEditText.setEnabled(false);
+                        sendButton.setEnabled(false);
+                        messageAdapter.notifyDataSetChanged();
+
+                    } else if (data.get("OtherUserDeactivatedAccount").equals("true")) {
+                        messageItems.add(new MessageItem("The recipient has deleted their account", "result"));
+                        chatBoxEditText.setEnabled(false);
+                        sendButton.setEnabled(false);
+                        messageAdapter.notifyDataSetChanged();
+
+                    } else if (data.get("All Messages Been Read").equals("false")) {
+                        databaseManager.updateTheField(contactMoreInfoDocPath, "All Messages Been Read", "true");
+                    }
+
+
+                }
+            }
+        });
     }
 
 }
