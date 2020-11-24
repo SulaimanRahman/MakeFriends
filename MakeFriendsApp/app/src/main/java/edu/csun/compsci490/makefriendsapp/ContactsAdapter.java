@@ -1,11 +1,13 @@
 package edu.csun.compsci490.makefriendsapp;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,70 +15,83 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.util.ArrayList;
 import java.util.List;
-
 public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.MyViewHolder> {
 
     private Context mContext;
-    private static List<Contact> mData;
-
-    public ContactsAdapter(Context mContext, List<Contact> mData) {
+    private List<Contact> mData;
+    private RecyclerviewClickListener listener;
+    StorageReference storageReference;
+    public ContactsAdapter(Context mContext, List<Contact> mData, RecyclerviewClickListener listener) {
         this.mContext = mContext;
         this.mData = mData;
+        this.listener = listener;
     }
 
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v;
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.single_user_layout,parent,false);
 
-        LayoutInflater inflater = LayoutInflater.from(mContext);
-        v = inflater.inflate(R.layout.fragment_friends, parent, false);
-
-        return new MyViewHolder(v);
+        return new MyViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-//        Glide.with(mContext)
-//                .load("https://image.tmdb.org/t/p/w500" + mData.get(position).getImg())
-//                .into(holder.img);
-    }
+    public void onBindViewHolder(@NonNull final MyViewHolder userViewHolder, int position) {
 
+        Contact user = mData.get(position);
+        storageReference = FirebaseStorage.getInstance().getReference().child(user.getUserImg());
+        storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Glide.with(mContext)
+                        .load(uri.toString())
+                        .placeholder(R.drawable.ic_baseline_account_circle_24)
+                        .into(userViewHolder.userImg);
+            }
+        });
+        userViewHolder.fullName.setText(user.getContactName());
+        userViewHolder.userMajor.setText(user.getContactMajor());
+        //userViewHolder.userMajor.setText(user.getMajor());
+    }
     @Override
     public int getItemCount() {
         return mData.size();
     }
 
+    public void filterList(ArrayList<Contact> filteredList){
+        mData = filteredList;
+        notifyDataSetChanged();
+    }
 
-    public static class MyViewHolder extends RecyclerView.ViewHolder {
+    public interface RecyclerviewClickListener{
+        void onClick(View view,int pos);
+    }
 
-        ImageView img;
-        //MovieSingleton movieSingleton = MovieSingleton.getInstance();
+
+    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+        private ImageView userImg;
+        private TextView fullName;
+        private TextView userMajor;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            //img = itemView.findViewById(R.id.movieImage);
-
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    int position = getAdapterPosition();
-//                    Log.d("Adaptery", "Position: " + position);
-//                    Log.d("Adaptery", "Id: " + mData.get(position).getId());
-//                    String id = mData.get(position).getId();
-//                    movieSingleton.setMovieId(id);
-//                    movieSingleton.setMovieModelClass((MovieModelClass)mData.get(position));
-//                    AppCompatActivity activity = (AppCompatActivity) view.getContext();
-//                    Fragment myFragment = new MovieProfileFragment();
-//                    activity.getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, myFragment).commit();
-
-
-                }
-            });
+            fullName = itemView.findViewById(R.id.fullName);
+            userImg = itemView.findViewById(R.id.profile_image);
+            userMajor = itemView.findViewById(R.id.userMajor);
+            itemView.setOnClickListener(this);
         }
 
+        @Override
+        public void onClick(View view) {
+            listener.onClick(view,getAdapterPosition());
+        }
     }
 }

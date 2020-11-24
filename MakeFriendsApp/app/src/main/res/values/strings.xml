@@ -16,6 +16,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="spinner_course_prompt">Course</string>
+    <string name="searchcontacts">searchContacts</string>
 
     <!--these are the values which will be added to the spinner in the search users fragment-->
     <string-array name="courses">

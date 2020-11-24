@@ -109,8 +109,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
-
     }
 
     @Override
@@ -121,13 +119,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
+        //getActivity().startService(new Intent(getActivity(), BackgroundService.class));
+      
         databaseManager = new DatabaseManager();
         userSingleton = UserSingleton.getInstance();
         userEmail = userSingleton.getEmail();
         firebaseAuth = FirebaseAuth.getInstance();
 
         firstAndLastName = view.findViewById(R.id.firstAndLastName);
-        profilePicture = view.findViewById(R.id.profilePicture);
+        profilePicture = view.findViewById(R.id.profile_image);
         biographyTextField = view.findViewById(R.id.biographyTextField);
         saveButton = view.findViewById(R.id.saveButton);
         logoutBtn = view.findViewById(R.id.btn_logOut);
@@ -237,7 +237,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.profilePicture:
+            case R.id.profile_image:
                 Intent getProfilePictureURI = new Intent(Intent.ACTION_GET_CONTENT);
                 getProfilePictureURI.setType("*/*");
                 startActivityForResult(getProfilePictureURI, 1);
@@ -333,10 +333,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         switch (requestCode) {
             case 1:
                 //if (resultCode == RESULT_OK) {
-                    String path = data.getData().getPath();
-                    Uri uri = data.getData();
-                    saveUserProfilePicture(uri);
-                    saveUserProfilePictureUri(uri);
+                String path = data.getData().getPath();
+                Uri uri = data.getData();
+                saveUserProfilePicture(uri);
+                saveUserProfilePictureUri(uri);
                 //}
                 break;
         }
@@ -355,7 +355,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 String firstName = String.valueOf(data.get("First Name"));
                 String lastName = String.valueOf(data.get("Last Name"));
                 String biography = String.valueOf(data.get("Biography"));
-                String pictureUploaded = String.valueOf(data.get("Picture Uploaded"));
+                String pictureUploaded = String.valueOf(data.get("Profile Picture Uri"));
                 /*
                 set all the data where it suppose to be
                 check if biography is null then set "edit your biography here"
@@ -368,7 +368,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 }
 
                 if (pictureUploaded != null) {
-                    getUserProfilePicture();
+                    getUserProfilePicture(pictureUploaded);
                 } else {
                     //user has not uploaded any pictures
                 }
@@ -378,9 +378,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     }
 
 
-    public void getUserProfilePicture() {
+    public void getUserProfilePicture(String picPath) {
 
-        databaseManager.getTheFileUriFromFirebaseStorage(userEmail + "/ProfilePic", new FirebaseCallback() {
+        databaseManager.getTheFileUriFromFirebaseStorage(picPath, new FirebaseCallback() {
             @Override
             public void onCallback(Object value) {
                 if (value == null) {
@@ -455,7 +455,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onCallback(Object value) {
                 saveUserProfilePictureUri(uri);
-                getUserProfilePicture();//basically this is to refresh and show the picture
+                getUserProfilePicture(uri.getPath());//basically this is to refresh and show the picture
 
             }
         });

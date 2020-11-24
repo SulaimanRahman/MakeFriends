@@ -11,6 +11,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <service
+            android:name=".BackgroundService"
+            android:enabled="true"
+            android:exported="true"></service>
         <activity android:name=".MainNavigation" />
         <activity android:name=".PlaceHolder" />
         <activity android:name=".SignUp" />
@@ -31,7 +35,10 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-<!--        <activity android:name=".HomePage" />-->
+
+        <activity android:name=".ContactProfilePage"/>
+        <activity android:name=".HomePage" />
+
         <activity android:name=".ServerPage"/>
 
         <meta-data

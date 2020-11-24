@@ -3,20 +3,36 @@ package edu.csun.compsci490.makefriendsapp;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-
+import java.util.List;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 //import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -24,6 +40,8 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,12 +65,19 @@ public class FriendsFragment extends Fragment {
     private static final String TAG = "FriendFragment";
 
     private RecyclerView contactsRecyclerView;
-
+    private ContactsAdapter mAdapter;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private DatabaseManager databaseManager;
     private UserSingleton userSingleton;
     private String userEmail;
     private ArrayList allContactsEmails;
     private HashMap<String, HashMap<String, Object>> contactsData;
+    private ArrayList<Contact> userData = new ArrayList<Contact>();
+    private List<String> allEmails = new ArrayList<String>();
+    private EditText searchQuery;
+    private ContactsAdapter.RecyclerviewClickListener listener;
+    TextView test;
+    private String data;
 
     public FriendsFragment() {
         // Required empty public constructor
@@ -95,15 +120,106 @@ public class FriendsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_friends,container,false);
 
         contactsRecyclerView = view.findViewById(R.id.myRecyclerView);
-
         databaseManager = new DatabaseManager();
         userSingleton = UserSingleton.getInstance();
         userEmail = userSingleton.getEmail();
         allContactsEmails = new ArrayList();
         contactsData = new HashMap<>();
+        searchQuery = view.findViewById(R.id.contactSearchBar);
+        gettingEmails();
 
+        setOnClickListener(userData);
+        mAdapter = new ContactsAdapter(getContext(),userData,listener);
+        contactsRecyclerView.setHasFixedSize(true);
+        contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        contactsRecyclerView.setAdapter(mAdapter);
+        searchQuery.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+//                if(editable.toString().isEmpty()){
+//                    setOnClickListener(userData);
+//                    mAdapter = new ContactsAdapter(getContext(),userData,listener);
+//                    contactsRecyclerView.setHasFixedSize(true);
+//                    contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+//                    contactsRecyclerView.setAdapter(mAdapter);
+//                }
+//                else{
+                    filter(editable.toString());
+                //}
+
+            }
+        });
         return view;
+    }
+    private void filter(String query){
+        ArrayList<Contact> filteredList = new ArrayList<>();
+        for(Contact item : userData) {
+            if (item.getContactName().toLowerCase().contains(query.toLowerCase())) {
+                filteredList.add(item);
+            }
+        }
+        setOnClickListener(filteredList);
+        ContactsAdapter mAdapter1 = new ContactsAdapter(getContext(),filteredList,listener);
+        contactsRecyclerView.setAdapter(mAdapter1);
+        mAdapter1.filterList(filteredList);
+
+    }
+
+    public void gettingData(final List<String> emails){
+        for(int i = 0; i < emails.size();i++) {
+            db.collection(emails.get(i)).document("Profile")
+                    .get()
+                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            if (documentSnapshot != null) {
+                                Contact user = new Contact();
+                                String name = documentSnapshot.getString("First Name") +" "+ documentSnapshot.getString("Last Name");
+                                user.setContactName(name);
+                                user.setUserImg(documentSnapshot.getString("Profile Picture Uri"));
+                                user.setContactBio(documentSnapshot.getString("Biography"));
+                                user.setContactMajor("Computer Science");
+
+                                userData.add(user);
+
+                            } else {
+                                data = "else case";
+                                Log.d("Tag           ", "else case");
+                                // Toast.makeText(this, "Document Does Not exists", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                     Toast.makeText(getContext(), "WAH DAH FAK?", Toast.LENGTH_SHORT).show();
+                    // Log.d("Tag",e.toString());
+                    data = "Failed";
+                }
+            });
+
+        }
+    }
+    public void gettingEmails() {
+        db.collection(userEmail)
+                .document("Contacts").get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        DocumentSnapshot document = task.getResult();
+                        allEmails = (List<String>) document.get("All Users");
+                        gettingData(allEmails);
+                    }
+                });
     }
 
     public void getAllContacts() {
@@ -229,6 +345,20 @@ public class FriendsFragment extends Fragment {
             }
         }
 
+    }
+
+    private void setOnClickListener(final ArrayList<Contact> newUserData){
+        listener = new ContactsAdapter.RecyclerviewClickListener() {
+            @Override
+            public void onClick(View view, int pos) {
+                Log.d(TAG,"im in setonclick!");
+                Intent intent = new Intent(getActivity(),ContactProfilePage.class);
+                intent.putExtra("userName",newUserData.get(pos).getContactName());
+                intent.putExtra("userBio",newUserData.get(pos).getContactBio());
+                intent.putExtra("userImg",newUserData.get(pos).getUserImg());
+                startActivity(intent);
+            }
+        };
     }
 
 }

@@ -123,12 +123,14 @@ public class MainActivity extends AppCompatActivity {
                                 startActivity(serverPage);
                             } else {
                                 startActivity(new Intent(getApplicationContext(),MainNavigation.class));
+
                             }
 //                            Intent homePage = new Intent(getApplicationContext(), HomePage.class);
 //                            startActivity(homePage);
                             finish();
                         }
                         else{
+                            progressBar.setVisibility(View.INVISIBLE);
                             Log.d("Main Activity", "Email: " + mEmail.getText().toString());
                             Toast.makeText(MainActivity.this,"Error! "+ task.getException().getMessage(),Toast.LENGTH_SHORT).show();
                         }

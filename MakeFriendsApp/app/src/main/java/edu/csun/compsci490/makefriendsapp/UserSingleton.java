@@ -10,6 +10,7 @@ public class UserSingleton {
 
     private String bio;
 
+
     public String getBio() {
         return bio;
     }
@@ -29,58 +30,9 @@ public class UserSingleton {
 
 
     private String profile;
-
-    public Uri getUserProfileImg() {
-        return userProfileImg;
-    }
-
-    public void setUserProfileImg(Uri userProfileImg) {
-        this.userProfileImg = userProfileImg;
-    }
-
-    private Uri userProfileImg;
-
-    public String getMajor() {
-        return major;
-    }
-
-    public void setMajor(String major) {
-        this.major = major;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    //private String fullName;
-    private String firstName;
-    private String lastName;
-    private String major;
     private static String email;
     private static String password;
-
-//    public String getUserImg() {
-//        return userImg;
-//    }
-
-//    public void setUserImg(String userImg) {
-//        this.userImg = userImg;
-//    }
-
-    //private String userImg;
-    private UserSingleton() {}
+    public UserSingleton() {}
 
     public static UserSingleton getInstance() {
         return userSingleton;
