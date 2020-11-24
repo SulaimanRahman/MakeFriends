@@ -45,7 +45,11 @@ public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.MyView
     public void onBindViewHolder(@NonNull final MyViewHolder userViewHolder, int position) {
 
         Contact user = mData.get(position);
-        storageReference = FirebaseStorage.getInstance().getReference().child(user.getUserImg());
+        String PATH = user.getUserImg();
+        if(!PATH.contains("@my.csun.edu")){
+            PATH = "Default/BlankProfilePic";
+        }
+        storageReference = FirebaseStorage.getInstance().getReference().child(PATH);
         storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
             public void onSuccess(Uri uri) {

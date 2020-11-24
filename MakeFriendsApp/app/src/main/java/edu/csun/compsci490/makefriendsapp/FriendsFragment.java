@@ -129,10 +129,10 @@ public class FriendsFragment extends Fragment {
         gettingEmails();
         setOnClickListener(userData);
 
-            contactsRecyclerView.setHasFixedSize(true);
-            contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-            mAdapter = new ContactsAdapter(getActivity(), userData, listener);
-            contactsRecyclerView.setAdapter(mAdapter);
+        contactsRecyclerView.setHasFixedSize(true);
+        contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        mAdapter = new ContactsAdapter(getActivity(), userData, listener);
+        contactsRecyclerView.setAdapter(mAdapter);
 
             searchQuery.addTextChangedListener(new TextWatcher() {
                 @Override
@@ -147,17 +147,7 @@ public class FriendsFragment extends Fragment {
 
                 @Override
                 public void afterTextChanged(Editable editable) {
-//                if(editable.toString().isEmpty()){
-//                    setOnClickListener(userData);
-//                    mAdapter = new ContactsAdapter(getContext(),userData,listener);
-//                    contactsRecyclerView.setHasFixedSize(true);
-//                    contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-//                    contactsRecyclerView.setAdapter(mAdapter);
-//                }
-//                else{
                     filter(editable.toString());
-                    //}
-
                 }
 
             });
@@ -204,7 +194,6 @@ public class FriendsFragment extends Fragment {
                     }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                     Toast.makeText(getContext(), "WAH DAH FAK?", Toast.LENGTH_SHORT).show();
                     // Log.d("Tag",e.toString());
                     data = "Failed";
                 }
@@ -221,10 +210,14 @@ public class FriendsFragment extends Fragment {
                         DocumentSnapshot document = task.getResult();
 
                             String test = document.get("All Users").toString();
-                            if(!test.equals("none")){
-                            //Toast.makeText(getContext(),test,Toast.LENGTH_LONG).show();
+                            //Object test = document.get("All Users");
+                            //Toast.makeText(getContext(), "we cool", Toast.LENGTH_LONG).show();
+                            if(!test.equals("none")) {
+                                Toast.makeText(getContext(), "we cool", Toast.LENGTH_LONG).show();
                                 allEmails = (List<String>) document.get("All Users");
-                                gettingData(allEmails);
+                                    if(!allEmails.get(0).equals("")) {
+                                        gettingData(allEmails);
+                                    }
                                 }
                             }
 
