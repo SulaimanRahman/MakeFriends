@@ -63,7 +63,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private TextView firstAndLastName;
     private ImageView profilePicture;
     private EditText biographyTextField;
-    private Button saveButton;
     private ImageButton logoutBtn;
 
     private ImageButton btnAddScheduleRow, btnRemoveScheduleRow;
@@ -129,7 +128,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         firstAndLastName = view.findViewById(R.id.firstAndLastName);
         profilePicture = view.findViewById(R.id.profile_image);
         biographyTextField = view.findViewById(R.id.biographyTextField);
-        saveButton = view.findViewById(R.id.saveButton);
         logoutBtn = view.findViewById(R.id.btn_logOut);
 
         getUserFirstNameLastNameBiographyAndProfilePicture();
@@ -213,7 +211,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 }
             }
         });
-        saveButton.setOnClickListener(this);
         logoutBtn.setOnClickListener(this);
         btnAddScheduleRow.setOnClickListener(this);
         btnRemoveScheduleRow.setOnClickListener(this);
@@ -242,10 +239,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 getProfilePictureURI.setType("*/*");
                 startActivityForResult(getProfilePictureURI, 1);
                 break;
-            case R.id.saveButton:
-                saveBiography();
-                break;
-
             case R.id.btn_addSchedule:
                 if(tableLayout.getChildCount() < 7){
                     addTableRow();
@@ -478,6 +471,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         }
 
         databaseManager.updateTheField(userEmail + "/Profile", "Biography", biography);
+        Toast.makeText(getContext(),"Biography saved",Toast.LENGTH_SHORT).show();
     }
 
     public void saveTheCourse() {
