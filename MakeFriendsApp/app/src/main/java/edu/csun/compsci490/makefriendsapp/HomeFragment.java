@@ -133,7 +133,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         getUserFirstNameLastNameBiographyAndProfilePicture();
         getUserInterests();
-
         tableLayout = view.findViewById(R.id.tableLayout);
         tr = view.findViewById(R.id.tr1);
         btnAddScheduleRow = view.findViewById(R.id.btn_addSchedule);
@@ -217,7 +216,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         btnAddScheduleRow.setOnClickListener(this);
         btnRemoveScheduleRow.setOnClickListener(this);
 
-        /* //this code cane be used to populate the interests on the firebase db
+        /* // helper code to populate the interests on the firebase db
         String[] interestData = {"Programming", "Web Development", "Computer Science", "Linear Algebra", "Android Development",
                                 "iOS development", "Linux", "Gaming", "Working Out", "Hiking",
                                 "Embedded Systems", "Machine Learning", "Cooking", "Tennis", "Dodgers",
@@ -407,10 +406,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 ArrayList<DocumentSnapshot> documents = (ArrayList) value;
 
                 for(int i = 0; i < documents.size(); i++) {
-                    String subject = documents.get(i).get("Subject").toString();
-                    String sectionNumber = documents.get(i).get("SectionNumber").toString();
-                    String semester = documents.get(i).get("Semester").toString();
-                    String year = documents.get(i).get("Year").toString();
+                    String sectionNumber = documents.get(i).get("Section Number").toString();
+                    String course = documents.get(i).get("Course").toString();
+                    String courseNumber = documents.get(i).get("Course Number").toString();
 
                     // TODO: add user schedule in dynamic table
                     
@@ -442,10 +440,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     String interest = interests.get(i);
                     String lowerInterest = interest.toLowerCase();
                     currentUserInterests.add(lowerInterest);
-                    // TODO: add each user interest in an interest bubble
                 }
-                Toast.makeText(getContext(),"tolower: " + currentUserInterests.get(0),Toast.LENGTH_LONG).show();
-                //currentUserInterests.addAll(interests);
+
+                generateUserInterestBubbles();
             }
         });
     }
@@ -602,7 +599,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     }
 
     public void removeInterestBubble(Button interest){
-        // TODO:remove interest from users interest on firebase
+        // remove interest from users interest on firebase
         String interestToDelete = interest.getText().toString();
         int removeIndex = currentUserInterests.indexOf(interestToDelete);
         currentUserInterests.remove(removeIndex);
@@ -612,5 +609,29 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         // remove textview/bubble which contains interest from flexbox layout (interestBubbleParent)
         interestBubbleParent.removeView(interest);
         balloon.dismiss();
+    }
+
+    private void generateUserInterestBubbles() {
+        if(!currentUserInterests.isEmpty()){
+            for(String interest: currentUserInterests){
+                // add interest to layout
+                interestBubble = new Button(getActivity().getApplicationContext());
+                interestBubble.setText(interest);
+                interestBubble.setTextSize(16);
+                interestBubble.setTextColor(getResources().getColor(R.color.white));
+                interestBubble.setBackgroundResource(R.drawable.interest_bubble);
+                FlexboxLayout.LayoutParams params = new FlexboxLayout.LayoutParams(FlexboxLayout.LayoutParams.WRAP_CONTENT, 80);
+                params.setMargins(10,5,10,15);
+                interestBubble.setLayoutParams(params);
+                interestBubbleParent.addView(interestBubble);
+                interestBubble.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        balloon.showAlignRight(view, -35, -30);
+                        interestBubble = (Button) view;
+                    }
+                });
+            }
+        }
     }
 }
