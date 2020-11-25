@@ -308,7 +308,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         rowParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, .25f);
         courseNumCell.setTextSize(16);
-        courseCell.setGravity(Gravity.CENTER_HORIZONTAL);
+        courseNumCell.setGravity(Gravity.CENTER_HORIZONTAL);
         courseNumCell.setPadding(10,0,10,15);
         courseNumCell.setLayoutParams(rowParams);
         courseNumCell.setOnFocusChangeListener(new View.OnFocusChangeListener() {
