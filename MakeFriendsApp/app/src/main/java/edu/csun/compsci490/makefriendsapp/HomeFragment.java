@@ -570,7 +570,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     }
 
     public void addInterestBubble(String interest){
-        // TODO: if interest does not already exist in the current users interests on firebase then,
+        // if interest does not already exist in the current users interests on firebase then,
         // add interest bubble else clear input
         interest = interest.toLowerCase();
         if(currentUserInterests.contains(interest)) {
@@ -588,7 +588,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             params.setMargins(10,5,10,15);
             interestBubble.setLayoutParams(params);
             interestBubbleParent.addView(interestBubble);
-            // TODO: add interest to users interest on firebase
+            // add interest to users interest on firebase
             currentUserInterests.add(interest);
             saveInterest();
             interestBubble.setOnClickListener(new View.OnClickListener() {
@@ -603,7 +603,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     public void removeInterestBubble(Button interest){
         // TODO:remove interest from users interest on firebase
-
+        String interestToDelete = interest.getText().toString();
+        int removeIndex = currentUserInterests.indexOf(interestToDelete);
+        currentUserInterests.remove(removeIndex);
+        // method automatically updates and deletes the field even without explicitly calling delete field
+        saveInterest();
 
         // remove textview/bubble which contains interest from flexbox layout (interestBubbleParent)
         interestBubbleParent.removeView(interest);
