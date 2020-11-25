@@ -73,6 +73,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     private AutoCompleteTextView interestSearchBar;
     private ArrayList<String> defaultInterests = new ArrayList<>();
+    private ArrayList<String> currentUserInterests = new ArrayList<>();
     private FlexboxLayout interestBubbleParent;
     private Button interestBubble;
     private Balloon balloon;
@@ -131,6 +132,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         logoutBtn = view.findViewById(R.id.btn_logOut);
 
         getUserFirstNameLastNameBiographyAndProfilePicture();
+        getUserInterests();
 
         tableLayout = view.findViewById(R.id.tableLayout);
         tr = view.findViewById(R.id.tr1);
@@ -435,10 +437,15 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     return;
                 }
 
+
                 for (int i = 0; i < interests.size(); i++) {
                     String interest = interests.get(i);
+                    String lowerInterest = interest.toLowerCase();
+                    currentUserInterests.add(lowerInterest);
                     // TODO: add each user interest in an interest bubble
                 }
+                Toast.makeText(getContext(),"tolower: " + currentUserInterests.get(0),Toast.LENGTH_LONG).show();
+                //currentUserInterests.addAll(interests);
             }
         });
     }
@@ -509,22 +516,23 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         final String interest = null;
         final String documentPath = userEmail + "/More Info";
 
-        databaseManager.getFieldValue(documentPath, "Interest Array", new FirebaseCallback() {
-            @Override
-            public void onCallback(Object value) {
-                if (value == null) {
-                    //failed to get user interests
-                    return;
-                }
-
-                ArrayList interestArray = (ArrayList) value;
-
-                interestArray.add(interest);
-
-                databaseManager.updateTheField(documentPath, "Interest Array", interestArray);
-
-            }
-        });
+//        databaseManager.getFieldValue(documentPath, "Interest Array", new FirebaseCallback() {
+//            @Override
+//            public void onCallback(Object value) {
+//                if (value == null) {
+//                    //failed to get user interests
+//                    return;
+//                }
+//
+//                ArrayList interestArray = (ArrayList) value;
+//
+//                interestArray.add(interest);
+//
+//                databaseManager.updateTheField(documentPath, "Interest Array", interestArray);
+//
+//            }
+//        });
+        databaseManager.updateTheField(documentPath, "Interest Array", currentUserInterests);
     }
 
     public void getAllDefaultInterests() {
@@ -563,28 +571,34 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     public void addInterestBubble(String interest){
         // TODO: if interest does not already exist in the current users interests on firebase then,
-        // add tv else clear input
-
-
-        interestBubble = new Button(getActivity().getApplicationContext());
-        interestBubble.setText(interest);
-        interestBubble.setTextSize(16);
-        interestBubble.setTextColor(getResources().getColor(R.color.white));
-        interestBubble.setBackgroundResource(R.drawable.interest_bubble);
-//        addition.setPadding(25,0,25,0);
-        FlexboxLayout.LayoutParams params = new FlexboxLayout.LayoutParams(FlexboxLayout.LayoutParams.WRAP_CONTENT, 80);
-        params.setMargins(10,5,10,15);
-        interestBubble.setLayoutParams(params);
-        interestBubbleParent.addView(interestBubble);
-
-        interestBubble.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                balloon.showAlignRight(view, -35, -30);
-                interestBubble = (Button) view;
-            }
-        });
-        // TODO: add interest to users interest on firebase
+        // add interest bubble else clear input
+        interest = interest.toLowerCase();
+        if(currentUserInterests.contains(interest)) {
+            //clear search interests bar
+            Toast.makeText(getContext(),"Duplicate interest",Toast.LENGTH_SHORT).show();
+            interestSearchBar.setText("");
+        } else {
+            // add interest to layout
+            interestBubble = new Button(getActivity().getApplicationContext());
+            interestBubble.setText(interest);
+            interestBubble.setTextSize(16);
+            interestBubble.setTextColor(getResources().getColor(R.color.white));
+            interestBubble.setBackgroundResource(R.drawable.interest_bubble);
+            FlexboxLayout.LayoutParams params = new FlexboxLayout.LayoutParams(FlexboxLayout.LayoutParams.WRAP_CONTENT, 80);
+            params.setMargins(10,5,10,15);
+            interestBubble.setLayoutParams(params);
+            interestBubbleParent.addView(interestBubble);
+            // TODO: add interest to users interest on firebase
+            currentUserInterests.add(interest);
+            saveInterest();
+            interestBubble.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    balloon.showAlignRight(view, -35, -30);
+                    interestBubble = (Button) view;
+                }
+            });
+        }
     }
 
     public void removeInterestBubble(Button interest){
