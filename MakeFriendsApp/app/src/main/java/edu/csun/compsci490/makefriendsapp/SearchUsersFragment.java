@@ -8,7 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,6 +28,8 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.lang.Thread.sleep;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -55,6 +59,12 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
 
     private ColorDrawable blackColor;
     private ColorDrawable greyColor;
+
+    private String canCancelSearching;
+    private ProgressBar progressBar;
+
+    private Button resetButton;
+
 
     public SearchUsersFragment() {
         // Required empty public constructor
@@ -92,6 +102,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_search_users, container, false);
 
+
         firebaseAuth = FirebaseAuth.getInstance();
         databaseManager = new DatabaseManager();
         userSingleton = UserSingleton.getInstance();
@@ -100,11 +111,33 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         greyColor = new ColorDrawable(ContextCompat.getColor(getContext(), R.color.grey));
         blackColor = new ColorDrawable(ContextCompat.getColor(getContext(), R.color.black));
 
+        progressBar = rootView.findViewById(R.id.progress_bar_search_users_fragment);
+        progressBar.setVisibility(View.VISIBLE);
         // selected search option icon
         allSelectedIcon = rootView.findViewById(R.id.allSelectedIcon);
         courseSelectedIcon = rootView.findViewById(R.id.courseSelectedIcon);
         locationSelectedIcon = rootView.findViewById(R.id.locationSelectedIcon);
         interestsSelectedIcon = rootView.findViewById(R.id.interestSelectedIcon);
+
+        resetButton = rootView.findViewById(R.id.reset_everything);
+        resetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                interestsSelectedIcon.setVisibility(View.INVISIBLE);
+                databaseManager.updateTheField(userEmail + "/Contacts", "All Users", "none");
+                databaseManager.updateTheField(userEmail + "/Contacts", "Blocked Users", "none");
+
+                databaseManager.updateTheField(userEmail + "/More Info", "Canceling", "false");
+                databaseManager.updateTheField(userEmail + "/More Info", "Searching For", "none");
+                databaseManager.updateTheField(userEmail + "/More Info", "User Is In Queue", "none");
+
+                databaseManager.updateTheField(userEmail + "/Profile Page Settings", "Can Edit Interests", "true");
+                databaseManager.updateTheField(userEmail + "/Search Canceling", "Can Cancel Searching", "false");
+                databaseManager.updateTheField(userEmail + "/Search Canceling", "Can Cancel Searching", "true");
+
+            }
+        });
+
 
         // buttons
         interests = rootView.findViewById(R.id.tv_interests);
@@ -113,7 +146,6 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
 
         spinner = (Spinner) rootView.findViewById(R.id.spinner_Course);
 
-        lockAllSearchingPossibilities();
 
         List<String> courseOptions = new ArrayList<>();
         courseOptions.add(0, "Course");
@@ -158,6 +190,9 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         location.setOnClickListener(this);
         all.setOnClickListener(this);
 
+        lockAllSearchingPossibilities();
+        getUserMoreInfoDocumentSnapshot();
+
         // Inflate the layout for this fragment
         return rootView;
     }
@@ -168,6 +203,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
             case R.id.tv_interests:
                 interests.setEnabled(false);
                 interests.setTextColor(greyColor.getColor());
+                progressBar.setVisibility(View.VISIBLE);
                 checkIfUserIsSearchingOrCanceling();
                 //toggleInterestIcon();
                 //checkIfUserHasAddedAnyInterests();
@@ -192,8 +228,6 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         interests.setTextColor(greyColor.getColor());
         location.setTextColor(greyColor.getColor());
         all.setTextColor(greyColor.getColor());
-
-        getUserMoreInfoDocumentSnapshot();
     }
 
     public void getUserMoreInfoDocumentSnapshot() {
@@ -204,27 +238,30 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
             @Override
             public void onCallback(Object value) {
                 DocumentSnapshot snapshot = (DocumentSnapshot) value;
-                setActionListenerToCanCancelSearching(snapshot);
+                snapshot.getReference().addSnapshotListener(getActivity(), new EventListener<DocumentSnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                        String fieldName = "Can Cancel Searching";
+                        String status = value.get(fieldName).toString();
+                        if (status.equals("true")) {
+                            //checking if User has started searching
+                            canCancelSearching = "true";
+                            updateTheLayout();
+
+                        } else {
+                            canCancelSearching = "false";
+                            lockAllSearchingPossibilities();
+                        }
+                        progressBar.setVisibility(View.GONE);
+                    }
+                });
             }
         });
     }
 
-    public void setActionListenerToCanCancelSearching(DocumentSnapshot snapshot) {
-        snapshot.getReference().addSnapshotListener(getActivity(), new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-                String fieldName = "Can Cancel Searching";
-                String status = value.get(fieldName).toString();
-                if (status.equals("true")) {
-                    //checking if User has started searching
-                    updateTheLayout();
-
-                } else {
-                    lockAllSearchingPossibilities();
-                }
-            }
-        });
-    }
+//    public void setActionListenerToCanCancelSearching(DocumentSnapshot snapshot) {
+//
+//    }
 
     private void updateTheLayout() {
         String userMoreInfoDocPath = userEmail + "/More Info";
@@ -237,7 +274,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
                 if (searchingFor.equals("none")) {
                     unlockAllSearchingPossibilities();
                 } else if (searchingFor.equals("Interest")) {
-                    lockOtherSearchingPossibilitiesForInterest();
+                    lockOtherSearchingPossibilitiesForInterest(false);
                 } else if (searchingFor.equals("Course")) {
                     lockOtherSearchingPossibilitiesForCourse();
                 } else if (searchingFor.equals("Location")) {
@@ -245,19 +282,20 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
                 } else if (searchingFor.equals("All")) {
                     lockOtherSearchingPossibilitiesForAll();
                 }
+
             }
         });
     }
     private void checkIfUserIsSearchingOrCanceling() {
         if (interestsSelectedIcon.getVisibility() == View.INVISIBLE) {//User is searching
-            lockOtherSearchingPossibilitiesForInterest();//user can only do one search at a time
+            lockOtherSearchingPossibilitiesForInterest(true);//user can only do one search at a time
             //toggleInterestIcon();
         } else {//user is canceling
             setTheUserStatusToCanceling();
         }
     }
 
-    private void lockOtherSearchingPossibilitiesForInterest() {
+    private void lockOtherSearchingPossibilitiesForInterest(boolean checkForInterest) {
         location.setEnabled(false);
         spinner.setEnabled(false);
         all.setEnabled(false);
@@ -265,7 +303,14 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         location.setTextColor(greyColor.getColor());
         all.setTextColor(greyColor.getColor());
 
-        checkIfUserHasAddedAnyInterests();
+        if (checkForInterest) {
+            checkIfUserHasAddedAnyInterests();
+        } else {
+            interestsSelectedIcon.setVisibility(View.VISIBLE);
+            interests.setEnabled(true);
+            interests.setTextColor(blackColor.getColor());
+        }
+
     }
 
 
@@ -279,6 +324,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
                     unlockAllSearchingPossibilities();
                     Log.d(TAG, "User don't have any interests");
                     Toast.makeText(getContext(), "Please add interests in the home page", Toast.LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.GONE);
                 } else {//user has interests saved
                     ArrayList<String> interest = (ArrayList) value;
                     Log.d(TAG, "User does have interests");
@@ -298,6 +344,11 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         interests.setTextColor(blackColor.getColor());
         location.setTextColor(blackColor.getColor());
         all.setTextColor(blackColor.getColor());
+
+        interestsSelectedIcon.setVisibility(View.INVISIBLE);
+        locationSelectedIcon.setVisibility(View.INVISIBLE);
+        allSelectedIcon.setVisibility(View.INVISIBLE);
+        courseSelectedIcon.setVisibility(View.INVISIBLE);
     }
 
     public void toggleInterestIcon() {
@@ -337,6 +388,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         databaseManager.createNewField(interestQueueDocPath, userUID, "Interest");
         interests.setEnabled(true);
         interests.setTextColor(blackColor.getColor());
+        progressBar.setVisibility(View.GONE);
     }
 
     private void setTheUserStatusToCanceling() {
@@ -347,6 +399,18 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
     }
 
     private void getWhatQueueIsTheUserIn() {
+
+        try {
+            sleep(1000);
+            Log.d(TAG, "Sleeping for 1000 millis");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        while (canCancelSearching.equals("false")) {
+
+        }
+
         String userQueueDocPath = userEmail + "/More Info";
         String fieldName = "User Is In Queue";
 
@@ -378,10 +442,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         String cancelingStatusFieldName = "Canceling";
         databaseManager.updateTheField(userMoreInfoDocPath, cancelingStatusFieldName, "false");
 
-        //resetting Can Cancel Searching
-        String searchCancelingDocPath = userEmail + "/Search Canceling";
-        String canCancelSearchingFieldName = "Can Cancel Searching";
-        databaseManager.updateTheField(searchCancelingDocPath, canCancelSearchingFieldName, "true");
+
 
         //resetting user Queue
         String userQueueLocFieldName = "User Is In Queue";
@@ -391,9 +452,16 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         String searchingForFieldName = "Searching For";
         databaseManager.updateTheField(userMoreInfoDocPath, searchingForFieldName, "none");
 
+        //resetting Can Cancel Searching
+        String searchCancelingDocPath = userEmail + "/Search Canceling";
+        String canCancelSearchingFieldName = "Can Cancel Searching";
+        databaseManager.updateTheField(searchCancelingDocPath, canCancelSearchingFieldName, "true");
+
         //resetting interest toggle
+        updateTheLayout();
         toggleInterestIcon();
-        unlockAllSearchingPossibilities();
+        progressBar.setVisibility(View.GONE);
+        //unlockAllSearchingPossibilities();
     }
 
 

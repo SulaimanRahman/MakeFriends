@@ -1,5 +1,6 @@
 package edu.csun.compsci490.makefriendsapp;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -72,7 +73,7 @@ public class ServerPage extends AppCompatActivity {
 
         realtimeDatabaseManager = new RealtimeDatabaseManager();
 
-        interestThread = new InterestThread(interestThreadStatusTextView, interestUserProcessedTextView, getApplicationContext(), interestSemaphore);
+        interestThread = new InterestThread(interestThreadStatusTextView, interestUserProcessedTextView, getApplicationContext(), interestSemaphore, this);
         courseThread = new Thread();
         locationThread = new Thread();
 
