@@ -22,14 +22,23 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.google.android.flexbox.FlexboxLayout;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.skydoves.balloon.Balloon;
 import com.skydoves.balloon.BalloonAnimation;
 import com.skydoves.balloon.OnBalloonClickListener;
@@ -38,6 +47,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -72,11 +82,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private EditText sectionCell, courseCell, courseNumCell;
 
     private AutoCompleteTextView interestSearchBar;
-    private ArrayList<String> defaultInterests = new ArrayList<>();
-    private ArrayList<String> currentUserInterests = new ArrayList<>();
+    private final ArrayList<String> defaultInterests = new ArrayList<>();
+    private final ArrayList<String> currentUserInterests = new ArrayList<>();
+    private final ArrayList<Course> currentUserCourses = new ArrayList<>();
     private FlexboxLayout interestBubbleParent;
     private Button interestBubble;
     private Balloon balloon;
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public HomeFragment() {
         // Required empty public constructor
@@ -133,6 +145,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         getUserFirstNameLastNameBiographyAndProfilePicture();
         getUserInterests();
+        getUserSchedule();
         tableLayout = view.findViewById(R.id.tableLayout);
         tr = view.findViewById(R.id.tr1);
         btnAddScheduleRow = view.findViewById(R.id.btn_addSchedule);
@@ -242,7 +255,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 break;
             case R.id.btn_addSchedule:
                 if(tableLayout.getChildCount() < 7){
-                    addTableRow();
+                    addTableRow("","","");
                 } else {
                     Toast.makeText(getContext(),"Schedule is limited to 6 courses",Toast.LENGTH_SHORT).show();
                 }
@@ -263,10 +276,30 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     // removes a row from the schedule table
     private void removeTableRow() {
         tableLayout.removeViewAt(tableLayout.getChildCount()-1);
+        if(currentUserCourses.size() > 0){
+
+            // update in fb
+            final CollectionReference cref = db.collection(userEmail).document("More Info").collection("Courses");
+            String sectionOfCourseToDelete = currentUserCourses.get(currentUserCourses.size()-1).getSectionNumber();
+            cref.whereEqualTo("Section", sectionOfCourseToDelete).get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot document : task.getResult()) {
+                            cref.document(document.getId()).delete();
+                        }
+                    } else {
+                        Log.d("FBcourseDeletion", "Error getting documents: ", task.getException());
+                    }
+                }
+            });
+            currentUserCourses.remove(currentUserCourses.size()-1);
+        }
     }
 
     // adds a row to the schedule
-    private void addTableRow() {
+    private void addTableRow(String section, String course, String courseNumber) {
         tr = new TableRow(getContext());
         sectionCell = new EditText(getContext());
         courseCell = new EditText(getContext());
@@ -275,16 +308,29 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         TableRow.LayoutParams rowParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, .25f);
         tr.setLayoutParams(tableParams);
 
+        final Course courseAddition = new Course();
+
         sectionCell.setTextSize(16);
         sectionCell.setGravity(Gravity.CENTER_HORIZONTAL);
         sectionCell.setPadding(10,0,10,15);
         sectionCell.setLayoutParams(rowParams);
+        sectionCell.setText(section);
         rowParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, .50f);
         sectionCell.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                // TODO: save user section to firebase here
-                Toast.makeText(getContext(),"section saved to firestore",Toast.LENGTH_SHORT).show();
+                if(!sectionCell.hasFocus()){
+                    // TODO: save user section to firebase here
+                    courseAddition.setSectionNumber(sectionCell.getText().toString());
+                    //Toast.makeText(getContext(), "course saved", Toast.LENGTH_SHORT).show();
+                    if(courseAddition.hasData()){
+                        if(currentUserCourses.contains(courseAddition)){
+                            Toast.makeText(getContext(), "Duplicate course", Toast.LENGTH_SHORT).show();
+                        } else{
+                            saveTheCourse(courseAddition);
+                        }
+                    }
+                }
             }
         });
 
@@ -292,11 +338,22 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         courseCell.setGravity(Gravity.CENTER_HORIZONTAL);
         courseCell.setPadding(10,0,10,15);
         courseCell.setLayoutParams(rowParams);
+        courseCell.setText(course);
         courseCell.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                // TODO: save user course to firebase here
-                Toast.makeText(getContext(),"course saved to firestore",Toast.LENGTH_SHORT).show();
+                if(!courseCell.hasFocus()) {
+                    // TODO: save user course to firebase here
+                    courseAddition.setCourse(courseCell.getText().toString());
+                    if(courseAddition.hasData()){
+                        if(currentUserCourses.contains(courseAddition)){
+                            Toast.makeText(getContext(), "Duplicate course", Toast.LENGTH_SHORT).show();
+                        } else{
+                            saveTheCourse(courseAddition);
+                        }
+                        //Toast.makeText(getContext(), "course saved", Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
         });
 
@@ -305,11 +362,22 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         courseNumCell.setGravity(Gravity.CENTER_HORIZONTAL);
         courseNumCell.setPadding(10,0,10,15);
         courseNumCell.setLayoutParams(rowParams);
+        courseNumCell.setText(courseNumber);
         courseNumCell.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                // TODO: save user course# to firebase here
-                Toast.makeText(getContext(),"course# saved to firestore",Toast.LENGTH_SHORT).show();
+                if(!courseNumCell.hasFocus()) {
+                    // TODO: save user course# to firebase here
+                    courseAddition.setCourseNumber(courseNumCell.getText().toString());
+                    if(courseAddition.hasData()){
+                        if(currentUserCourses.contains(courseAddition)){
+                            Toast.makeText(getContext(), "Duplicate course", Toast.LENGTH_SHORT).show();
+                        } else{
+                            saveTheCourse(courseAddition);
+                        }
+                        //Toast.makeText(getContext(), "course saved", Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
         });
 
@@ -395,25 +463,48 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     }
 
     public void getUserSchedule() {
-        databaseManager.getAllDocumentsInArrayListFromCollection(userEmail + "/More Info/Courses", new FirebaseCallback() {
+//        databaseManager.getAllDocumentsInArrayListFromCollection(userEmail + "/More Info/Courses/", new FirebaseCallback() {
+//            @Override
+//            public void onCallback(Object value) {
+//                if (value == null) {
+//                    //no data exists
+//                    return;
+//                }
+//
+//                ArrayList<DocumentSnapshot> documents = (ArrayList) value;
+//
+//                for(int i = 0; i < documents.size(); i++) {
+//                    String sectionNumber = documents.get(i).get("Section Number").toString();
+//                    String course = documents.get(i).get("Course").toString();
+//                    String courseNumber = documents.get(i).get("Course Number").toString();
+//
+//                    // TODO: add user schedule in dynamic table
+//                    Course loadedCourse = new Course(sectionNumber, course, courseNumber);
+//                    currentUserCourses.add(loadedCourse);
+//                    addTableRow(sectionNumber, course, courseNumber);
+//                }
+//
+//            }
+//        });
+
+
+        db.collection(userEmail).document("More Info").collection("Courses").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
-            public void onCallback(Object value) {
-                if (value == null) {
-                    //no data exists
-                    return;
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        String sectionNumber = (String) document.get("Section");
+                        String course = (String) document.get("Course");
+                        String courseNumber = (String) document.get("Course Number");
+
+                        // TODO: add user schedule in dynamic table
+                        Course loadedCourse = new Course(sectionNumber, course, courseNumber);
+                        currentUserCourses.add(loadedCourse);
+                        addTableRow(sectionNumber, course, courseNumber);
+                    }
+                } else {
+                    Log.d("GETUSERSCHED", "Error getting documents: ", task.getException());
                 }
-
-                ArrayList<DocumentSnapshot> documents = (ArrayList) value;
-
-                for(int i = 0; i < documents.size(); i++) {
-                    String sectionNumber = documents.get(i).get("Section Number").toString();
-                    String course = documents.get(i).get("Course").toString();
-                    String courseNumber = documents.get(i).get("Course Number").toString();
-
-                    // TODO: add user schedule in dynamic table
-                    
-                }
-
             }
         });
     }
@@ -478,34 +569,59 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         Toast.makeText(getContext(),"Biography saved",Toast.LENGTH_SHORT).show();
     }
 
-    public void saveTheCourse() {
+    public void saveTheCourse(final Course courseToSave) {
+        currentUserCourses.add(courseToSave);
         //set the following variables and get the data from the textFields
-        final String subject = null;
-        final String sectionNumber = null;
-        final String semester = null;
-        final String year = null;
+        final String sectionNumber = courseToSave.getSectionNumber();
+        final String course = courseToSave.getCourse();
+        final String courseNumber = courseToSave.getCourseNumber();
 
-        databaseManager.checkIfThisDocumentExists(userEmail + "/" + sectionNumber, new FirebaseCallback() {
-            @Override
-            public void onCallback(Object value) {
-                if (value == null) {
-                    //failed to check if the document exists
-                    return;
-                }
+        Map<String, String> courseInfo = new HashMap<>();
+        courseInfo.put("Section", sectionNumber);
+        courseInfo.put("Course", course);
+        courseInfo.put("Course Number", courseNumber);
 
-                boolean documentExists = (boolean) value;
 
-                if (documentExists) {
-                    //show a toast that the course already exists in the
-                    return;
-                }
+        db.collection(userEmail).document("More Info").collection("Courses").document().set(courseInfo)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(getContext(), "Course saved", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
 
-                databaseManager.createNewField(userEmail + "/" + sectionNumber, "Subject", subject);
-                databaseManager.createNewField(userEmail + "/" + sectionNumber, "sectionNumber", sectionNumber);
-                databaseManager.createNewField(userEmail + "/" + sectionNumber, "Semester" , semester);
-                databaseManager.createNewField(userEmail + "/" + sectionNumber, "Year", year);
-            }
-        });
+                    }
+                });
+//        databaseManager.checkIfThisDocumentExists(userEmail + "/More Info/Courses/" + courseToSave.getSectionNumber(), new FirebaseCallback() {
+//            @Override
+//            public void onCallback(Object value) {
+//                if (value == null) {
+//                    //failed to check if the document exists
+//                    return;
+//                }
+//
+//                boolean documentExists = (boolean) value;
+//
+//                if (documentExists) {
+//                    //show a toast that the course already exists in the
+//                    return;
+//                }
+//
+//                currentUserCourses.add(courseToSave);
+//
+//                String docPath = userEmail + "/More Info/Courses/" + sectionNumber;
+//                databaseManager.createNewField(docPath, "Section Number", courseToSave.getSectionNumber());
+//                databaseManager.createNewField(docPath, "Course", courseToSave.getCourse());
+//                databaseManager.createNewField(docPath, "Course Number", courseToSave.getCourseNumber());
+////                databaseManager.createNewField(userEmail + "/" + sectionNumber, "Subject", subject);
+////                databaseManager.createNewField(userEmail + "/" + sectionNumber, "sectionNumber", sectionNumber);
+////                databaseManager.createNewField(userEmail + "/" + sectionNumber, "Semester" , semester);
+////                databaseManager.createNewField(userEmail + "/" + sectionNumber, "Year", year);
+//            }
+        //});
 
     }
 
