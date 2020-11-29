@@ -196,32 +196,37 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         }
 
                         if (snapshot != null && snapshot.exists()) {
-                            String conversationEndedStatus = snapshot.get("Conversation Ended").toString();
-                            String conversationEndedByMeStatus = snapshot.get("Conversation Ended From My Side").toString();
-                            String userBlockedStatus = snapshot.get("Blocked User").toString();
-                            String otherUserDeactivatedAccount = snapshot.get("OtherUserDeactivatedAccount").toString();
-                            String allMessagesBeenRead = snapshot.get("All Messages Been Read").toString();
+                            try {
+                                String conversationEndedStatus = snapshot.get("Conversation Ended").toString();
+                                String conversationEndedByMeStatus = snapshot.get("Conversation Ended From My Side").toString();
+                                String userBlockedStatus = snapshot.get("Blocked User").toString();
+                                String otherUserDeactivatedAccount = snapshot.get("OtherUserDeactivatedAccount").toString();
+                                String allMessagesBeenRead = snapshot.get("All Messages Been Read").toString();
 
 
 
-                            if (conversationEndedStatus.equals("true")) {
-                                ((ChatViewHolder) holder).mChatPreview.setText("This conversation has ended");
-                                ((ChatViewHolder) holder).notificationDot.setVisibility(View.VISIBLE);
-                            }
+                                if (conversationEndedStatus.equals("true")) {
+                                    ((ChatViewHolder) holder).mChatPreview.setText("This conversation has ended");
+                                    ((ChatViewHolder) holder).notificationDot.setVisibility(View.VISIBLE);
+                                }
 
 
 
-                            if (otherUserDeactivatedAccount.equals("true")) {
-                                ((ChatViewHolder) holder).notificationDot.setVisibility(View.VISIBLE);
-                                ((ChatViewHolder) holder).mChatPreview.setText("User has deactivated their account");
-                            }
+                                if (otherUserDeactivatedAccount.equals("true")) {
+                                    ((ChatViewHolder) holder).notificationDot.setVisibility(View.VISIBLE);
+                                    ((ChatViewHolder) holder).mChatPreview.setText("User has deactivated their account");
+                                }
 
-                            if (allMessagesBeenRead.equals("false")){
-                                ((ChatViewHolder) holder).notificationDot.setVisibility(View.VISIBLE);
-                            }
+                                if (allMessagesBeenRead.equals("false")){
+                                    ((ChatViewHolder) holder).notificationDot.setVisibility(View.VISIBLE);
+                                }
 
-                            if (allMessagesBeenRead.equals("true")){
-                                ((ChatViewHolder) holder).notificationDot.setVisibility(View.INVISIBLE);
+                                if (allMessagesBeenRead.equals("true")){
+                                    ((ChatViewHolder) holder).notificationDot.setVisibility(View.INVISIBLE);
+                                }
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
 
                         }

@@ -22,14 +22,23 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.google.android.flexbox.FlexboxLayout;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.skydoves.balloon.Balloon;
 import com.skydoves.balloon.BalloonAnimation;
 import com.skydoves.balloon.OnBalloonClickListener;
@@ -38,6 +47,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -63,7 +73,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private TextView firstAndLastName;
     private ImageView profilePicture;
     private EditText biographyTextField;
-    private Button saveButton;
     private ImageButton logoutBtn;
 
     private ImageButton btnAddScheduleRow, btnRemoveScheduleRow;
@@ -73,10 +82,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private EditText sectionCell, courseCell, courseNumCell;
 
     private AutoCompleteTextView interestSearchBar;
-    private ArrayList<String> defaultInterests = new ArrayList<>();
+    private final ArrayList<String> defaultInterests = new ArrayList<>();
+    private final ArrayList<String> currentUserInterests = new ArrayList<>();
+    private final ArrayList<Course> currentUserCourses = new ArrayList<>();
     private FlexboxLayout interestBubbleParent;
     private Button interestBubble;
     private Balloon balloon;
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public HomeFragment() {
         // Required empty public constructor
@@ -129,11 +141,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         firstAndLastName = view.findViewById(R.id.firstAndLastName);
         profilePicture = view.findViewById(R.id.profile_image);
         biographyTextField = view.findViewById(R.id.biographyTextField);
-        saveButton = view.findViewById(R.id.saveButton);
         logoutBtn = view.findViewById(R.id.btn_logOut);
 
         getUserFirstNameLastNameBiographyAndProfilePicture();
-
+        getUserInterests();
+        getUserSchedule();
         tableLayout = view.findViewById(R.id.tableLayout);
         tr = view.findViewById(R.id.tr1);
         btnAddScheduleRow = view.findViewById(R.id.btn_addSchedule);
@@ -213,12 +225,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 }
             }
         });
-        saveButton.setOnClickListener(this);
         logoutBtn.setOnClickListener(this);
         btnAddScheduleRow.setOnClickListener(this);
         btnRemoveScheduleRow.setOnClickListener(this);
 
-        /* //this code cane be used to populate the interests on the firebase db
+        /* // helper code to populate the interests on the firebase db
         String[] interestData = {"Programming", "Web Development", "Computer Science", "Linear Algebra", "Android Development",
                                 "iOS development", "Linux", "Gaming", "Working Out", "Hiking",
                                 "Embedded Systems", "Machine Learning", "Cooking", "Tennis", "Dodgers",
@@ -242,13 +253,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 getProfilePictureURI.setType("*/*");
                 startActivityForResult(getProfilePictureURI, 1);
                 break;
-            case R.id.saveButton:
-                saveBiography();
-                break;
-
             case R.id.btn_addSchedule:
                 if(tableLayout.getChildCount() < 7){
-                    addTableRow();
+                    addTableRow("","","");
                 } else {
                     Toast.makeText(getContext(),"Schedule is limited to 6 courses",Toast.LENGTH_SHORT).show();
                 }
@@ -269,10 +276,30 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     // removes a row from the schedule table
     private void removeTableRow() {
         tableLayout.removeViewAt(tableLayout.getChildCount()-1);
+        if(currentUserCourses.size() > 0){
+
+            // update in fb
+            final CollectionReference cref = db.collection(userEmail).document("More Info").collection("Courses");
+            String sectionOfCourseToDelete = currentUserCourses.get(currentUserCourses.size()-1).getSectionNumber();
+            cref.whereEqualTo("Section", sectionOfCourseToDelete).get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    if (task.isSuccessful()) {
+                        for (DocumentSnapshot document : task.getResult()) {
+                            cref.document(document.getId()).delete();
+                        }
+                    } else {
+                        Log.d("FBcourseDeletion", "Error getting documents: ", task.getException());
+                    }
+                }
+            });
+            currentUserCourses.remove(currentUserCourses.size()-1);
+        }
     }
 
     // adds a row to the schedule
-    private void addTableRow() {
+    private void addTableRow(String section, String course, String courseNumber) {
         tr = new TableRow(getContext());
         sectionCell = new EditText(getContext());
         courseCell = new EditText(getContext());
@@ -281,16 +308,29 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         TableRow.LayoutParams rowParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, .25f);
         tr.setLayoutParams(tableParams);
 
+        final Course courseAddition = new Course();
+
         sectionCell.setTextSize(16);
         sectionCell.setGravity(Gravity.CENTER_HORIZONTAL);
         sectionCell.setPadding(10,0,10,15);
         sectionCell.setLayoutParams(rowParams);
+        sectionCell.setText(section);
         rowParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, .50f);
         sectionCell.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                // TODO: save user section to firebase here
-                Toast.makeText(getContext(),"section saved to firestore",Toast.LENGTH_SHORT).show();
+                if(!sectionCell.hasFocus()){
+                    // TODO: save user section to firebase here
+                    courseAddition.setSectionNumber(sectionCell.getText().toString());
+                    //Toast.makeText(getContext(), "course saved", Toast.LENGTH_SHORT).show();
+                    if(courseAddition.hasData()){
+                        if(currentUserCourses.contains(courseAddition)){
+                            Toast.makeText(getContext(), "Duplicate course", Toast.LENGTH_SHORT).show();
+                        } else{
+                            saveTheCourse(courseAddition);
+                        }
+                    }
+                }
             }
         });
 
@@ -298,24 +338,46 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         courseCell.setGravity(Gravity.CENTER_HORIZONTAL);
         courseCell.setPadding(10,0,10,15);
         courseCell.setLayoutParams(rowParams);
+        courseCell.setText(course);
         courseCell.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                // TODO: save user course to firebase here
-                Toast.makeText(getContext(),"course saved to firestore",Toast.LENGTH_SHORT).show();
+                if(!courseCell.hasFocus()) {
+                    // TODO: save user course to firebase here
+                    courseAddition.setCourse(courseCell.getText().toString());
+                    if(courseAddition.hasData()){
+                        if(currentUserCourses.contains(courseAddition)){
+                            Toast.makeText(getContext(), "Duplicate course", Toast.LENGTH_SHORT).show();
+                        } else{
+                            saveTheCourse(courseAddition);
+                        }
+                        //Toast.makeText(getContext(), "course saved", Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
         });
 
         rowParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, .25f);
         courseNumCell.setTextSize(16);
-        courseCell.setGravity(Gravity.CENTER_HORIZONTAL);
+        courseNumCell.setGravity(Gravity.CENTER_HORIZONTAL);
         courseNumCell.setPadding(10,0,10,15);
         courseNumCell.setLayoutParams(rowParams);
+        courseNumCell.setText(courseNumber);
         courseNumCell.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-                // TODO: save user course# to firebase here
-                Toast.makeText(getContext(),"course# saved to firestore",Toast.LENGTH_SHORT).show();
+                if(!courseNumCell.hasFocus()) {
+                    // TODO: save user course# to firebase here
+                    courseAddition.setCourseNumber(courseNumCell.getText().toString());
+                    if(courseAddition.hasData()){
+                        if(currentUserCourses.contains(courseAddition)){
+                            Toast.makeText(getContext(), "Duplicate course", Toast.LENGTH_SHORT).show();
+                        } else{
+                            saveTheCourse(courseAddition);
+                        }
+                        //Toast.makeText(getContext(), "course saved", Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
         });
 
@@ -401,26 +463,48 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     }
 
     public void getUserSchedule() {
-        databaseManager.getAllDocumentsInArrayListFromCollection(userEmail + "/More Info/Courses", new FirebaseCallback() {
+//        databaseManager.getAllDocumentsInArrayListFromCollection(userEmail + "/More Info/Courses/", new FirebaseCallback() {
+//            @Override
+//            public void onCallback(Object value) {
+//                if (value == null) {
+//                    //no data exists
+//                    return;
+//                }
+//
+//                ArrayList<DocumentSnapshot> documents = (ArrayList) value;
+//
+//                for(int i = 0; i < documents.size(); i++) {
+//                    String sectionNumber = documents.get(i).get("Section Number").toString();
+//                    String course = documents.get(i).get("Course").toString();
+//                    String courseNumber = documents.get(i).get("Course Number").toString();
+//
+//                    // TODO: add user schedule in dynamic table
+//                    Course loadedCourse = new Course(sectionNumber, course, courseNumber);
+//                    currentUserCourses.add(loadedCourse);
+//                    addTableRow(sectionNumber, course, courseNumber);
+//                }
+//
+//            }
+//        });
+
+
+        db.collection(userEmail).document("More Info").collection("Courses").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
-            public void onCallback(Object value) {
-                if (value == null) {
-                    //no data exists
-                    return;
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        String sectionNumber = (String) document.get("Section");
+                        String course = (String) document.get("Course");
+                        String courseNumber = (String) document.get("Course Number");
+
+                        // TODO: add user schedule in dynamic table
+                        Course loadedCourse = new Course(sectionNumber, course, courseNumber);
+                        currentUserCourses.add(loadedCourse);
+                        addTableRow(sectionNumber, course, courseNumber);
+                    }
+                } else {
+                    Log.d("GETUSERSCHED", "Error getting documents: ", task.getException());
                 }
-
-                ArrayList<DocumentSnapshot> documents = (ArrayList) value;
-
-                for(int i = 0; i < documents.size(); i++) {
-                    String subject = documents.get(i).get("Subject").toString();
-                    String sectionNumber = documents.get(i).get("SectionNumber").toString();
-                    String semester = documents.get(i).get("Semester").toString();
-                    String year = documents.get(i).get("Year").toString();
-
-                    // TODO: add user schedule in dynamic table
-                    
-                }
-
             }
         });
     }
@@ -442,10 +526,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     return;
                 }
 
+
                 for (int i = 0; i < interests.size(); i++) {
                     String interest = interests.get(i);
-                    // TODO: add each user interest in an interest bubble
+                    String lowerInterest = interest.toLowerCase();
+                    currentUserInterests.add(lowerInterest);
                 }
+
+                generateUserInterestBubbles();
             }
         });
     }
@@ -478,36 +566,62 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         }
 
         databaseManager.updateTheField(userEmail + "/Profile", "Biography", biography);
+        Toast.makeText(getContext(),"Biography saved",Toast.LENGTH_SHORT).show();
     }
 
-    public void saveTheCourse() {
+    public void saveTheCourse(final Course courseToSave) {
+        currentUserCourses.add(courseToSave);
         //set the following variables and get the data from the textFields
-        final String subject = null;
-        final String sectionNumber = null;
-        final String semester = null;
-        final String year = null;
+        final String sectionNumber = courseToSave.getSectionNumber();
+        final String course = courseToSave.getCourse();
+        final String courseNumber = courseToSave.getCourseNumber();
 
-        databaseManager.checkIfThisDocumentExists(userEmail + "/" + sectionNumber, new FirebaseCallback() {
-            @Override
-            public void onCallback(Object value) {
-                if (value == null) {
-                    //failed to check if the document exists
-                    return;
-                }
+        Map<String, String> courseInfo = new HashMap<>();
+        courseInfo.put("Section", sectionNumber);
+        courseInfo.put("Course", course);
+        courseInfo.put("Course Number", courseNumber);
 
-                boolean documentExists = (boolean) value;
 
-                if (documentExists) {
-                    //show a toast that the course already exists in the
-                    return;
-                }
+        db.collection(userEmail).document("More Info").collection("Courses").document().set(courseInfo)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(getContext(), "Course saved", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
 
-                databaseManager.createNewField(userEmail + "/" + sectionNumber, "Subject", subject);
-                databaseManager.createNewField(userEmail + "/" + sectionNumber, "sectionNumber", sectionNumber);
-                databaseManager.createNewField(userEmail + "/" + sectionNumber, "Semester" , semester);
-                databaseManager.createNewField(userEmail + "/" + sectionNumber, "Year", year);
-            }
-        });
+                    }
+                });
+//        databaseManager.checkIfThisDocumentExists(userEmail + "/More Info/Courses/" + courseToSave.getSectionNumber(), new FirebaseCallback() {
+//            @Override
+//            public void onCallback(Object value) {
+//                if (value == null) {
+//                    //failed to check if the document exists
+//                    return;
+//                }
+//
+//                boolean documentExists = (boolean) value;
+//
+//                if (documentExists) {
+//                    //show a toast that the course already exists in the
+//                    return;
+//                }
+//
+//                currentUserCourses.add(courseToSave);
+//
+//                String docPath = userEmail + "/More Info/Courses/" + sectionNumber;
+//                databaseManager.createNewField(docPath, "Section Number", courseToSave.getSectionNumber());
+//                databaseManager.createNewField(docPath, "Course", courseToSave.getCourse());
+//                databaseManager.createNewField(docPath, "Course Number", courseToSave.getCourseNumber());
+////                databaseManager.createNewField(userEmail + "/" + sectionNumber, "Subject", subject);
+////                databaseManager.createNewField(userEmail + "/" + sectionNumber, "sectionNumber", sectionNumber);
+////                databaseManager.createNewField(userEmail + "/" + sectionNumber, "Semester" , semester);
+////                databaseManager.createNewField(userEmail + "/" + sectionNumber, "Year", year);
+//            }
+        //});
 
     }
 
@@ -515,22 +629,23 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         final String interest = null;
         final String documentPath = userEmail + "/More Info";
 
-        databaseManager.getFieldValue(documentPath, "Interest Array", new FirebaseCallback() {
-            @Override
-            public void onCallback(Object value) {
-                if (value == null) {
-                    //failed to get user interests
-                    return;
-                }
-
-                ArrayList interestArray = (ArrayList) value;
-
-                interestArray.add(interest);
-
-                databaseManager.updateTheField(documentPath, "Interest Array", interestArray);
-
-            }
-        });
+//        databaseManager.getFieldValue(documentPath, "Interest Array", new FirebaseCallback() {
+//            @Override
+//            public void onCallback(Object value) {
+//                if (value == null) {
+//                    //failed to get user interests
+//                    return;
+//                }
+//
+//                ArrayList interestArray = (ArrayList) value;
+//
+//                interestArray.add(interest);
+//
+//                databaseManager.updateTheField(documentPath, "Interest Array", interestArray);
+//
+//            }
+//        });
+        databaseManager.updateTheField(documentPath, "Interest Array", currentUserInterests);
     }
 
     public void getAllDefaultInterests() {
@@ -568,37 +683,71 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     }
 
     public void addInterestBubble(String interest){
-        // TODO: if interest does not already exist in the current users interests on firebase then,
-        // add tv else clear input
-
-
-        interestBubble = new Button(getActivity().getApplicationContext());
-        interestBubble.setText(interest);
-        interestBubble.setTextSize(16);
-        interestBubble.setTextColor(getResources().getColor(R.color.white));
-        interestBubble.setBackgroundResource(R.drawable.interest_bubble);
-//        addition.setPadding(25,0,25,0);
-        FlexboxLayout.LayoutParams params = new FlexboxLayout.LayoutParams(FlexboxLayout.LayoutParams.WRAP_CONTENT, 80);
-        params.setMargins(10,5,10,15);
-        interestBubble.setLayoutParams(params);
-        interestBubbleParent.addView(interestBubble);
-
-        interestBubble.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                balloon.showAlignRight(view, -35, -30);
-                interestBubble = (Button) view;
-            }
-        });
-        // TODO: add interest to users interest on firebase
+        // if interest does not already exist in the current users interests on firebase then,
+        // add interest bubble else clear input
+        interest = interest.toLowerCase();
+        if(currentUserInterests.contains(interest)) {
+            //clear search interests bar
+            Toast.makeText(getContext(),"Duplicate interest",Toast.LENGTH_SHORT).show();
+            interestSearchBar.setText("");
+        } else {
+            // add interest to layout
+            interestBubble = new Button(getActivity().getApplicationContext());
+            interestBubble.setText(interest);
+            interestBubble.setTextSize(16);
+            interestBubble.setTextColor(getResources().getColor(R.color.white));
+            interestBubble.setBackgroundResource(R.drawable.interest_bubble);
+            FlexboxLayout.LayoutParams params = new FlexboxLayout.LayoutParams(FlexboxLayout.LayoutParams.WRAP_CONTENT, 80);
+            params.setMargins(10,5,10,15);
+            interestBubble.setLayoutParams(params);
+            interestBubbleParent.addView(interestBubble);
+            // add interest to users interest on firebase
+            currentUserInterests.add(interest);
+            saveInterest();
+            interestBubble.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    balloon.showAlignRight(view, -35, -30);
+                    interestBubble = (Button) view;
+                }
+            });
+        }
     }
 
     public void removeInterestBubble(Button interest){
-        // TODO:remove interest from users interest on firebase
-
+        // remove interest from users interest on firebase
+        String interestToDelete = interest.getText().toString();
+        int removeIndex = currentUserInterests.indexOf(interestToDelete);
+        currentUserInterests.remove(removeIndex);
+        // method automatically updates and deletes the field even without explicitly calling delete field
+        saveInterest();
 
         // remove textview/bubble which contains interest from flexbox layout (interestBubbleParent)
         interestBubbleParent.removeView(interest);
         balloon.dismiss();
+    }
+
+    private void generateUserInterestBubbles() {
+        if(!currentUserInterests.isEmpty()){
+            for(String interest: currentUserInterests){
+                // add interest to layout
+                interestBubble = new Button(getActivity().getApplicationContext());
+                interestBubble.setText(interest);
+                interestBubble.setTextSize(16);
+                interestBubble.setTextColor(getResources().getColor(R.color.white));
+                interestBubble.setBackgroundResource(R.drawable.interest_bubble);
+                FlexboxLayout.LayoutParams params = new FlexboxLayout.LayoutParams(FlexboxLayout.LayoutParams.WRAP_CONTENT, 80);
+                params.setMargins(10,5,10,15);
+                interestBubble.setLayoutParams(params);
+                interestBubbleParent.addView(interestBubble);
+                interestBubble.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        balloon.showAlignRight(view, -35, -30);
+                        interestBubble = (Button) view;
+                    }
+                });
+            }
+        }
     }
 }
