@@ -519,21 +519,25 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                     return;
                 }
 
-                ArrayList<String> interests = (ArrayList) value;
+                if (value.equals("none")) {
+                    //not interests exists
+                } else {
+                    ArrayList<String> interests = (ArrayList) value;
 
-                if (interests.size() == 0) {
-                    //the user hasn't added any interests
-                    return;
+                    if (interests.size() == 0) {
+                        //the user hasn't added any interests
+                        return;
+                    }
+
+
+                    for (int i = 0; i < interests.size(); i++) {
+                        String interest = interests.get(i);
+                        String lowerInterest = interest.toLowerCase();
+                        currentUserInterests.add(lowerInterest);
+                    }
+
+                    generateUserInterestBubbles();
                 }
-
-
-                for (int i = 0; i < interests.size(); i++) {
-                    String interest = interests.get(i);
-                    String lowerInterest = interest.toLowerCase();
-                    currentUserInterests.add(lowerInterest);
-                }
-
-                generateUserInterestBubbles();
             }
         });
     }
