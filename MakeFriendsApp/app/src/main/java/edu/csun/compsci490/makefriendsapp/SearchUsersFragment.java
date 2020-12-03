@@ -25,7 +25,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -130,8 +129,10 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
                 databaseManager.updateTheField(userEmail + "/More Info", "Canceling", "false");
                 databaseManager.updateTheField(userEmail + "/More Info", "Searching For", "none");
                 databaseManager.updateTheField(userEmail + "/More Info", "User Is In Queue", "none");
+                databaseManager.updateTheField(userEmail + "/More Info", "Searching For What Course", "none");
 
                 databaseManager.updateTheField(userEmail + "/Profile Page Settings", "Can Edit Interests", "true");
+                databaseManager.updateTheField(userEmail + "/Profile Page Settings", "Can Edit Courses", "true");
                 databaseManager.updateTheField(userEmail + "/Search Canceling", "Can Cancel Searching", "false");
                 databaseManager.updateTheField(userEmail + "/Search Canceling", "Can Cancel Searching", "true");
 
@@ -147,36 +148,82 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         spinner = (Spinner) rootView.findViewById(R.id.spinner_Course);
 
 
-        List<String> courseOptions = new ArrayList<>();
+        //setting up the courses in the list
+        final List<String> courseOptions = new ArrayList<>();
         courseOptions.add(0, "Course");
-        courseOptions.add("COMP1");
-        courseOptions.add("COMP2");
-        courseOptions.add("COMP3");
-        courseOptions.add("COMP4");
-        courseOptions.add("COMP5");
 
-        ArrayAdapter<String> dataAdapter;
-        dataAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item, courseOptions);
+        final String coursesCollectionPath = userEmail + "/More Info/Courses";
+        databaseManager.getAllDocumentsNameInArrayListFromCollection(coursesCollectionPath, new FirebaseCallback() {
+            @Override
+            public void onCallback(Object value) {
+                final ArrayList<String> documentNames = (ArrayList) value;
 
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                for(int i = 0; i < documentNames.size(); i++) {
+                    String documentPath = coursesCollectionPath + "/" + documentNames.get(i);
+                    final int finalI = i;
+                    databaseManager.getFieldValue(documentPath, "Section", new FirebaseCallback() {
+                        @Override
+                        public void onCallback(Object value) {
+                            String sectionNumber = value.toString();
+                            courseOptions.add(sectionNumber);
 
-        spinner.setAdapter(dataAdapter);
+                            if (finalI == documentNames.size() - 1) {
+                                ArrayAdapter<String> dataAdapter;
+                                dataAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item, courseOptions);
+
+                                dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+                                spinner.setAdapter(dataAdapter);
+                            }
+                        }
+                    });
+                }
+                if (documentNames.size() == 0) {
+                    ArrayAdapter<String> dataAdapter;
+                    dataAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item, courseOptions);
+
+                    dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+                    spinner.setAdapter(dataAdapter);
+                }
+            }
+        });
+//        List<String> courseOptions = new ArrayList<>();
+//        courseOptions.add(0, "Course");
+//        courseOptions.add("COMP1");
+//        courseOptions.add("COMP2");
+//        courseOptions.add("COMP3");
+//        courseOptions.add("COMP4");
+//        courseOptions.add("COMP5");
+
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if(adapterView.getItemAtPosition(i).equals("Course")){
+                if(adapterView.getItemAtPosition(i).equals("Course")) {
                     // selected item is the course hint, do nothing
+
+                } else if (adapterView.getItemAtPosition(i).equals("Cancel")) {
+                    lockAllSearchingPossibilities();
+                    setTheUserStatusToCanceling();
+                    resetCourseSpinner();
                 } else {
                     // on selected spinner item
-                    String item = adapterView.getItemAtPosition(i).toString();
-                    // search based on which item/course was selected here
+                    if (courseSelectedIcon.getVisibility() == View.VISIBLE) {
+                        // the user selected the same course he is searching for so do nothing
+                    } else {
+                        String item = adapterView.getItemAtPosition(i).toString();
+                        // search based on which item/course was selected here
+                        progressBar.setVisibility(View.VISIBLE);
+                        spinner.setEnabled(false);
+                        lockOtherSearchingPossibilitiesForCourse(true, item);
 
-                    // show selected spinner item
-                    // Toast.makeText(adapterView.getContext(), "Selected: " + item, Toast.LENGTH_SHORT).show();
+                        // show selected spinner item
+                        // Toast.makeText(adapterView.getContext(), "Selected: " + item, Toast.LENGTH_SHORT).show();
 
-                    // there is still a bug here when toggling the icon for the courses. needs fix
-                    toggleCourseIcon();
+                        // there is still a bug here when toggling the icon for the courses. needs fix
+                        //toggleCourseIcon();
+                    }
                 }
             }
 
@@ -204,7 +251,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
                 interests.setEnabled(false);
                 interests.setTextColor(greyColor.getColor());
                 progressBar.setVisibility(View.VISIBLE);
-                checkIfUserIsSearchingOrCanceling();
+                checkIfUserIsSearchingOrCancelingForInterest();
                 //toggleInterestIcon();
                 //checkIfUserHasAddedAnyInterests();
                 //addUserToTheInterestQueue();
@@ -276,7 +323,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
                 } else if (searchingFor.equals("Interest")) {
                     lockOtherSearchingPossibilitiesForInterest(false);
                 } else if (searchingFor.equals("Course")) {
-                    lockOtherSearchingPossibilitiesForCourse();
+                    lockOtherSearchingPossibilitiesForCourse(false, null);
                 } else if (searchingFor.equals("Location")) {
                     lockOtherSearchingPossibilitiesForLocation();
                 } else if (searchingFor.equals("All")) {
@@ -286,7 +333,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
             }
         });
     }
-    private void checkIfUserIsSearchingOrCanceling() {
+    private void checkIfUserIsSearchingOrCancelingForInterest() {
         if (interestsSelectedIcon.getVisibility() == View.INVISIBLE) {//User is searching
             lockOtherSearchingPossibilitiesForInterest(true);//user can only do one search at a time
             //toggleInterestIcon();
@@ -313,7 +360,6 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
 
     }
 
-
     private void checkIfUserHasAddedAnyInterests() {
         String interestsDocPath = userEmail + "/More Info";
         databaseManager.getFieldValue(interestsDocPath, "Interest Array", new FirebaseCallback() {
@@ -339,6 +385,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         interests.setEnabled(true);
         location.setEnabled(true);
         spinner.setEnabled(true);
+        resetCourseSpinner();
         all.setEnabled(true);
 
         interests.setTextColor(blackColor.getColor());
@@ -364,10 +411,10 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         String profileSettingDocPath = userEmail + "/Profile Page Settings";
         String fieldName = "Can Edit Interests";
         databaseManager.updateTheField(profileSettingDocPath, fieldName, "false");
-        setTheUserSearchingFor();
+        setTheUserSearchingForInterest();
     }
 
-    private void setTheUserSearchingFor() {
+    private void setTheUserSearchingForInterest() {
         String searchingForDocPath = userEmail + "/More Info";
         String fieldName = "Searching For";
 
@@ -433,7 +480,9 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         //enabling interest Editing
         String profileSettingsDocPath = userEmail + "/Profile Page Settings";
         String enablingInterestFieldName = "Can Edit Interests";
+        String enablingCourseFieldName = "Can Edit Courses";
         databaseManager.updateTheField(profileSettingsDocPath, enablingInterestFieldName, "true");
+        databaseManager.updateTheField(profileSettingsDocPath, enablingCourseFieldName, "true");
 
         //resetting things in user More Info document
         String userMoreInfoDocPath = userEmail + "/More Info";
@@ -442,7 +491,9 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         String cancelingStatusFieldName = "Canceling";
         databaseManager.updateTheField(userMoreInfoDocPath, cancelingStatusFieldName, "false");
 
-
+        //resetting name of the courseSearching
+        String courseSearching = "Searching For What Course";
+        databaseManager.updateTheField(userMoreInfoDocPath, courseSearching, "none");
 
         //resetting user Queue
         String userQueueLocFieldName = "User Is In Queue";
@@ -474,7 +525,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         }
     }
 
-    private void lockOtherSearchingPossibilitiesForCourse() {
+    private void lockOtherSearchingPossibilitiesForCourse(boolean searchingForACourse, String course) {
         interests.setEnabled(false);
         location.setEnabled(false);
         all.setEnabled(false);
@@ -483,6 +534,104 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         location.setTextColor(greyColor.getColor());
         all.setTextColor(greyColor.getColor());
 
+        //set the Course drop down to the course that is being searched for
+        if (searchingForACourse) {
+            final String documentPath = userEmail + "/More Info";
+
+            databaseManager.updateTheField(documentPath, "Searching For What Course", course);
+            List<String> courseOptions = new ArrayList<>();
+            courseOptions.add(0, course);
+            courseOptions.add("Cancel");
+
+            ArrayAdapter<String> dataAdapter;
+            dataAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item, courseOptions);
+
+            dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+            spinner.setAdapter(dataAdapter);
+
+            lockEditingCourses(course);
+
+        } else {
+            //checking what course is the user searching for is in progress
+            String moreInfoDocPath = userEmail + "/More Info";
+            String fieldName = "Searching For What Course";
+            databaseManager.getFieldValue(moreInfoDocPath, fieldName, new FirebaseCallback() {
+                @Override
+                public void onCallback(Object value) {
+                    String course = value.toString();
+                    List<String> courseOptions = new ArrayList<>();
+                    courseOptions.add(0, course);
+                    courseOptions.add("Cancel");
+
+                    ArrayAdapter<String> dataAdapter;
+                    dataAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item, courseOptions);
+
+                    dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+                    spinner.setAdapter(dataAdapter);
+                    spinner.setEnabled(true);
+                }
+            });
+        }
+
+    }
+
+    private void resetCourseSpinner() {
+        final List<String> courseOptions = new ArrayList<>();
+        courseOptions.add(0, "Course");
+
+        final String coursesCollectionPath = userEmail + "/More Info/Courses";
+        databaseManager.getAllDocumentsNameInArrayListFromCollection(coursesCollectionPath, new FirebaseCallback() {
+            @Override
+            public void onCallback(Object value) {
+                final ArrayList<String> documentNames = (ArrayList) value;
+
+                for(int i = 0; i < documentNames.size(); i++) {
+                    String documentPath = coursesCollectionPath + "/" + documentNames.get(i);
+                    final int finalI = i;
+                    databaseManager.getFieldValue(documentPath, "Section", new FirebaseCallback() {
+                        @Override
+                        public void onCallback(Object value) {
+                            String sectionNumber = value.toString();
+                            courseOptions.add(sectionNumber);
+
+                            if (finalI == documentNames.size() - 1) {
+                                ArrayAdapter<String> dataAdapter;
+                                dataAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item, courseOptions);
+
+                                dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+                                spinner.setAdapter(dataAdapter);
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void lockEditingCourses(String course) {
+        String profileSettingDocPath = userEmail + "/Profile Page Settings";
+        databaseManager.updateTheField(profileSettingDocPath, "Can Edit Courses", "false");
+        setTheUserSearchingForCourse(course);
+    }
+
+    private void setTheUserSearchingForCourse(String course) {
+        String moreInfoDocPath = userEmail + "/More Info";
+        databaseManager.updateTheField(moreInfoDocPath, "Searching For", "Course");
+        databaseManager.updateTheField(moreInfoDocPath, "Searching For What Course", course);
+        databaseManager.updateTheField(moreInfoDocPath, "User Is In Queue", "Course Queue");
+        addUserToTheCourseQueue(course);
+    }
+
+    private void addUserToTheCourseQueue(String course) {
+        String courseQueueDocPath = "Connecting/Course Queue";
+        String userUID = firebaseAuth.getUid();
+        databaseManager.createNewField(courseQueueDocPath, userUID, course);
+        courseSelectedIcon.setVisibility(View.VISIBLE);
+        spinner.setEnabled(true);
+        progressBar.setVisibility(View.GONE);
     }
 
     public void toggleLocationIcon() {
