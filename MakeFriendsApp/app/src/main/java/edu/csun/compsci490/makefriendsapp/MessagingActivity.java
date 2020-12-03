@@ -328,14 +328,18 @@ public class MessagingActivity extends AppCompatActivity {
                     for (int i = 0; i < dataKeys.size(); i++) {
                         if (dataKeys.get(i).contains("Me" + (totalKeys - 1)) || dataKeys.get(i).contains("Recipient" + (totalKeys - 1))) {
                             lastKey = dataKeys.get(i);
+                            break;
                         }
                     }
 
                     if (lastKey.contains("Me")) {
                         //do nothing
-                        Log.d(TAG, "Last key" + lastKey);
+                        firstLoad = false;
+                        Log.d(TAG, "Last key: " + lastKey);
                     } else if (lastKey.contains("Recipient")){
-                        if (!firstLoad) {
+                        if (firstLoad) {
+                            firstLoad = false;
+                        } else {
                             final String message = data.get(lastKey).toString();
                             final String contactName = chatSingleton.getContactName();
                             final Uri contactProfilePicUri = chatSingleton.getContactProfilePicUri();
@@ -348,9 +352,10 @@ public class MessagingActivity extends AppCompatActivity {
                                     messageAdapter.notifyDataSetChanged();
                                 }
                             });
-                        } else {
-                            firstLoad = false;
                         }
+                        noConversationExists.setVisibility(View.GONE);
+                    } else {
+                        firstLoad = false;
                     }
                 } else {
                     Log.d(TAG, "Current Data: Null");
