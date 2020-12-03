@@ -74,7 +74,7 @@ public class ServerPage extends AppCompatActivity {
         realtimeDatabaseManager = new RealtimeDatabaseManager();
 
         interestThread = new InterestThread(interestThreadStatusTextView, interestUserProcessedTextView, getApplicationContext(), interestSemaphore, this);
-        courseThread = new Thread();
+        courseThread = new CourseThread(courseThreadStatusTextView, courseUserProcessedTextView, getApplicationContext(), this);
         locationThread = new Thread();
 
         final ColorDrawable redColor = new ColorDrawable(getResources().getColor(R.color.red2));
@@ -91,6 +91,8 @@ public class ServerPage extends AppCompatActivity {
                     startButton.setBackground(redColor);
 
                     interestThread.run();
+                    courseThread.run();
+
                     //setUpInterestThread();
 
                     //setUpCourseThread();
