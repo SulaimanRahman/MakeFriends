@@ -24,6 +24,7 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 //import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.bumptech.glide.Glide;
@@ -65,7 +66,6 @@ public class FriendsFragment extends Fragment {
     private static final String TAG = "FriendFragment";
 
     private RecyclerView contactsRecyclerView;
-    private ContactsAdapter mAdapter;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private DatabaseManager databaseManager;
     private UserSingleton userSingleton;
@@ -76,9 +76,9 @@ public class FriendsFragment extends Fragment {
     private List<String> allEmails = new ArrayList<String>();
     private EditText searchQuery;
     private ContactsAdapter.RecyclerviewClickListener listener;
-    TextView test;
-    private String data;
 
+    private String interests = "";
+    private String data;
     public FriendsFragment() {
         // Required empty public constructor
     }
@@ -125,13 +125,16 @@ public class FriendsFragment extends Fragment {
         allContactsEmails = new ArrayList();
         contactsData = new HashMap<>();
         searchQuery = view.findViewById(R.id.contactSearchBar);
-        contactsRecyclerView = view.findViewById(R.id.myRecyclerView);
+        //contactsRecyclerView = view.findViewById(R.id.myRecyclerView);
+        ContactsAdapter mAdapter;
         gettingEmails();
         setOnClickListener(userData);
 
+        mAdapter = new ContactsAdapter(getContext(), userData, listener);
+
+        contactsRecyclerView = view.findViewById(R.id.myRecyclerView);
         contactsRecyclerView.setHasFixedSize(true);
-        contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        mAdapter = new ContactsAdapter(getActivity(), userData, listener);
+        contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         contactsRecyclerView.setAdapter(mAdapter);
 
             searchQuery.addTextChangedListener(new TextWatcher() {
@@ -170,6 +173,7 @@ public class FriendsFragment extends Fragment {
 
     public void gettingData(final List<String> emails){
         for(int i = 0; i < emails.size();i++) {
+            final String curEmail = emails.get(i);
             db.collection(emails.get(i)).document("Profile")
                     .get()
                     .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -182,9 +186,12 @@ public class FriendsFragment extends Fragment {
                                 user.setUserImg(documentSnapshot.getString("Profile Picture Uri"));
                                 user.setContactBio(documentSnapshot.getString("Biography"));
                                 user.setContactMajor("Computer Science");
+                                getInterests(curEmail,user);
+                                //Toast.makeText(getContext(),test,Toast.LENGTH_LONG).show();
+                                //user.setContactInterest(interests);
 
-                                userData.add(user);
-
+                                //userData.add(user);
+                                //interests = "";
                             } else {
                                 data = "else case";
                                 Log.d("Tag           ", "else case");
@@ -200,6 +207,34 @@ public class FriendsFragment extends Fragment {
             });
 
         }
+    }
+    public void getInterests(String e, final Contact user){
+        db.collection(e)
+                .document("More Info").get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        DocumentSnapshot document = task.getResult();
+                        String test = document.get("Interest Array").toString();
+                        //Toast.makeText(getContext(),test,Toast.LENGTH_LONG).show();
+                        if(!test.equals("none")) {
+                            //Toast.makeText(getContext(), "we cool", Toast.LENGTH_LONG).show();
+                            List<String> allInterests = (List<String>) document.get("Interest Array");
+                            for(String s : allInterests){
+                                //Log.d("interest",s);
+                                s += " ";
+                                interests += s;
+                                //Toast.makeText(getContext(),interests, Toast.LENGTH_LONG).show();
+                            }
+                        }
+                        //Toast.makeText(getContext(),interests, Toast.LENGTH_LONG).show();
+                        user.setContactInterest(interests);
+                        userData.add(user);
+                        interests="";
+                    }
+
+                });
+        //Toast.makeText(getContext(),interests, Toast.LENGTH_LONG).show();
     }
     public void gettingEmails() {
         db.collection(userEmail)
@@ -358,6 +393,7 @@ public class FriendsFragment extends Fragment {
                 intent.putExtra("userName",newUserData.get(pos).getContactName());
                 intent.putExtra("userBio",newUserData.get(pos).getContactBio());
                 intent.putExtra("userImg",newUserData.get(pos).getUserImg());
+                intent.putExtra("interests",newUserData.get(pos).getContactInterest());
                 startActivity(intent);
             }
         };

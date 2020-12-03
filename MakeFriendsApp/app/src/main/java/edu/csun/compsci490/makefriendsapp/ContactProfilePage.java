@@ -28,15 +28,18 @@ public class ContactProfilePage extends AppCompatActivity {
         String userName = "not yet set";
         String userBio = "blank";
         String userImg = "https://www.joyonlineschool.com/static/emptyuserphoto.png";
+        String interest = "none";
         Bundle extras = getIntent().getExtras();
         if(extras != null){
             userName = extras.getString("userName");
             userBio = extras.getString("userBio");
             userImg = extras.getString("userImg");
+            interest = extras.getString("interests");
         }
 
         contactName.setText(userName);
         contactBio.setText(userBio);
+        contactInterest.setText(interest);
         storageReference = FirebaseStorage.getInstance().getReference().child(userImg);
         storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
