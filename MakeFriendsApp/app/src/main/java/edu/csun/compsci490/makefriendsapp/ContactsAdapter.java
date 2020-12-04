@@ -23,9 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 public class ContactsAdapter extends RecyclerView.Adapter<ContactsAdapter.MyViewHolder> {
 
-    private Context mContext;
+    private final Context mContext;
     private List<Contact> mData;
-    private RecyclerviewClickListener listener;
+    private final RecyclerviewClickListener listener;
     StorageReference storageReference;
     public ContactsAdapter(Context mContext, List<Contact> mData, RecyclerviewClickListener listener) {
         this.mContext = mContext;
