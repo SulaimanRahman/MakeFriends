@@ -65,7 +65,6 @@ public class FriendsFragment extends Fragment {
 
     private static final String TAG = "FriendFragment";
 
-    private RecyclerView contactsRecyclerView;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private DatabaseManager databaseManager;
     private UserSingleton userSingleton;
@@ -76,7 +75,7 @@ public class FriendsFragment extends Fragment {
     private List<String> allEmails = new ArrayList<String>();
     private EditText searchQuery;
     private ContactsAdapter.RecyclerviewClickListener listener;
-
+    private RecyclerView contactsRecyclerView;
     private String interests = "";
     private String data;
     public FriendsFragment() {
@@ -104,12 +103,12 @@ public class FriendsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-
-        //Log.d(TAG,"onCreate: started.");
+//        if (getArguments() != null) {
+//            mParam1 = getArguments().getString(ARG_PARAM1);
+//            mParam2 = getArguments().getString(ARG_PARAM2);
+//        }
+//
+//        //Log.d(TAG,"onCreate: started.");
 
     }
 
@@ -119,13 +118,20 @@ public class FriendsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_friends,container,false);
 
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+
         databaseManager = new DatabaseManager();
         userSingleton = UserSingleton.getInstance();
         userEmail = userSingleton.getEmail();
         allContactsEmails = new ArrayList();
         contactsData = new HashMap<>();
         searchQuery = view.findViewById(R.id.contactSearchBar);
-        //contactsRecyclerView = view.findViewById(R.id.myRecyclerView);
         ContactsAdapter mAdapter;
         gettingEmails();
         setOnClickListener(userData);
@@ -137,26 +143,25 @@ public class FriendsFragment extends Fragment {
         contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         contactsRecyclerView.setAdapter(mAdapter);
 
-            searchQuery.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        searchQuery.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-                }
+            }
 
-                @Override
-                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-                }
+            }
 
-                @Override
-                public void afterTextChanged(Editable editable) {
-                    filter(editable.toString());
-                }
+            @Override
+            public void afterTextChanged(Editable editable) {
+                filter(editable.toString());
+            }
 
-            });
-
-        return view;
+        });
     }
+
     private void filter(String query){
         ArrayList<Contact> filteredList = new ArrayList<>();
         for(Contact item : userData) {
