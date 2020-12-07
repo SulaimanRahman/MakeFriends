@@ -136,6 +136,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         interestsSelectedIcon = rootView.findViewById(R.id.interestSelectedIcon);
 
         resetButton = rootView.findViewById(R.id.reset_everything);
+        resetButton.setVisibility(View.INVISIBLE);
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
