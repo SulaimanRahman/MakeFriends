@@ -1,6 +1,11 @@
 package edu.csun.compsci490.makefriendsapp;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,8 +20,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -25,6 +32,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +55,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
     private String mParam1;
     private String mParam2;
     TextView interests, location, all;
-    ImageView allSelectedIcon, courseSelectedIcon, locationSelectedIcon,interestsSelectedIcon;
+    ImageView allSelectedIcon, courseSelectedIcon, locationSelectedIcon, interestsSelectedIcon;
     ConstraintLayout.LayoutParams params;
     Spinner spinner;
 
@@ -64,6 +73,14 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
 
     private Button resetButton;
 
+    private String latitude;
+    private String longitude;
+
+    private LocationManager locationManager;
+    private Location mLocation;
+    private boolean isGPSEnabled;
+    private boolean isNetworkEnabled;
+    private String providerInfo;
 
     public SearchUsersFragment() {
         // Required empty public constructor
@@ -139,7 +156,6 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
             }
         });
 
-
         // buttons
         interests = rootView.findViewById(R.id.tv_interests);
         location = rootView.findViewById(R.id.tv_location);
@@ -158,7 +174,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
             public void onCallback(Object value) {
                 final ArrayList<String> documentNames = (ArrayList) value;
 
-                for(int i = 0; i < documentNames.size(); i++) {
+                for (int i = 0; i < documentNames.size(); i++) {
                     String documentPath = coursesCollectionPath + "/" + documentNames.get(i);
                     final int finalI = i;
                     databaseManager.getFieldValue(documentPath, "Section", new FirebaseCallback() {
@@ -200,7 +216,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if(adapterView.getItemAtPosition(i).equals("Course")) {
+                if (adapterView.getItemAtPosition(i).equals("Course")) {
                     // selected item is the course hint, do nothing
 
                 } else if (adapterView.getItemAtPosition(i).equals("Cancel")) {
@@ -210,7 +226,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
                 } else {
                     // on selected spinner item
                     if (courseSelectedIcon.getVisibility() == View.VISIBLE) {
-                        // the user selected the same course he is searching for so do nothing
+                        // the user selected the same course he is searching for, so do nothing
                     } else {
                         String item = adapterView.getItemAtPosition(i).toString();
                         // search based on which item/course was selected here
@@ -257,11 +273,16 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
                 //addUserToTheInterestQueue();
                 break;
             case R.id.tv_location:
-                toggleLocationIcon();
+                progressBar.setVisibility(View.VISIBLE);
+                checkIfUserIsSearchingOrCancelingForLocation();
+
+                //toggleLocationIcon();
                 break;
             case R.id.tv_all:
                 //check interest, courses, and location. they all have to be available
-                toggleAllIcon();
+                progressBar.setVisibility(View.VISIBLE);
+                checkIfUserIsSearchingOrCancelingForAll();
+                //toggleAllIcon();
                 break;
         }
     }
@@ -325,14 +346,15 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
                 } else if (searchingFor.equals("Course")) {
                     lockOtherSearchingPossibilitiesForCourse(false, null);
                 } else if (searchingFor.equals("Location")) {
-                    lockOtherSearchingPossibilitiesForLocation();
+                    lockOtherSearchingPossibilitiesForLocation(false);
                 } else if (searchingFor.equals("All")) {
-                    lockOtherSearchingPossibilitiesForAll();
+                    lockOtherSearchingPossibilitiesForAll(false);
                 }
 
             }
         });
     }
+
     private void checkIfUserIsSearchingOrCancelingForInterest() {
         if (interestsSelectedIcon.getVisibility() == View.INVISIBLE) {//User is searching
             lockOtherSearchingPossibilitiesForInterest(true);//user can only do one search at a time
@@ -382,25 +404,53 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
     }
 
     private void unlockAllSearchingPossibilities() {
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            location.setEnabled(true);
+            all.setEnabled(true);
+
+            location.setTextColor(blackColor.getColor());
+            all.setTextColor(blackColor.getColor());
+
+            locationSelectedIcon.setVisibility(View.INVISIBLE);
+            allSelectedIcon.setVisibility(View.INVISIBLE);
+
+            /*if the user preses home and goes to the settings and turns off the location
+            take care of this situation, like add listener to that or if the user leaves the
+            app and then comes back to this exact page, then recheck if the location is on or off
+             */
+        } else {
+            location.setEnabled(false);
+            all.setEnabled(false);
+
+            location.setTextColor(greyColor.getColor());
+            all.setTextColor(greyColor.getColor());
+
+            locationSelectedIcon.setVisibility(View.INVISIBLE);
+            allSelectedIcon.setVisibility(View.INVISIBLE);
+
+            //show a popup that access to location is off and go to settings to give access
+            //until then you will not be able to search by all and location
+
+            //writing the following toast twice for making it to last longer than LENGTH_LONG
+            Toast.makeText(getContext(), "Please allow location from the settings to be able to search by 'Location' and 'All'", Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "Please allow location from the settings to be able to search by 'Location' and 'All'", Toast.LENGTH_LONG).show();
+        }
+
         interests.setEnabled(true);
-        location.setEnabled(true);
+
         spinner.setEnabled(true);
         resetCourseSpinner();
-        all.setEnabled(true);
 
         interests.setTextColor(blackColor.getColor());
-        location.setTextColor(blackColor.getColor());
-        all.setTextColor(blackColor.getColor());
 
         interestsSelectedIcon.setVisibility(View.INVISIBLE);
-        locationSelectedIcon.setVisibility(View.INVISIBLE);
-        allSelectedIcon.setVisibility(View.INVISIBLE);
         courseSelectedIcon.setVisibility(View.INVISIBLE);
+
     }
 
     public void toggleInterestIcon() {
         allSelectedIcon.setVisibility(View.INVISIBLE);
-        if(interestsSelectedIcon.getVisibility() == View.VISIBLE){
+        if (interestsSelectedIcon.getVisibility() == View.VISIBLE) {
             interestsSelectedIcon.setVisibility(View.INVISIBLE);
         } else {
             interestsSelectedIcon.setVisibility(View.VISIBLE);
@@ -428,6 +478,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         databaseManager.updateTheField(whereAboutDocPath, fieldName, "Interest Queue");
         addUserToTheInterestQueue();
     }
+
     private void addUserToTheInterestQueue() {
         String interestQueueDocPath = "Connecting/Interest Queue";
         String userUID = firebaseAuth.getUid();
@@ -469,6 +520,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
             }
         });
     }
+
     private void removeUserFromTheSearching(String queueName) {
         String queueDocPath = "Connecting/" + queueName;
         String fieldName = firebaseAuth.getUid();
@@ -503,6 +555,10 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         String searchingForFieldName = "Searching For";
         databaseManager.updateTheField(userMoreInfoDocPath, searchingForFieldName, "none");
 
+        //resetting User Latitude and Longitude
+        databaseManager.updateTheField(userMoreInfoDocPath, "Latitude", "none");
+        databaseManager.updateTheField(userMoreInfoDocPath, "Longitude", "none");
+
         //resetting Can Cancel Searching
         String searchCancelingDocPath = userEmail + "/Search Canceling";
         String canCancelSearchingFieldName = "Can Cancel Searching";
@@ -510,15 +566,14 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
 
         //resetting interest toggle
         updateTheLayout();
-        toggleInterestIcon();
+        //toggleInterestIcon();
         progressBar.setVisibility(View.GONE);
         //unlockAllSearchingPossibilities();
     }
 
-
     public void toggleCourseIcon() {
         allSelectedIcon.setVisibility(View.INVISIBLE);
-        if(courseSelectedIcon.getVisibility() == View.VISIBLE){
+        if (courseSelectedIcon.getVisibility() == View.VISIBLE) {
             courseSelectedIcon.setVisibility(View.INVISIBLE);
         } else {
             courseSelectedIcon.setVisibility(View.VISIBLE);
@@ -587,7 +642,7 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
             public void onCallback(Object value) {
                 final ArrayList<String> documentNames = (ArrayList) value;
 
-                for(int i = 0; i < documentNames.size(); i++) {
+                for (int i = 0; i < documentNames.size(); i++) {
                     String documentPath = coursesCollectionPath + "/" + documentNames.get(i);
                     final int finalI = i;
                     databaseManager.getFieldValue(documentPath, "Section", new FirebaseCallback() {
@@ -634,23 +689,189 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         progressBar.setVisibility(View.GONE);
     }
 
+    private void checkIfUserIsSearchingOrCancelingForLocation() {
+        if (locationSelectedIcon.getVisibility() == View.VISIBLE) {
+            //user is canceling
+            String moreInfoDocPath = userEmail + "/More Info";
+            databaseManager.updateTheField(moreInfoDocPath, "Canceling", "true");
+            getWhatQueueIsTheUserInForCourse();
+        } else {
+            //user is searching
+            locationManager = (LocationManager) getActivity().getSystemService(getContext().LOCATION_SERVICE);
+            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                lockOtherSearchingPossibilitiesForLocation(true);
+            } else {
+                Toast.makeText(getContext(), "Please enable your location", Toast.LENGTH_LONG).show();
+                progressBar.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    private void getWhatQueueIsTheUserInForCourse() {
+        try {
+            sleep(1000);
+            Log.d(TAG, "Sleeping for 1000 millis");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        while (canCancelSearching.equals("false")) {
+
+        }
+
+        String moreInfoDocPath = userEmail + "/More Info";
+        databaseManager.getFieldValue(moreInfoDocPath, "User Is In Queue", new FirebaseCallback() {
+            @Override
+            public void onCallback(Object value) {
+                String queueName = value.toString();
+                removeUserFromTheSearching(queueName);
+            }
+        });
+    }
+
+
     public void toggleLocationIcon() {
         allSelectedIcon.setVisibility(View.INVISIBLE);
-        if(locationSelectedIcon.getVisibility() == View.VISIBLE){
+        if (locationSelectedIcon.getVisibility() == View.VISIBLE) {
             locationSelectedIcon.setVisibility(View.INVISIBLE);
         } else {
             locationSelectedIcon.setVisibility(View.VISIBLE);
         }
     }
 
-    private void lockOtherSearchingPossibilitiesForLocation() {
+    private void lockOtherSearchingPossibilitiesForLocation(boolean searchingByLocation) {
         interests.setEnabled(false);
         spinner.setEnabled(false);
         all.setEnabled(false);
 
         interests.setTextColor(greyColor.getColor());
         all.setTextColor(greyColor.getColor());
+        if (searchingByLocation) {//user is searching by location
+            location.setEnabled(false);
+            location.setTextColor(greyColor.getColor());
+            getLatitudeAndLongitude();
+        } else {//user is just setting up for Location
+            locationSelectedIcon.setVisibility(View.VISIBLE);
+            location.setEnabled(true);
+            location.setTextColor(blackColor.getColor());
+        }
 
+    }
+
+    private void getLatitudeAndLongitude() {
+        locationManager = (LocationManager) getActivity().getSystemService(getContext().LOCATION_SERVICE);
+
+        isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+        if (isGPSEnabled) {
+            providerInfo = locationManager.GPS_PROVIDER;
+        } else if (isNetworkEnabled) {
+            providerInfo = locationManager.NETWORK_PROVIDER;
+        }
+
+        LocationListener locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(@NonNull Location location) {
+                if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(getContext(), "Failed to get Location", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                mLocation = locationManager.getLastKnownLocation(providerInfo);
+
+            }
+            public void onProviderEnabled(@NonNull String provider) {
+
+            }
+
+            public void onProviderDisabled(@NonNull String provider) {
+
+            }
+
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+        };
+
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            Toast.makeText(getContext(), "Failed to get Location", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        locationManager.requestLocationUpdates(providerInfo, 1000, 0, locationListener);
+        mLocation = locationManager.getLastKnownLocation(providerInfo);
+
+//        while (mLocation == null) {
+//
+//        }
+
+        NumberFormat formatter = new DecimalFormat("#0.00");
+        latitude = formatter.format(mLocation.getLatitude());
+        longitude = formatter.format(mLocation.getLongitude());
+
+        saveLatitudeAndLongitudeInTheDatabase();
+    }
+
+    private void saveLatitudeAndLongitudeInTheDatabase() {
+        String moreInfoDocPath = userEmail + "/More Info";
+        databaseManager.updateTheField(moreInfoDocPath, "Latitude", latitude);
+        databaseManager.updateTheField(moreInfoDocPath, "Longitude", longitude);
+
+        databaseManager.updateTheField(moreInfoDocPath, "User Is In Queue", "Location Queue");
+        databaseManager.updateTheField(moreInfoDocPath, "Searching For", "Location");
+        addUserToTheLocationQueue();
+    }
+
+    private void addUserToTheLocationQueue() {
+        String locationQueueDocPath = "Connecting/Location Queue";
+        String userUID = firebaseAuth.getUid();
+        databaseManager.createNewField(locationQueueDocPath, userUID, "Location");
+
+        updateTheLayout();
+        progressBar.setVisibility(View.GONE);
+    }
+
+    private void checkIfUserIsSearchingOrCancelingForAll() {
+        if (allSelectedIcon.getVisibility() == View.VISIBLE) {
+            //user is canceling
+            String moreInfoDocPath = userEmail + "/More Info";
+            databaseManager.updateTheField(moreInfoDocPath, "Canceling", "true");
+            getWhatQueueIsTheUserInForCourse();
+
+        } else {
+            //user is searching
+            locationManager = (LocationManager) getActivity().getSystemService(getContext().LOCATION_SERVICE);
+            if (spinner.getCount() < 2) {//checking if user has at least one course
+                //user don't have any courses
+                Toast.makeText(getContext(), "Please add at least one course on homepage: ", Toast.LENGTH_LONG).show();
+                progressBar.setVisibility(View.GONE);
+            } else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) == false) {//checking if use has the location turn on
+                //user don't have location turn on
+                Toast.makeText(getContext(), "Please turn on you Location", Toast.LENGTH_SHORT).show();
+                progressBar.setVisibility(View.GONE);
+            } else {//checking if use has at least one interest
+                String userMoreInfoDocPath = userEmail + "/More Info";
+                databaseManager.getFieldValue(userMoreInfoDocPath, "Interest Array", new FirebaseCallback() {
+                    @Override
+                    public void onCallback(Object value) {
+                        String dbValue = value.toString();
+                        if (dbValue.equals("none")) {
+                            //user don't have any interests
+                            Toast.makeText(getContext(), "Please add at least one Interest on homepage", Toast.LENGTH_LONG);
+                            progressBar.setVisibility(View.GONE);
+                        } else {
+                            lockOtherSearchingPossibilitiesForAll(true);
+                        }
+                    }
+                });
+            }
+        }
     }
 
     public void toggleAllIcon() {
@@ -664,14 +885,41 @@ public class SearchUsersFragment extends Fragment implements View.OnClickListene
         }
     }
 
-    private void lockOtherSearchingPossibilitiesForAll() {
+    private void lockOtherSearchingPossibilitiesForAll(boolean searchingForAll) {
         interests.setEnabled(false);
-        location.setEnabled(false);
         spinner.setEnabled(false);
+        location.setEnabled(false);
 
         interests.setTextColor(greyColor.getColor());
         location.setTextColor(greyColor.getColor());
 
+        if (searchingForAll) {//user is searching by All
+            all.setEnabled(false);
+            all.setTextColor(greyColor.getColor());
+            setUpDatabaseForAll();
+        } else {//user is just setting up for All
+            allSelectedIcon.setVisibility(View.VISIBLE);
+            all.setEnabled(true);
+            all.setTextColor(blackColor.getColor());
+        }
     }
 
+    private void setUpDatabaseForAll() {
+        String moreInfoDocPath = userEmail + "/More Info";
+
+        databaseManager.updateTheField(moreInfoDocPath, "User Is In Queue", "Interest Queue");
+        databaseManager.updateTheField(moreInfoDocPath, "Searching For", "All");
+        addUserToTheInterestQueueForAll();
+    }
+
+    private void addUserToTheInterestQueueForAll() {
+        String interestQueueDocPath = "Connecting/Interest Queue";
+        String userUID = firebaseAuth.getUid();
+
+        databaseManager.createNewField(interestQueueDocPath, userUID, "All");
+        all.setEnabled(true);
+        allSelectedIcon.setVisibility(View.VISIBLE);
+        all.setTextColor(blackColor.getColor());
+        progressBar.setVisibility(View.GONE);
+    }
 }

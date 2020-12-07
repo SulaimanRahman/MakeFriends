@@ -141,6 +141,8 @@ public class SignUp extends AppCompatActivity {
                             databaseManager.createNewField(userMoreInfoDocPath, "Searching For", "none");
                             databaseManager.createNewField(userMoreInfoDocPath, "Searching For What Course", "none");
                             databaseManager.createNewField(userMoreInfoDocPath, "User Is In Queue", "none");
+                            databaseManager.createNewField(userMoreInfoDocPath, "Latitude", "none");
+                            databaseManager.createNewField(userMoreInfoDocPath, "Longitude", "none");
 
                             String profileSettingsDocPath = email + "/Profile Page Settings";
                             databaseManager.createDocument(profileSettingsDocPath, "Can Edit Interests", "true");
