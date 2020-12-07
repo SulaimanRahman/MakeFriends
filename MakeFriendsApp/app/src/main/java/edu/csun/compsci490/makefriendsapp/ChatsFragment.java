@@ -6,12 +6,14 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.Button;
 
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -34,6 +36,8 @@ public class ChatsFragment extends Fragment{
     private ArrayList<ChatItem> chatItems;
     private RecyclerView recyclerView;
     private ChatAdapter chatAdapter;
+
+    private EditText chatsSearchBar;
 
     private Button btnAdd, btnDelete;
 
@@ -112,19 +116,97 @@ public class ChatsFragment extends Fragment{
             }
         });
 
-//        chatAdapter.setOnChatClickListener(new ChatAdapter.OnChatClickListener() {
+        chatsSearchBar = rootView.findViewById(R.id.chatsSearchBar);
+        chatsSearchBar.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int keyCode, KeyEvent keyEvent) {
+                if (keyEvent.getAction() == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
+                    if (chatsSearchBar.getText().equals("")) {
+                        //reset everything
+                        if (contactsNames.size() == 0) {
+                            noContacts();
+                            return true;
+                        } else {
+                            ArrayList<String> allContactsEmails = new ArrayList<>();
+                            allContactsEmails.addAll(contactsNames.keySet());
+                            listAllTheChats(allContactsEmails);
+                            return true;
+                        }
+
+                    } else {
+                        if (contactsNames.size() == 0) {
+                            noContacts();
+                            return true;
+                        } else {
+                            ArrayList<String> searchedContactEmails = new ArrayList<>();
+                            ArrayList<String> allContactsEmails = new ArrayList<>();
+                            allContactsEmails.addAll(contactsNames.keySet());
+
+                            for (int j = 0; j < contactsNames.size(); j++) {
+                                String contactEmail = allContactsEmails.get(j);
+                                if (contactsNames.get(contactEmail).contains(chatsSearchBar.getText())) {
+                                    searchedContactEmails.add(contactEmail);
+                                }
+                            }
+
+                            if (searchedContactEmails.size() == 0) {
+                                noContactsFoundInSearch();
+                                return true;
+                            } else {
+                                listAllTheChats(searchedContactEmails);
+                                return true;
+                            }
+
+                        }
+                    }
+                }
+                return false;
+            }
+        });
+
+        chatsSearchBar.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean focusGained) {
+                if (!focusGained) {
+                    if (chatsSearchBar.getText().equals("")) {
+                        if (contactsNames.size() == 0) {
+                            noContacts();
+                        } else {
+                            ArrayList<String> allContactsEmails = new ArrayList<>();
+                            allContactsEmails.addAll(contactsNames.keySet());
+                            listAllTheChats(allContactsEmails);
+                        }
+                    }
+                }
+            }
+        });
+
+//        chatsSearchBar.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 //            @Override
-//            public void onChatClick(int position) {
-//                enterMessagingActivity();
-//            }
-//
-//            @Override
-//            public void onDeleteClick(int position) {
-//                deleteChat(position);
+//            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+//                if (chatsSearchBar.getText().equals("")) {
+//                    //reset everything
+//                    ArrayList<String> allContactsEmails = new ArrayList<>();
+//                    allContactsEmails.addAll(contactsNames.keySet());
+//                    listAllTheChats(allContactsEmails);
+//                    return true;
+//                }
+//                return false;
 //            }
 //        });
-
         return rootView;
+    }
+
+    private void noContactsFoundInSearch() {
+        chatItems = new ArrayList<>();
+        //chatItems.add(new ChatItem(R.drawable.ic_launcher_foreground, "NO CONVERSATIONS YET"));
+        chatItems.add(new ChatItem(null, "No Results", "Try something different", null, false, false, false, false, true));
+        //insertChat(0);
+        chatAdapter = new ChatAdapter(chatItems);
+        recyclerView.setAdapter(chatAdapter);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        progressBar.setVisibility(View.GONE);
+        chatAdapter.notifyItemInserted(0);
     }
 
     public void insertChat(int position){

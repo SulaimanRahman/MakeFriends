@@ -1,11 +1,17 @@
 package edu.csun.compsci490.makefriendsapp;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -25,6 +31,10 @@ import org.w3c.dom.Text;
 
 import java.util.concurrent.Semaphore;
 
+import javax.inject.Scope;
+
+import static java.lang.Thread.sleep;
+
 public class ServerPage extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
 
@@ -41,13 +51,12 @@ public class ServerPage extends AppCompatActivity {
     private Button signOutButton;
 
     private InterestThread interestThread;
-    private Thread courseThread;
-    private Thread locationThread;
+    private CourseThread courseThread;
+    private LocationThread locationThread;
 
     private RealtimeDatabaseManager realtimeDatabaseManager;
 
-    private String TAG = "ServerPage";
-    private int firstTime = 0;
+    private String TAG = ServerPage.class.getName();
 
     private Semaphore interestSemaphore;
 
@@ -68,6 +77,17 @@ public class ServerPage extends AppCompatActivity {
         locationThreadStatusTextView = findViewById(R.id.location_thread_status_textview);
         locationUserProcessedTextView = findViewById(R.id.processing_location_user_textview);
 
+        Typeface customFont = Typeface.createFromAsset(getAssets(), "CCBold.ttf");
+
+        interestUserProcessedTextView.setTypeface(customFont);
+        interestThreadStatusTextView.setMovementMethod(new ScrollingMovementMethod());
+
+        courseUserProcessedTextView.setTypeface(customFont);
+        courseUserProcessedTextView.setMovementMethod(new ScrollingMovementMethod());
+
+        locationUserProcessedTextView.setTypeface(customFont);
+        locationUserProcessedTextView.setMovementMethod(new ScrollingMovementMethod());
+
         signOutButton = findViewById(R.id.sign_out_button);
         startButton = findViewById(R.id.start_button);
 
@@ -75,11 +95,12 @@ public class ServerPage extends AppCompatActivity {
 
         interestThread = new InterestThread(interestThreadStatusTextView, interestUserProcessedTextView, getApplicationContext(), interestSemaphore, this);
         courseThread = new CourseThread(courseThreadStatusTextView, courseUserProcessedTextView, getApplicationContext(), this);
-        locationThread = new Thread();
+        locationThread = new LocationThread(locationThreadStatusTextView, locationUserProcessedTextView, getApplicationContext(), this);
 
         final ColorDrawable redColor = new ColorDrawable(getResources().getColor(R.color.red2));
         final ColorDrawable greenColor = new ColorDrawable(getResources().getColor(R.color.green));
         final ColorDrawable greyColor = new ColorDrawable(getResources().getColor(R.color.grey));
+
 
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,25 +111,46 @@ public class ServerPage extends AppCompatActivity {
                     startButton.setText("Stop");
                     startButton.setBackground(redColor);
 
+                    interestThread.setOrder("Keep Going");
+                    interestThread.setReadyToStop(false);
+
+                    courseThread.setOrder("Keep Going");
+                    courseThread.setReadyToStop(false);
+
+                    locationThread.setOrder("Keep Going");
+                    locationThread.setReadyToStop(false);
+
                     interestThread.run();
                     courseThread.run();
+                    locationThread.run();
 
-                    //setUpInterestThread();
-
-                    //setUpCourseThread();
-
-                    //setUpLocationThread();
                 } else {
                     //successfully stops the threads
+                    interestThread.setOrder("Stop");
+                    courseThread.setOrder("Stop");
+                    locationThread.setOrder("Stop");
+
+                    interestThread.run();
+
+                    courseThread.run();
+                    locationThread.run();
+
+                    while (interestThread.isReadyToStop() == false || courseThread.isReadyToStop() == false || locationThread.isReadyToStop() == false) {
+
+                    }
+
+                    interestThread.interrupt();
+                    courseThread.interrupt();
+                    locationThread.interrupt();
+
+                    interestThreadStatusTextView.setText("Stopped");
+                    courseThreadStatusTextView.setText("Stopped");
+                    locationThreadStatusTextView.setText("Stopped");
+
                     signOutButton.setEnabled(true);
                     signOutButton.setBackground(redColor);
                     startButton.setBackground(greenColor);
                     startButton.setText("Start");
-//                    try {
-//                        interestThread.join();
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
                 }
             }
         });
@@ -128,138 +170,5 @@ public class ServerPage extends AppCompatActivity {
                 finish();
             }
         });
-    }
-
-    private void getUser0Number() {
-        String childPath = "Interest/User0";
-        realtimeDatabaseManager.getValueOfChild(childPath, new FirebaseCallback() {
-            @Override
-            public void onCallback(Object value) {
-                int user0Number = Integer.parseInt(value.toString());
-                interestThread.setUser0Number(user0Number);
-
-            }
-        });
-    }
-
-
-    private void setUpInterestThread() {
-        String path = "Interest Queue";
-        Log.d(TAG, "Setting Up Interest LIne 132");
-        realtimeDatabaseManager.getSnapshot(path, new FirebaseCallback() {
-            @Override
-            public void onCallback(Object value) {
-                DataSnapshot dataSnapshot = (DataSnapshot) value;
-                Log.d(TAG, "Setting Up Interest and first time = " + firstTime);
-                if (dataSnapshot.getChildrenCount() == 1 && firstTime == 0) {
-                    //do nothing
-                    interestThread.setStatus("Waiting");
-                    interestUserProcessedTextView.setText("No one's in the Queue");
-                    Log.d(TAG, "total number of children are 1");
-                    addEventListenerToInterestQueue();
-                } else if (firstTime == 0) {
-                    Log.d(TAG, "Starting the thread");
-                    interestThread.setStatus("Keep running");
-                    interestUserProcessedTextView.setText("Starting");
-                    interestThread.start();
-                    addEventListenerToInterestQueue();
-                }
-
-            }
-        });
-    }
-
-    private void addEventListenerToInterestQueue() {
-        String path = "Interest Queue";
-
-        Log.d(TAG, "Adding EventListenerToInterestQueue");
-        realtimeDatabaseManager.getSnapshot(path, new FirebaseCallback() {
-            @Override
-            public void onCallback(Object value) {
-                DataSnapshot snapshot = (DataSnapshot) value;
-                snapshot.getRef().addChildEventListener(new ChildEventListener() {
-                    @Override
-                    public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-//                        if (interestThread.isAlive()) {
-//                            //do nothing
-//                        } else if (interestThread.getState() == Thread.State.WAITING) {
-//                            interestThread.notify();
-//                        }
-
-//                        if (interestThread.getStatus().equals("Waiting") == true && firstTime != 0) {
-//                            if (firstTime == 1) {
-//                                interestThread.start();
-//                                interestUserProcessedTextView.setText("Starting");
-//                            } else {
-//                                interestThread.releaseSem();
-//                            }
-//
-//                        } else {
-//                            //do nothing
-//                        }
-
-                        if (interestThread.getStatus().equals("Waiting") == true && firstTime != 0) {
-                            if (firstTime == 1) {
-                                Log.d(TAG, "Starting from childEventListener");
-                                interestThread.start();
-                                interestUserProcessedTextView.setText("Starting");
-                            } else {
-                                Log.d(TAG, "Releasing a sem");
-                                interestSemaphore.release();
-                                interestThread.setStatus("Run");
-                                interestThread.run();
-                            }
-
-                        } else {
-                            //do nothing
-                            Log.d(TAG, "Doing nothing from ChildEventListener");
-                        }
-                        firstTime++;
-                    }
-
-                    @Override
-                    public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                    }
-
-                    @Override
-                    public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-                    }
-
-                    @Override
-                    public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-
-            }
-        });
-
-    }
-
-    private void startInterestThread() {
-
-    }
-
-    private void setUpCourseThread() {
-
-    }
-
-    private void startCourseThread() {
-
-    }
-
-    private void setUpLocationThread() {
-
-    }
-
-    private void startLocationThread() {
-
     }
 }

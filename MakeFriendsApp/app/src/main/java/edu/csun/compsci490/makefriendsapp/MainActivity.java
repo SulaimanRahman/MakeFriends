@@ -114,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
                         if(task.isSuccessful()){
                             saveLoginDetails();
                             userSingleton.setEmail(mEmail.getText().toString() + "@my.csun.edu");
+                            userSingleton.setPassword(mPassword.getText().toString());
                             Toast.makeText(MainActivity.this,"Logged In Successfully!",Toast.LENGTH_SHORT).show();
                             Log.d("Main Activity", "Email: " + mEmail.getText().toString());
 //                            finish();

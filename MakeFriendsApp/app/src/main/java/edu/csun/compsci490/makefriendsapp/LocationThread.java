@@ -17,82 +17,74 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Semaphore;
 
-public class CourseThread extends Thread {
+public class LocationThread extends Thread {
+    private String TAG = LocationThread.class.getName();
 
-    private TextView courseThreadStatusTextView;
-    private TextView courseUserProcessedTextView;
+    private TextView locationThreadStatusTextView;
+    private TextView locationUserProcessedTextView;
+    private Context context;
+    private Activity activity;
 
     private DatabaseManager databaseManager;
-    private String TAG = "Course Thread";
     private String status;
-
-    private String user1Email;
-    private String user1UID;
-    private String user1Value;
-
-    private String user2Email;
-    private String user2UID;
-    private String user2Value;
-
-    private String courseMatched;
-    private String courseFoundStatus;
+    private String locationMatchedStatus;
+    private String userStatus;
 
     private ColorDrawable redColor;
     private ColorDrawable greenColor;
 
-    private Context context;
-
-    private int comparingSize, comparingCurrentSize;
-
-    private Activity activity;
+    private int comparingSize;
+    private int comparingCurrentSize;
 
     private Thread thread1;
     private Thread thread2;
 
-    private String userStatus;
-
-    private ArrayList<String> user1Courses;
-    private boolean haveGotUser1Courses;
-    private ArrayList<DocumentSnapshot> user1CoursesDocuments;
-    private String nameOfTheCourseThatMatched;
-
     private boolean canKillThread1and2;
+
+    private String user1UID;
+    private String user1Email;
+    private String user1Value;
+    private String user1Latitude;
+    private String user1Longitude;
+
+    private String user2UID;
+    private String user2Email;
+    private String user2Value;
+    private String user2Latitude;
+    private String user2Longitude;
 
     private boolean isReadyToStop;
     private String order;
 
-    public CourseThread (TextView courseThreadStatusTextView, TextView courseUserProcessedTextView, Context context, Activity activity) {
-        this.courseThreadStatusTextView = courseThreadStatusTextView;
-        this.courseUserProcessedTextView = courseUserProcessedTextView;
+    public LocationThread (TextView locationThreadStatusTextView, TextView locationUserProcessedTextView, Context context, Activity activity) {
+        this.locationThreadStatusTextView = locationThreadStatusTextView;
+        this.locationUserProcessedTextView = locationUserProcessedTextView;
         this.context = context;
         this.activity = activity;
 
         databaseManager = new DatabaseManager();
 
         status = "Running";
-        courseFoundStatus = "Not Found";
+        locationMatchedStatus = "Not Found";
         userStatus = "Continue";
 
         redColor = new ColorDrawable(ContextCompat.getColor(context, R.color.red2));
         greenColor = new ColorDrawable(ContextCompat.getColor(context, R.color.green));
 
-        user1Courses = new ArrayList<>();
-        user1CoursesDocuments = new ArrayList<>();
-
         isReadyToStop = false;
         order = "Keep Going";
 
-        addActionListenerToCourseQueue();
+        addActionListenerToLocationQueue();
     }
 
-    private void addActionListenerToCourseQueue() {
-        Log.d(TAG, "adding EventListenerToCourseQueue");
-        String courseQueueDocPath = "Connecting/Course Queue";
+    private void addActionListenerToLocationQueue() {
+        Log.d(TAG, "adding EventListenerToLocationQueue");
+        String locationQueueDocPath = "Connecting/Location Queue";
 
-        databaseManager.getDocumentReference(courseQueueDocPath).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+        databaseManager.getDocumentReference(locationQueueDocPath).addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
                 try {
@@ -107,7 +99,6 @@ public class CourseThread extends Thread {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    //status = "Running";
                     if (order.equals("Keep Going")) {
                         run();
                     }
@@ -120,11 +111,10 @@ public class CourseThread extends Thread {
         super.run();
 
         if (order.equals("Keep Going")) {
-            courseThreadStatusTextView.setTextColor(greenColor.getColor());
-            courseUserProcessedTextView.setTextColor(greenColor.getColor());
-            appendToCourseProcessedTextView("running method processed");
-            haveGotUser1Courses = false;
-            Log.d(TAG, "Starting Course Run()");
+            locationThreadStatusTextView.setTextColor(greenColor.getColor());
+            locationUserProcessedTextView.setTextColor(greenColor.getColor());
+            appendToLocationProcessedTextView("running method processed");
+            Log.d(TAG, "Starting Location Run()");
 
             try {
                 Log.d(TAG, "Thread1  before join(): " + String.valueOf(thread1.getState()));
@@ -164,11 +154,12 @@ public class CourseThread extends Thread {
                 e.printStackTrace();
             }
             canKillThread1and2 = false;
+
             if (status.equalsIgnoreCase("Waiting")) {
                 //do nothing
-                courseThreadStatusTextView.setText("Waiting");
-                courseThreadStatusTextView.setTextColor(redColor.getColor());
-                appendToCourseProcessedTextView("Waiting for next request");
+                locationThreadStatusTextView.setText("Waiting");
+                locationThreadStatusTextView.setTextColor(redColor.getColor());
+                appendToLocationProcessedTextView("Waiting for next request");
 
             } else {
                 Log.d(TAG, "Status: " + status);
@@ -181,31 +172,31 @@ public class CourseThread extends Thread {
                 }
             }
         } else {
-            courseUserProcessedTextView.setTextColor(redColor.getColor());
-            courseThreadStatusTextView.setTextColor(redColor.getColor());
-            courseThreadStatusTextView.setText("Stopped");
-            appendToCourseProcessedTextView("Stopped");
+            locationUserProcessedTextView.append("Stopped.\n");
+            locationUserProcessedTextView.setTextColor(redColor.getColor());
+            locationThreadStatusTextView.setTextColor(redColor.getColor());
             isReadyToStop = true;
         }
+
     }
 
-    private void appendToCourseProcessedTextView(final String string) {
-        courseUserProcessedTextView.append(string + "...\n");
-        courseUserProcessedTextView.setMovementMethod(new ScrollingMovementMethod());
+    private void appendToLocationProcessedTextView(final String string) {
+        locationUserProcessedTextView.append(string + "...\n");
+        locationUserProcessedTextView.setMovementMethod(new ScrollingMovementMethod());
     }
 
     private void checkIfTheresAnyOneInTheQueue() {
-        Log.d(TAG, "checkIfTheresAnyOneInTheQueueInCourseThread");
+        Log.d(TAG, "checkIfTheresAnyOneInTheQueue from Location Thread");
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                courseThreadStatusTextView.setText("Processing");
-                courseThreadStatusTextView.setTextColor(greenColor.getColor());
+                locationThreadStatusTextView.setText("Processing");
+                locationThreadStatusTextView.setTextColor(greenColor.getColor());
             }
         });
 
 
-        String courseDocPath = "Connecting/Course Queue";
+        String courseDocPath = "Connecting/Location Queue";
 
         databaseManager.getDocumentSnapshot(courseDocPath, new FirebaseCallback() {
             @Override
@@ -215,13 +206,13 @@ public class CourseThread extends Thread {
                 if (snapshot.getData().size() == 0) {
                     //no ones in the queue
                     status = "Waiting";
-                    courseThreadStatusTextView.setText("Waiting");
-                    courseThreadStatusTextView.setTextColor(redColor.getColor());
-                    //courseUserProcessedTextView.setText("No one's in the queue from checkIfTheresAnyOneInTheQueue()");
-                    appendToCourseProcessedTextView("No one is in the queue");
-                    appendToCourseProcessedTextView("Waiting for next request");
+                    locationThreadStatusTextView.setText("Waiting");
+                    locationThreadStatusTextView.setTextColor(redColor.getColor());
+                    //locationUserProcessedTextView.setText("No one's in the queue from checkIfTheresAnyOneInTheQueue()");
+                    appendToLocationProcessedTextView("No one is in the queue");
+                    appendToLocationProcessedTextView("Waiting for next request");
                 } else {
-                    appendToCourseProcessedTextView("Getting first person in the queue");
+                    appendToLocationProcessedTextView("Getting first person in the queue");
                     getFirstPersonInTheQueueAndLockIt(snapshot);
                 }
             }
@@ -229,7 +220,7 @@ public class CourseThread extends Thread {
     }
 
     private void getFirstPersonInTheQueueAndLockIt(final DocumentSnapshot snapshot) {
-        Log.d(TAG, "getFirstPersonInTheQueueAndLockIt from Course Thread");
+        Log.d(TAG, "getFirstPersonInTheQueueAndLockIt from Location Thread");
 
         ArrayList<String> keys = new ArrayList<>();
         keys.addAll(snapshot.getData().keySet());
@@ -244,7 +235,7 @@ public class CourseThread extends Thread {
                 user1Email = value.toString();
 
                 //check if user 1 is canceling
-                appendToCourseProcessedTextView("Checking if user1 is canceling");
+                appendToLocationProcessedTextView("Checking if user1 is canceling");
                 String cancelingDocPath = user1Email + "/More Info";
                 String cancelingFieldName = "Canceling";
                 databaseManager.getFieldValue(cancelingDocPath, cancelingFieldName, new FirebaseCallback() {
@@ -252,9 +243,9 @@ public class CourseThread extends Thread {
                     public void onCallback(Object value) {
                         String status = value.toString();
                         if (status.equals("false")) {
-                            appendToCourseProcessedTextView("User one is not canceling");
-                            appendToCourseProcessedTextView(user1Email + " is being processed");
-                            //courseUserProcessedTextView.setText(user1Email);
+                            appendToLocationProcessedTextView("User one is not canceling");
+                            appendToLocationProcessedTextView(user1Email + " is being processed");
+                            //locationUserProcessedTextView.setText(user1Email);
 
                             user1Value = snapshot.get(user1UID).toString();
 
@@ -262,16 +253,16 @@ public class CourseThread extends Thread {
                             String fieldName = "Can Cancel Searching";
 
                             //locking user1
-                            appendToCourseProcessedTextView("locking " + user1Email);
+                            appendToLocationProcessedTextView("locking " + user1Email);
                             databaseManager.updateTheField(user1CanCancelSearchingDocPath, fieldName, "false");
 
                             //removing user1 from the queue
-                            appendToCourseProcessedTextView("Removing " + user1Email + " from the queue");
-                            String courseQueueDocPath = "Connecting/Course Queue";
+                            appendToLocationProcessedTextView("Removing " + user1Email + " from the queue");
+                            String courseQueueDocPath = "Connecting/Location Queue";
 
                             databaseManager.deleteField(courseQueueDocPath, user1UID);
-                            Log.d(TAG, "deleted user1 from the course queue");
-                            appendToCourseProcessedTextView(user1Email + " removed from the queue");
+                            Log.d(TAG, "deleted user1 from the Location queue");
+                            appendToLocationProcessedTextView(user1Email + " removed from the queue");
                             try {
                                 sleep(2000);
                             } catch (InterruptedException e) {
@@ -279,13 +270,13 @@ public class CourseThread extends Thread {
                             }
                             checkIfTheresAnyoneInTheListToCompareWith();
                         } else {
-                            appendToCourseProcessedTextView("User1 is canceling");
+                            appendToLocationProcessedTextView("User1 is canceling");
                             try {
                                 sleep(1000);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
-                            //sem.release();
+
                             run();
                         }
                     }
@@ -295,21 +286,21 @@ public class CourseThread extends Thread {
     }
 
     private void checkIfTheresAnyoneInTheListToCompareWith() {
-        appendToCourseProcessedTextView("Checking if there's anyone to compare " + user1Email + " with");
-        Log.d(TAG, "checkIfTheresAnyoneInTheListToCompareWith From Course Thread");
+        appendToLocationProcessedTextView("Checking if there's anyone to compare " + user1Email + " with");
+        Log.d(TAG, "checkIfTheresAnyoneInTheListToCompareWith From Location Thread");
 
-        final String courseUsersDocPath = "Connecting/Course";
+        final String courseUsersDocPath = "Connecting/Location";
 
         databaseManager.getDocumentSnapshot(courseUsersDocPath, new FirebaseCallback() {
             @Override
             public void onCallback(Object value) {
                 DocumentSnapshot snapshot = (DocumentSnapshot) value;
-                Log.d(TAG, "Number of people in the Course list: " + snapshot.getData().size());
+                Log.d(TAG, "Number of people in the Location list: " + snapshot.getData().size());
                 if (snapshot.getData().size() == 0) {//if no ones in the list
-                    appendToCourseProcessedTextView("There's non one to compare with");
-                    checkIfUser1IsLookingForAnyUserOrOnlyCourseMatch(false, true);
+                    appendToLocationProcessedTextView("There's non one to compare with");
+                    checkIfUser1IsLookingForAnyUserOrOnlyLocationMatch(false, true);
                 } else {
-                    appendToCourseProcessedTextView("Getting another user to compare with");
+                    appendToLocationProcessedTextView("Getting another user to compare with");
                     getSecondUserFromTheListToCompareWithAndLockIt(snapshot);
                 }
             }
@@ -317,7 +308,7 @@ public class CourseThread extends Thread {
     }
 
     private void getSecondUserFromTheListToCompareWithAndLockIt(final DocumentSnapshot snapshot) {
-        Log.d(TAG, "getSecondUserFromTheListToCompareWithAndLockIt from Course Thread");
+        Log.d(TAG, "getSecondUserFromTheListToCompareWithAndLockIt from Location Thread");
 
         final ArrayList<String> keys = new ArrayList<>();
 
@@ -330,15 +321,15 @@ public class CourseThread extends Thread {
         thread1 = new Thread(new Runnable() {
             @Override
             public void run() {
-                appendToCourseProcessedTextView("Thread1 started");
+                appendToLocationProcessedTextView("Thread1 started");
                 for (int i = 0; i < keys.size(); i++) {
 
                     try {
-                        Log.d(TAG, "setting userStatus to wait from Course Thread");
+                        Log.d(TAG, "setting userStatus to wait from Location Thread");
                         userStatus = "Wait";
-                        appendToCourseProcessedTextView("Got another user to compare with");
-                        if (courseFoundStatus.equals("Not Found") == false) {
-                            Log.d(TAG, "Course found status is true");
+                        appendToLocationProcessedTextView("Got another user to compare with");
+                        if (locationMatchedStatus.equals("Not Found") == false) {
+                            Log.d(TAG, "Location matched status is true");
 
                             break;
                         }
@@ -346,7 +337,7 @@ public class CourseThread extends Thread {
                         while(userStatus.equals("Wait")) {
                             sleep(2000);
                         }
-                        Log.d(TAG, "userStatus = " + userStatus + " from Course Thread");
+                        Log.d(TAG, "userStatus = " + userStatus + " from Location Thread");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -359,12 +350,12 @@ public class CourseThread extends Thread {
 
                 }
 
-                if (courseFoundStatus.equals("Not Found")) {
-                    appendToCourseProcessedTextView("No interests found with any of the users");
-                    checkIfUser1IsLookingForAnyUserOrOnlyCourseMatch(true, true);
+                if (locationMatchedStatus.equals("Not Found")) {
+                    appendToLocationProcessedTextView("No interests found with any of the users");
+                    checkIfUser1IsLookingForAnyUserOrOnlyLocationMatch(true, true);
                 } else {
-                    appendToCourseProcessedTextView("Starting all over");
-                    Log.d(TAG, "Going to call the super.run() From Course Thread");
+                    appendToLocationProcessedTextView("Starting all over");
+                    Log.d(TAG, "Going to call the super.run() From Location Thread");
                     try {
                         sleep(2000);
                     } catch (InterruptedException e) {
@@ -379,7 +370,7 @@ public class CourseThread extends Thread {
 
     private void runTheSuperThread() {
         canKillThread1and2 = true;
-        courseFoundStatus = "Not Found";
+        locationMatchedStatus = "Not Found";
         run();
     }
 
@@ -387,26 +378,26 @@ public class CourseThread extends Thread {
         thread2 = new Thread(new Runnable() {
             @Override
             public void run() {
-                appendToCourseProcessedTextView("Thread2 started");
+                appendToLocationProcessedTextView("Thread2 started");
                 comparingCurrentSize = i;
                 user2UID = keys.get(i);
 
                 //getting user2 email
-                appendToCourseProcessedTextView("Getting second user email");
+                appendToLocationProcessedTextView("Getting second user email");
                 databaseManager.getFieldValue(allUsersDocumentPath, user2UID, new FirebaseCallback() {
                     @Override
                     public void onCallback(Object value) {
                         user2Email = value.toString();
-                        appendToCourseProcessedTextView("second user is " + user2Email);
-                        //courseUserProcessedTextView.setText("Comparing " + user1Email + " and " + user2Email + " from Course Thread");
-                        appendToCourseProcessedTextView("Comparing " + user1Email + " and " + user2Email);
+                        appendToLocationProcessedTextView("second user is " + user2Email);
+                        //locationUserProcessedTextView.setText("Comparing " + user1Email + " and " + user2Email + " from Location Thread");
+                        appendToLocationProcessedTextView("Comparing " + user1Email + " and " + user2Email);
                         user2Value = snapshot.get(user2UID).toString();
 
                         final String documentPath = user2Email + "/Search Canceling";
                         final String fieldName = "Can Cancel Searching";
 
                         //checking if user wants to cancel the searching
-                        appendToCourseProcessedTextView("Checking if " + user2Email + " is canceling");
+                        appendToLocationProcessedTextView("Checking if " + user2Email + " is canceling");
                         String user2MoreInfoDocPath = user2Email + "/More Info";
                         String cancelingFieldName = "Canceling";
 
@@ -416,7 +407,7 @@ public class CourseThread extends Thread {
                                 String status = value.toString();
 
                                 if (status.equals("true")) {//user 2 wants to cancel the search
-                                    appendToCourseProcessedTextView(user2Email + " is canceling");
+                                    appendToLocationProcessedTextView(user2Email + " is canceling");
                                     databaseManager.updateTheField(documentPath, fieldName, "true");
                                     try {
                                         sleep(1000);
@@ -427,7 +418,7 @@ public class CourseThread extends Thread {
                                     userStatus = "Continue";
                                 } else {
                                     //locking user2
-                                    appendToCourseProcessedTextView(user2Email + " is not canceling");
+                                    appendToLocationProcessedTextView(user2Email + " is not canceling");
                                     databaseManager.updateTheField(documentPath, fieldName, "false");
                                     checkIfUser2IsAlreadyAContactWithUser1();
                                 }
@@ -442,9 +433,9 @@ public class CourseThread extends Thread {
     }
 
     private void checkIfUser2IsAlreadyAContactWithUser1() {
-        Log.d(TAG, "checkIfUser2IsAlreadyAContactWithUser1 from Course Thread");
+        Log.d(TAG, "checkIfUser2IsAlreadyAContactWithUser1 from Interest Thread");
         //checking if this user already a contact with user1 or not
-        appendToCourseProcessedTextView("Checking if " + user1Email + " and " + user1Email + " are already contacts");
+        appendToLocationProcessedTextView("Checking if " + user1Email + " and " + user1Email + " are already contacts");
         final String user1ContactsDocPath = user1Email + "/Contacts";
         String fieldName = "All Users";
 
@@ -455,7 +446,7 @@ public class CourseThread extends Thread {
                 String dbValue = value.toString();
 
                 if (dbValue.equals("none")) {//user don't have any contacts
-                    appendToCourseProcessedTextView(user1Email + " and " + user2Email + " are not contacts");
+                    appendToLocationProcessedTextView(user1Email + " and " + user2Email + " are not contacts");
                     checkIfUser2IsBlockedByUser1();
                 } else {//user has contacts
                     ArrayList<String> user1ContactsList = (ArrayList) value;
@@ -463,14 +454,14 @@ public class CourseThread extends Thread {
                     for (int i = 0; i < user1ContactsList.size(); i++) {
                         if (user1ContactsList.get(i).equals(user2Email)) {//user2 is already a contact with user1
                             //unlocking user2
-                            appendToCourseProcessedTextView(user2Email + " is already a contact with " + user1Email);
+                            appendToLocationProcessedTextView(user2Email + " is already a contact with " + user1Email);
                             String user2MoreInfoDocPath = user2Email + "/Search Canceling";
                             String searchingFieldName = "Can Cancel Searching";
-                            appendToCourseProcessedTextView("Unlocking " + user2Email);
+                            appendToLocationProcessedTextView("Unlocking " + user2Email);
                             databaseManager.updateTheField(user2MoreInfoDocPath, searchingFieldName, "true");
-                            //courseUserProcessedTextView.setText("User 2 is already a contact with user 1 from Course Thread");
+                            //locationUserProcessedTextView.setText("User 2 is already a contact with user 1 from Location Thread");
                             //try next person in the list to compare with
-                            appendToCourseProcessedTextView("Getting next person in the line");
+                            appendToLocationProcessedTextView("Getting next person in the line");
                             try {
                                 sleep(1000);
                             } catch (InterruptedException e) {
@@ -482,7 +473,7 @@ public class CourseThread extends Thread {
                         }
 
                         if (i == user1ContactsList.size() - 1) {//user2 is not a contact with user1
-                            appendToCourseProcessedTextView(user2Email + " is not a contact with " + user1Email);
+                            appendToLocationProcessedTextView(user2Email + " is not a contact with " + user1Email);
                             checkIfUser2IsBlockedByUser1();
                         }
                     }
@@ -492,8 +483,8 @@ public class CourseThread extends Thread {
     }
 
     private void checkIfUser2IsBlockedByUser1() {
-        appendToCourseProcessedTextView("Checking if " + user2Email + " is blocked by " + user1Email);
-        Log.d(TAG, "checkIfUser2IsBlockedByUser1 from Course Thread");
+        appendToLocationProcessedTextView("Checking if " + user2Email + " is blocked by " + user1Email);
+        Log.d(TAG, "checkIfUser2IsBlockedByUser1 from Location Thread");
         String user1ContactsDocPath = user1Email + "/Contacts";
         final String blockedUsersFieldName = "Blocked Users";
 
@@ -502,41 +493,37 @@ public class CourseThread extends Thread {
             public void onCallback(Object value) {
 
                 String dbValue = value.toString();
-                Log.d(TAG, "Working line 350");
+
                 if (dbValue.equals("none")) {//user 1 has not blocked anyone
-                    appendToCourseProcessedTextView(user1Email + " has not blocked " + user2Email);
-                    Log.d(TAG, "User1 has not blocked anyone");
+                    appendToLocationProcessedTextView(user1Email + " has not blocked " + user2Email);
                     checkIfUser1IsBlockedByUser2();
+
                 } else {//user1 has blocked some users
                     ArrayList<String> blockedUsers = (ArrayList) value;
 
                     for (int i = 0; i < blockedUsers.size(); i++) {
                         if (blockedUsers.get(i).equals(user2Email)) {//user2 has been blocked by user1
+                            appendToLocationProcessedTextView(user1Email + " has blocked " + user2Email);
                             //unlocking user2
-                            appendToCourseProcessedTextView(user1Email + " has blocked " + user2Email);
                             String user2MoreInfoDocPath = user2Email + "/Search Canceling";
                             String searchingFieldName = "Can Cancel Searching";
                             databaseManager.updateTheField(user2MoreInfoDocPath, searchingFieldName, "true");
-                            //courseUserProcessedTextView.setText("User 2 is blocked by user 1");
-                            appendToCourseProcessedTextView("Getting next person in the list");
+                            //locationUserProcessedTextView.setText("User 2 is blocked by user 1");
+                            appendToLocationProcessedTextView("Getting next person in the list");
                             try {
                                 sleep(1000);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
-                            //try next person in the list to compare with
+                            //try next person in the list o compare with
                             userStatus = "Continue";
                             break;
                         }
 
                         if (i == blockedUsers.size() - 1) {//user1 has not blocked user2
-                            appendToCourseProcessedTextView(user1Email + " has not blocked " + user2Email);
+                            appendToLocationProcessedTextView(user1Email + " has not blocked " + user2Email);
                             checkIfUser1IsBlockedByUser2();
-//                            if (user1Value.equals("All")) {
-//                                getUser1Courses();
-//                            } else {
-//                                compareUser1AndUser2Course();
-//                            }
+
                         }
                     }
                 }
@@ -545,8 +532,8 @@ public class CourseThread extends Thread {
     }
 
     private void checkIfUser1IsBlockedByUser2() {
-        appendToCourseProcessedTextView("Checking if " + user1Email + " is blocked by " + user2Email);
-        Log.d(TAG, "checkIfUser1IsBlockedByUser2 from Course Thread");
+        appendToLocationProcessedTextView("Checking if " + user1Email + " is blocked by " + user2Email);
+        Log.d(TAG, "checkIfUser1IsBlockedByUser2 from Location Thread");
         String user1ContactsDocPath = user2Email + "/Contacts";
         final String blockedUsersFieldName = "Blocked Users";
 
@@ -557,26 +544,21 @@ public class CourseThread extends Thread {
                 String dbValue = value.toString();
 
                 if (dbValue.equals("none")) {//user 2 has not blocked anyone
-                    appendToCourseProcessedTextView(user2Email + " has not blocked " + user1Email);
-                    Log.d(TAG, "User2 has not blocked anyone");
-                    getUser1Courses();
-//                    if (user1Value.equals("All")) {
-//                        getUser1Courses();
-//                    } else {
-//                        compareUser1AndUser2Course();
-//                    }
-                } else {//user2 has blocked some users
+                    appendToLocationProcessedTextView(user2Email + " has not blocked " + user1Email);
+                    getUser1LatitudeAndLongitude();
+
+                } else {//user1 has blocked some users
                     ArrayList<String> blockedUsers = (ArrayList) value;
 
                     for (int i = 0; i < blockedUsers.size(); i++) {
                         if (blockedUsers.get(i).equals(user1Email)) {//user1 has been blocked by user2
+                            appendToLocationProcessedTextView(user2Email + " has blocked " + user1Email);
                             //unlocking user2
-                            appendToCourseProcessedTextView(user2Email + " has blocked " + user1Email);
                             String user2MoreInfoDocPath = user2Email + "/Search Canceling";
                             String searchingFieldName = "Can Cancel Searching";
                             databaseManager.updateTheField(user2MoreInfoDocPath, searchingFieldName, "true");
-                            //courseUserProcessedTextView.setText("User 1 is blocked by user 2");
-                            appendToCourseProcessedTextView("Getting next person in the list");
+                            //locationUserProcessedTextView.setText("User 1 is blocked by user 2");
+                            appendToLocationProcessedTextView("Getting next person in the list");
                             try {
                                 sleep(1000);
                             } catch (InterruptedException e) {
@@ -588,137 +570,90 @@ public class CourseThread extends Thread {
                         }
 
                         if (i == blockedUsers.size() - 1) {//user2 has not blocked user1
-                            appendToCourseProcessedTextView(user2Email + " has not blocked " + user1Email);
-                            getUser1Courses();
-//                            if (user1Value.equals("All")) {
-//                                getUser1Courses();
-//                            } else {
-//                                compareUser1AndUser2Course();
-//                            }
+                            appendToLocationProcessedTextView(user2Email + " has not blocked " + user1Email);
+                            getUser1LatitudeAndLongitude();
+
                         }
                     }
                 }
             }
         });
     }
+    private void getUser1LatitudeAndLongitude() {
+        appendToLocationProcessedTextView("Getting " + user1Email + " Latitude and Longitude");
+        Log.d(TAG, "getUser1LatitudeAndLongitude");
+        String user1MoreInfoDocPath = user1Email + "/More Info";
+        databaseManager.getAllDocumentDataInHashMap(user1MoreInfoDocPath, new FirebaseCallback() {
+            @Override
+            public void onCallback(Object value) {
+                HashMap<String, Object> data = (HashMap) value;
 
-    private void getUser1Courses() {
-        appendToCourseProcessedTextView("Getting " + user1Email + " Courses");
-        Log.d(TAG, "getUser1Courses");
-        if (haveGotUser1Courses) {
-            compareUser1AndUser2Course();
-        } else {
-            final String user1CoursesCollectionPath = user1Email + "/More Info/Courses";
-            databaseManager.getAllDocumentsInArrayListFromCollection(user1CoursesCollectionPath, new FirebaseCallback() {
-                @Override
-                public void onCallback(Object value) {
-                    user1CoursesDocuments = (ArrayList) value;
-                    compareUser1AndUser2Course();
-                }
-            });
-//            databaseManager.getAllDocumentsNameInArrayListFromCollection(user1CoursesCollectionPath, new FirebaseCallback() {
-//                @Override
-//                public void onCallback(Object value) {
-//                    final ArrayList<String> documentsName = (ArrayList) value;
-//                    for (int i = 0; i < documentsName.size(); i++) {
-//                        String documentPath = user1CoursesCollectionPath + "/" + documentsName.get(i);
-//                        final int finalI = i;
-//                        databaseManager.getFieldValue(documentPath, "Section", new FirebaseCallback() {
-//                            @Override
-//                            public void onCallback(Object value) {
-//                                String sectionNumber = value.toString();
-//                                user1Courses.add(sectionNumber);
-//                                if (finalI == documentsName.size() - 1) {
-//                                    haveGotUser1Courses = true;
-//                                    compareUser1AndUser2Course();
-//                                }
-//                            }
-//                        });
-//                    }
-//                }
-//            });
-        }
-
+                user1Latitude = data.get("Latitude").toString();
+                user1Longitude = data.get("Longitude").toString();
+                Log.d(TAG, "User1 Latitude and Longitude: " + user1Latitude + ", " + user1Longitude);
+                getUser2LatitudeAndLongitude();
+            }
+        });
     }
 
-    private void compareUser1AndUser2Course() {
-        appendToCourseProcessedTextView("Comparing " + user1Email + " and " + user2Email + " courses");
-        Log.d(TAG, "compareUser1AndUser2Course");
-        if (user1Value.equals("All")) {
-            for (int i = 0; i < user1CoursesDocuments.size(); i++) {
-                String user1Course = user1CoursesDocuments.get(i).get("Section").toString();
-                if (user1Course.equals(user2Value)) {//course found
-                    appendToCourseProcessedTextView("Course matched");
-                    courseMatched = user2Value;
-                    courseFoundStatus = "Found";
-                    nameOfTheCourseThatMatched = user1CoursesDocuments.get(i).get("Course").toString() + " " + user1CoursesDocuments.get(i).get("Course Number");
-                    try {
-                        sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+    private void getUser2LatitudeAndLongitude() {
+        appendToLocationProcessedTextView("Getting " + user2Email + " Latitude and Longitude");
+        Log.d(TAG, "getUser2LatitudeAndLongitude");
+        String user2MoreInfoDocPath = user1Email + "/More Info";
+        databaseManager.getAllDocumentDataInHashMap(user2MoreInfoDocPath, new FirebaseCallback() {
+            @Override
+            public void onCallback(Object value) {
+                HashMap<String, Object> data = (HashMap) value;
 
-                    connectUser1AndUser2();
-                } else {
-                    //unlock user 2
-                    appendToCourseProcessedTextView("Courses did not match");
-                    String documentPath = user2Email + "/Search Canceling";
-                    String fieldName = "Can Cancel Searching";
-                    databaseManager.updateTheField(documentPath, fieldName, "true");
-                    courseFoundStatus = "Not Found";
-                    Log.d(TAG, "No Course Matched");
-                    try {
-                        sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    userStatus = "Continue";
-//                    if (comparingCurrentSize == comparingSize - 1) {//no course match with any of the users
-//                        checkIfUser1IsLookingForAnyUserOrOnlyCourseMatch(true, false);
-//                    } else {
-//                        try {
-//                            sleep(1000);
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-//                        userStatus.equals("Continue");
-//                    }
-                }
+                user2Latitude = data.get("Latitude").toString();
+                user2Longitude = data.get("Longitude").toString();
+                Log.d(TAG, "User2 Latitude and Longitude: " + user2Latitude + ", " + user2Longitude);
+                checkIfUser1And2AreWithin5Miles();
             }
+        });
+    }
+
+    private void checkIfUser1And2AreWithin5Miles() {
+        appendToLocationProcessedTextView("Checking if " + user1Email + " and " + user2Email + " are within 5 miles");
+        Log.d(TAG, "checkIfUser1And2AreWithin5Miles");
+        double user1Latitude = Double.valueOf(this.user1Latitude);
+        double user1Longitude = Double.valueOf(this.user1Longitude);
+
+        double user2Latitude = Double.valueOf(this.user2Latitude);
+        double user2Longitude = Double.valueOf(this.user2Longitude);
+
+        if ((user1Latitude == user2Latitude) && (user1Longitude == user2Longitude)) {
+            //the distance between the users is 0. Connect them.
+            appendToLocationProcessedTextView(user1Email + " and " + user2Email + " are 0 miles away from each other");
+            appendToLocationProcessedTextView("Two Users within 5 miles founded");
+            Log.d(TAG, "The distance between user1 and user2 is 0");
+            locationMatchedStatus = "Found";
+            connectUser1AndUser2();
         } else {
-            if (user1Value.equals(user2Value)) {//course matched
-                appendToCourseProcessedTextView("Course matched");
-                courseMatched = user1Value;
-                courseFoundStatus = "Found";
-
-                //getting the name of the course that matched
-                for (int i = 0; i < user1CoursesDocuments.size(); i++) {
-                    if (user1CoursesDocuments.get(i).get("Section").equals(user1Value)) {
-                        String course = user1CoursesDocuments.get(i).get("Course").toString();
-                        String courseNumber = user1CoursesDocuments.get(i).get("Course Number").toString();
-                        nameOfTheCourseThatMatched = course + " " + courseNumber;
-                        break;
-                    }
-                }
-
-                try {
-                    sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
+            double theta = user1Longitude - user2Longitude;
+            double distance = Math.sin(Math.toRadians(user1Latitude)) * Math.sin(Math.toRadians(user2Latitude)) + Math.cos(Math.toRadians(user1Latitude) * Math.cos(Math.toRadians(user2Latitude)) * Math.cos(Math.toRadians(theta)));
+            distance = Math.acos(distance);
+            distance = Math.toDegrees(distance);
+            distance = distance * 60 * 1.1515;
+            Log.d(TAG, "The distance between User1 and User2: " + distance);
+            appendToLocationProcessedTextView("Distance between " + user1Email + " and " + user2Email + " is " + distance + " miles");
+            if (distance <= 5) {
+                appendToLocationProcessedTextView("Two Users within 5 miles founded");
+                locationMatchedStatus = "Found";
                 connectUser1AndUser2();
             } else {
                 //unlock user 2
-                appendToCourseProcessedTextView("Courses did not match");
+                appendToLocationProcessedTextView(user1Email + " and " + user2Email + " are not within five miles");
                 String documentPath = user2Email + "/Search Canceling";
                 String fieldName = "Can Cancel Searching";
                 databaseManager.updateTheField(documentPath, fieldName, "true");
-                courseFoundStatus = "Not Found";
+                locationMatchedStatus = "Not Found";
                 Log.d(TAG, "No Course Matched");
-                if (comparingCurrentSize == comparingSize - 1) {//no course match with any of the users
-                    checkIfUser1IsLookingForAnyUserOrOnlyCourseMatch(true, false);
+                if (comparingCurrentSize == comparingSize - 1) {//no location match with any of the users
+                    appendToLocationProcessedTextView(user1Email + " is nearby none of the uses that are searching by location");
+                    checkIfUser1IsLookingForAnyUserOrOnlyLocationMatch(true, false);
                 } else {
+                    appendToLocationProcessedTextView("Getting next person to compare with");
                     try {
                         sleep(1000);
                     } catch (InterruptedException e) {
@@ -728,55 +663,56 @@ public class CourseThread extends Thread {
                 }
             }
         }
-
     }
 
-    private void checkIfUser1IsLookingForAnyUserOrOnlyCourseMatch(boolean releaseComparingSem, boolean callRun) {
-        appendToCourseProcessedTextView("Checking if " + user1Email + " is looking for only course match");
-        Log.d(TAG, "checkIfUser1IsLookingForAnyUserOrOnlyCourseMatch From Course Thread");
+    private void checkIfUser1IsLookingForAnyUserOrOnlyLocationMatch(boolean releaseComparingSem, boolean callRun) {
+        appendToLocationProcessedTextView("Checking if " + user1Email + " is looking for only location match");
+        Log.d(TAG, "checkIfUser1IsLookingForAnyUserOrOnlyLocationMatch From Location Thread");
 
         if (user1Value.equals("All")) {
-            appendToCourseProcessedTextView(user1Email + " is not only looking for course match");
-            String courseDocPath = "Connecting/Location Queue";
+            appendToLocationProcessedTextView(user1Email + " is not only looking for location match");
+            String courseDocPath = "Connecting/Interest Queue";
 //            activity.runOnUiThread(new Runnable() {
 //                @Override
 //                public void run() {
-//                    courseUserProcessedTextView.setText("Moving " + user1Email + " to Location Queue");
+//                    locationUserProcessedTextView.setText("Moving " + user1Email + " to Interest Queue");
 //                }
 //            });
-            appendToCourseProcessedTextView("Moving " + user1Email + " to the Location Thread");
+            appendToLocationProcessedTextView("Moving " + user1Email + " to the Interest Thread");
             databaseManager.createNewField(courseDocPath, user1UID, user1Value);
-            databaseManager.updateTheField(user1Email + "/More Info", "User Is In Queue", "Location Queue");
+            databaseManager.updateTheField(user1Email + "/More Info", "User Is In Queue", "Interest Queue");
             unlockUser1(releaseComparingSem, callRun);
         } else {
 //            activity.runOnUiThread(new Runnable() {
 //                @Override
 //                public void run() {
-//                    courseUserProcessedTextView.setText("Adding user to course list");
+//                    locationUserProcessedTextView.setText("Adding user to location list");
 //                }
 //            });
-            appendToCourseProcessedTextView("User is only looking for course match");
+
+            appendToLocationProcessedTextView("User is only looking for location match");
+
             addUser1ToTheList(releaseComparingSem, callRun);
         }
     }
 
     private void addUser1ToTheList(boolean releaseComparingSem, boolean callRun) {
-        Log.d(TAG, "addUser1ToTheList From Course Thread");
+        Log.d(TAG, "addUser1ToTheList From Location Thread");
 //        activity.runOnUiThread(new Runnable() {
 //            @Override
 //            public void run() {
-//                courseUserProcessedTextView.setText("Adding " + user1Email + " to the list");
+//                locationUserProcessedTextView.setText("Adding " + user1Email + " to the list");
 //            }
 //        });
 
-        appendToCourseProcessedTextView("Adding " + user1Email + " to the Course list");
-        String courseDocPath = "Connecting/Course";
+        appendToLocationProcessedTextView("Adding " + user1Email + " to the Location list");
+        String courseDocPath = "Connecting/Location";
 
         databaseManager.createNewField(courseDocPath, user1UID, user1Value);
 
         //updating user1 whereabout
-        appendToCourseProcessedTextView("Updating "  + user1Email + " whereabout in the database");
-        databaseManager.updateTheField(user1Email + "/More Info", "User Is In Queue", "Course");
+        appendToLocationProcessedTextView("Updating "  + user1Email + " whereabout in the database");
+        databaseManager.updateTheField(user1Email + "/More Info", "User Is In Queue", "Location");
 
         try {
             sleep(2000);
@@ -788,8 +724,8 @@ public class CourseThread extends Thread {
     }
 
     private void unlockUser1(boolean releaseComparingSem, boolean callRun) {
-        appendToCourseProcessedTextView("Unlocking " + user1Email);
-        Log.d(TAG, "unlockUser1() from Course Thread");
+        appendToLocationProcessedTextView("Unlocking " + user1Email);
+        Log.d(TAG, "unlockUser1() from Location Thread");
 
         String user1DocumentPath = user1Email + "/Search Canceling";
 
@@ -798,7 +734,7 @@ public class CourseThread extends Thread {
 //        activity.runOnUiThread(new Runnable() {
 //            @Override
 //            public void run() {
-//                courseUserProcessedTextView.setText("Starting all over from unlockUser1()");
+//                locationUserProcessedTextView.setText("Starting all over");
 //            }
 //        });
 
@@ -807,17 +743,16 @@ public class CourseThread extends Thread {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
         if (releaseComparingSem == true && callRun == true) {
-            appendToCourseProcessedTextView("Starting all over again");
+            appendToLocationProcessedTextView("Starting all over again");
             userStatus = "Continue";
             canKillThread1and2 = true;
             run();
         } else if (releaseComparingSem == true) {
-            appendToCourseProcessedTextView("Getting next person in the line");
+            appendToLocationProcessedTextView("Getting next person in the line");
             userStatus = "Continue";
         } else if (callRun) {
-            appendToCourseProcessedTextView("Starting all over again");
+            appendToLocationProcessedTextView("Starting all over again");
             //sem.release();
             canKillThread1and2 = true;
             run();
@@ -825,12 +760,12 @@ public class CourseThread extends Thread {
     }
 
     private void connectUser1AndUser2() {
-        appendToCourseProcessedTextView("Connecting " + user1Email + " and " + user2Email);
-        Log.d(TAG, "connectUser1AndUser2 from course Thread");
+        appendToLocationProcessedTextView("Connecting " + user1Email + " and " + user2Email);
+        Log.d(TAG, "connectUser1AndUser2 from Location Thread");
 //        activity.runOnUiThread(new Runnable() {
 //            @Override
 //            public void run() {
-//                courseUserProcessedTextView.setText("Connecting users");
+//                locationUserProcessedTextView.setText("Connecting users");
 //            }
 //        });
 
@@ -838,8 +773,8 @@ public class CourseThread extends Thread {
     }
 
     private void setUpUser1() {
-        appendToCourseProcessedTextView("Setting up " + user1Email);
-        final String message = "You two have been linked because you both are in class " + nameOfTheCourseThatMatched + "!";
+        appendToLocationProcessedTextView("Setting up " + user1Email);
+        final String message = "You two have been linked because you both are within 5 miles radius!";
 
         final String user1ContactsDocumentPath = user1Email + "/Contacts";
         final String user1ChatDocumentPath = user1Email + "/Contacts/" + user2Email + "/Chat";
@@ -881,7 +816,6 @@ public class CourseThread extends Thread {
                     databaseManager.createNewField(user1MoreInfoDocumentPath, "Blocked User", "false");
                     databaseManager.createNewField(user1MoreInfoDocumentPath, "Conversation Ended From My Side", "false");
                     databaseManager.createNewField(user1MoreInfoDocumentPath, "All Messages Been Read", "false");
-
                 }
 
                 setUpUser2();
@@ -891,8 +825,8 @@ public class CourseThread extends Thread {
     }
 
     private void setUpUser2() {
-        appendToCourseProcessedTextView("Setting up " + user2Email);
-        final String message = "You two have been linked because you both are in class " + nameOfTheCourseThatMatched + "!";
+        appendToLocationProcessedTextView("Setting up " + user2Email);
+        final String message = "You two have been linked because you both are within 5 miles radius!";
         final String user2ContactsDocumentPath = user2Email + "/Contacts";
         final String user2ChatDocumentPath = user2Email + "/Contacts/" + user1Email + "/Chat";
         final String user2ChatTimeDocumentPath = user2Email + "/Contacts/" + user1Email + "/Chat Time";
@@ -935,21 +869,21 @@ public class CourseThread extends Thread {
                     databaseManager.createNewField(user2MoreInfoDocumentPath, "All Messages Been Read", "false");
 
                 }
-                removeUsers2FromCourseAndUnlockBothUsers();
+                removeUsers2FromLocationAndUnlockBothUsers();
             }
         });
     }
 
-    private void removeUsers2FromCourseAndUnlockBothUsers() {
-        appendToCourseProcessedTextView("Resetting everything for " + user1Email + " and " + user2Email);
+    private void removeUsers2FromLocationAndUnlockBothUsers() {
+        appendToLocationProcessedTextView("Resetting everything for " + user1Email + " and " + user2Email);
         Log.d(TAG, "removeUsers2FromCourseAndUnlockBothUsers");
-        //courseUserProcessedTextView.setText("Connecting complete, removing users from the Course list");
+        //locationUserProcessedTextView.setText("Connecting complete, removing users from the Location list");
         //removing the user1 and 2 from Course list
-        databaseManager.deleteField("Connecting/Course", user1UID);
-        databaseManager.deleteField("Connecting/Course", user2UID);
+        databaseManager.deleteField("Connecting/Location", user1UID);
+        databaseManager.deleteField("Connecting/Location", user2UID);
 
-        databaseManager.deleteField("Connecting/Course Queue", user1UID);
-        databaseManager.deleteField("Connecting/Course Queue", user2UID);
+        databaseManager.deleteField("Connecting/Location Queue", user1UID);
+        databaseManager.deleteField("Connecting/Location Queue", user2UID);
         //unlocking Both users variables
         String user1MoreInfoDocumentPath = user1Email + "/More Info";
         String user1CanCancelSearchingDocPath = user1Email + "/Search Canceling";
@@ -983,12 +917,14 @@ public class CourseThread extends Thread {
         String searchingForFieldName = "Searching For";
         databaseManager.updateTheField(userMoreInfoDocPath, searchingForFieldName, "none");
 
+        //resetting Latitude and Longitude
+        databaseManager.updateTheField(user1MoreInfoDocumentPath, "Latitude", "none");
+        databaseManager.updateTheField(user1MoreInfoDocumentPath, "Longitude", "none");
+
         //resetting Can Cancel Searching
         String searchCancelingDocPath = user1Email + "/Search Canceling";
         String canCancelSearchingFieldName = "Can Cancel Searching";
         databaseManager.updateTheField(searchCancelingDocPath, canCancelSearchingFieldName, "true");
-
-
 
         //resetting everything for user 2
         //enabling interest Editing
@@ -1013,6 +949,10 @@ public class CourseThread extends Thread {
         String searchingForFieldName2 = "Searching For";
         databaseManager.updateTheField(userMoreInfoDocPath2, searchingForFieldName2, "none");
 
+        //resetting Latitude and Longitude
+        databaseManager.updateTheField(user2MoreInfoDocumentPath, "Latitude", "none");
+        databaseManager.updateTheField(user2MoreInfoDocumentPath, "Longitude", "none");
+
         //resetting Can Cancel Searching
         String searchCancelingDocPath2 = user2Email + "/Search Canceling";
         String canCancelSearchingFieldName2 = "Can Cancel Searching";
@@ -1022,11 +962,12 @@ public class CourseThread extends Thread {
 //        databaseManager.updateTheField(user2CanCancelSearchingDocPath, "Can Cancel Searching", "true");
 //        databaseManager.updateTheField(user2MoreInfoDocumentPath, "Done Searching", "true");
 
-        //courseUserProcessedTextView.setText("Starting all over");
-        appendToCourseProcessedTextView("Everything's Complete");
-        appendToCourseProcessedTextView("Starting all over again");
+        //locationUserProcessedTextView.setText("Starting all over");
+        appendToLocationProcessedTextView("Everything's Complete");
+        appendToLocationProcessedTextView("Starting all over again");
+
         try {
-            Log.d(TAG, "Everything's Complete from Course Thread");
+            Log.d(TAG, "Everything's Complete from Location Thread");
             sleep(2000);
         } catch (InterruptedException e) {
             e.printStackTrace();

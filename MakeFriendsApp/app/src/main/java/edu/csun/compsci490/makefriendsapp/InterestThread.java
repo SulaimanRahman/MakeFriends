@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.icu.util.Freezable;
 import android.provider.ContactsContract;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -40,7 +41,6 @@ public class InterestThread extends Thread {
     private FirebaseAuth firebaseAuth;
 
     private DatabaseManager databaseManager;
-    private int user0Number;
     private String TAG = "Interest Thread";
     private String status;
     private Semaphore sem;
@@ -81,13 +81,17 @@ public class InterestThread extends Thread {
 
     private boolean canKillThread1and2;
 
+    private boolean isReadyToStop;
+
     public InterestThread(TextView interestThreadStatusTextView, TextView interestUserProcessedTextView, Context context, Semaphore sem, Activity activity) {
         this.interestThreadStatusTextView = interestThreadStatusTextView;
         this.interestUserProcessedTextView = interestUserProcessedTextView;
 
         this.activity = activity;
 
-        order = "Stop";
+        isReadyToStop = false;
+        order = "Keep Going";
+
         databaseManager = new DatabaseManager();
         this.sem = sem;
         firebaseAuth = FirebaseAuth.getInstance();
@@ -124,8 +128,10 @@ public class InterestThread extends Thread {
                         e.printStackTrace();
                     }
                     status = "Running";
-                    sem.release();
-                    run();
+                    if (order.equals("Keep Going")) {
+                        sem.release();
+                        run();
+                    }
                 }
             }
         });
@@ -135,98 +141,89 @@ public class InterestThread extends Thread {
     @Override
     public void run() {
         super.run();
-        //comparingSem.release();
-        Log.d(TAG, "Starting Interest Run()");
-        Log.d(TAG, "number of comparing Sem from run: " + comparingSem.availablePermits());
-//        try {
-//            Log.d(TAG, "Thread1  before join(): " + String.valueOf(thread1.getState()));
-//            Log.d(TAG, "Thread2 state before join(): " + thread2.getState());
-//
-//            if(thread1.isAlive()) {
-//                try {
-//                    thread1.join();
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//            if (thread2.isAlive()) {
-//                try {
-//                    thread2.join();
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//
-//            Log.d(TAG, "Thread1 state: " + String.valueOf(thread1.getState()));
-//            Log.d(TAG, "Thread2 state: " + thread2.getState());
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        if (order.equals("Keep Going")) {
+            interestThreadStatusTextView.setTextColor(greenColor.getColor());
+            interestUserProcessedTextView.setTextColor(greenColor.getColor());
+            interestUserProcessedTextView.append("running method processed...\n");
+            Log.d(TAG, "Starting Interest Run()");
+            Log.d(TAG, "number of comparing Sem from run: " + comparingSem.availablePermits());
 
-        try {
-            Log.d(TAG, "Thread1  before join(): " + String.valueOf(thread1.getState()));
-            Log.d(TAG, "Thread2 state before join(): " + thread2.getState());
 
-            if(thread1.isAlive()) {
-                if (canKillThread1and2) {
-                    thread1.stop();
-                } else {
-                    try {
-                        thread1.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            if (thread2.isAlive()) {
-                if (canKillThread1and2) {
-                    thread1.stop();
-                } else {
-                    try {
-                        thread2.join();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            Log.d(TAG, "Thread1 state: " + String.valueOf(thread1.getState()));
-            Log.d(TAG, "Thread2 state: " + thread2.getState());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        canKillThread1and2 = false;
-
-        //while (status.equals("Keep running") || status.equals("Waiting")) {
-
-        if (status.equalsIgnoreCase("Waiting")) {
-            //do nothing
-            interestThreadStatusTextView.setText("Waiting from run()");
-            //Log.d(TAG, "Waiting");
-        } else {
-            Log.d(TAG, "Status: " + status);
             try {
-                sem.acquire();
-                Log.d(TAG, "From Run() sem acquired");
-                checkIfTheresAnyOneInTheQueue();
-                //lock.wait();
-            } catch (InterruptedException e) {
+                Log.d(TAG, "Thread1  before join(): " + String.valueOf(thread1.getState()));
+                Log.d(TAG, "Thread2 state before join(): " + thread2.getState());
+
+                if(thread1.isAlive()) {
+                    if (canKillThread1and2) {
+                        thread1.stop();
+                    } else {
+                        try {
+                            thread1.join();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                if (thread2.isAlive()) {
+                    if (canKillThread1and2) {
+                        thread1.stop();
+                    } else {
+                        try {
+                            thread2.join();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            try {
+                Log.d(TAG, "Thread1 state: " + String.valueOf(thread1.getState()));
+                Log.d(TAG, "Thread2 state: " + thread2.getState());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            canKillThread1and2 = false;
+
+            if (status.equalsIgnoreCase("Waiting")) {
+                //do nothing
+                interestThreadStatusTextView.setText("Waiting");
+                interestThreadStatusTextView.setTextColor(redColor.getColor());
+                interestUserProcessedTextView.append("Waiting for next request...\n");
+            } else {
+                Log.d(TAG, "Status: " + status);
+                try {
+                    sem.acquire();
+                    Log.d(TAG, "From Run() sem acquired");
+                    checkIfTheresAnyOneInTheQueue();
+                    //lock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        } else {
+            isReadyToStop = true;
+            interestUserProcessedTextView.append("Stopped.\n");
+            interestUserProcessedTextView.setTextColor(redColor.getColor());
+            interestThreadStatusTextView.setTextColor(redColor.getColor());
         }
-//            synchronized (lock) {
+
+    }
+
+    private void appendToInterestProcessedTextView(final String string) {
+        interestUserProcessedTextView.append(string + "...\n");
+        interestUserProcessedTextView.setMovementMethod(new ScrollingMovementMethod());
+        //appendToInterestProcessedTextView(string + "...\n");
+//        activity.runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
 //
 //            }
-
-        //}
-
+//        });
     }
 
     private void checkIfTheresAnyOneInTheQueue() {
@@ -236,6 +233,7 @@ public class InterestThread extends Thread {
             public void run() {
                 interestThreadStatusTextView.setText("Processing");
                 interestThreadStatusTextView.setTextColor(greenColor.getColor());
+                interestUserProcessedTextView.append("Checking if there's anyone in the queue...\n");
             }
         });
 
@@ -252,8 +250,11 @@ public class InterestThread extends Thread {
                     status = "Waiting";
                     interestThreadStatusTextView.setText("Waiting");
                     interestThreadStatusTextView.setTextColor(redColor.getColor());
-                    interestUserProcessedTextView.setText("No one's in the queue from checkIfTheresAnyOneInTheQueue()");
+                    //interestUserProcessedTextView.setText("No one's in the queue from checkIfTheresAnyOneInTheQueue()");
+                    interestUserProcessedTextView.append("No one is in the queue...\n");
+                    interestUserProcessedTextView.append("Waiting for next request...\n");
                 } else {
+                    interestUserProcessedTextView.append("Getting first person in the queue...\n");
                     getFirstPersonInTheQueueAndLockIt(snapshot);
                 }
             }
@@ -276,6 +277,7 @@ public class InterestThread extends Thread {
                 user1Email = value.toString();
 
                 //check if user 1 is canceling
+                interestUserProcessedTextView.append("Checking if user1 is canceling...\n");
                 String cancelingDocPath = user1Email + "/More Info";
                 String cancelingFieldName = "Canceling";
                 databaseManager.getFieldValue(cancelingDocPath, cancelingFieldName, new FirebaseCallback() {
@@ -283,7 +285,9 @@ public class InterestThread extends Thread {
                     public void onCallback(Object value) {
                         String status = value.toString();
                         if (status.equals("false")) {
-                            interestUserProcessedTextView.setText(user1Email);
+                            interestUserProcessedTextView.append("User1 is not canceling...\n");
+                            interestUserProcessedTextView.append(user1Email + " is being processed...\n");
+                            //interestUserProcessedTextView.setText(user1Email);
 
                             user1Value = snapshot.get(user1UID).toString();
 
@@ -291,13 +295,16 @@ public class InterestThread extends Thread {
                             String fieldName = "Can Cancel Searching";
 
                             //locking user1
+                            interestUserProcessedTextView.append("Locking " + user1Email + "...\n");
                             databaseManager.updateTheField(user1CanCancelSearchingDocPath, fieldName, "false");
 
                             //removing user1 from the queue
+                            interestUserProcessedTextView.append("Removing " + user1Email + " from the queue...\n");
                             String interestQueueDocPath = "Connecting/Interest Queue";
 
                             databaseManager.deleteField(interestQueueDocPath, user1UID);
                             Log.d(TAG, "deleted user1 from the interest queue");
+                            interestUserProcessedTextView.append(user1Email + " removed from the queue...\n");
                             try {
                                 sleep(2000);
                             } catch (InterruptedException e) {
@@ -305,6 +312,7 @@ public class InterestThread extends Thread {
                             }
                             checkIfTheresAnyoneInTheListToCompareWith();
                         } else {
+                            interestUserProcessedTextView.append("User1 is canceling...\n");
                             try {
                                 sleep(1000);
                             } catch (InterruptedException e) {
@@ -322,6 +330,7 @@ public class InterestThread extends Thread {
     }
 
     private void checkIfTheresAnyoneInTheListToCompareWith() {
+        interestUserProcessedTextView.append("Checking if there's anyone to compare " + user1Email + " with...\n");
         Log.d(TAG, "checkIfTheresAnyoneInTheListToCompareWith From Interest Thread");
 
         final String interestUsersDocPath = "Connecting/Interest";
@@ -332,10 +341,11 @@ public class InterestThread extends Thread {
                 DocumentSnapshot snapshot = (DocumentSnapshot) value;
                 Log.d(TAG, "Number of people in the Interest list: " + snapshot.getData().size());
                 if (snapshot.getData().size() == 0) {//if no ones in the list
+                    interestUserProcessedTextView.append("There's no one to compare with...\n");
                     checkIfUser1IsLookingForAnyUserOrOnlyInterestMatch(false, true);
                 } else {
                     //comparingSem.release();
-                    //Log.d(TAG, "Number of comparing Sem " + comparingSem.getQueueLength());
+                    interestUserProcessedTextView.append("Getting another user to compare with...\n");
                     getSecondUserFromTheListToCompareWithAndLockIt(snapshot);
 
                 }
@@ -345,35 +355,33 @@ public class InterestThread extends Thread {
 
     private void getSecondUserFromTheListToCompareWithAndLockIt(final DocumentSnapshot snapshot) {
         Log.d(TAG, "getSecondUserFromTheListToCompareWithAndLockIt from Interest Thread");
-        //Log.d(TAG, "Working 212");
+
         final ArrayList<String> keys = new ArrayList<>();
-        //Log.d(TAG, "Working 214");
+
         keys.addAll(snapshot.getData().keySet());
-        //Log.d(TAG, "Working 252");
+
         final String allUsersDocumentPath = "Default/All Users";
 
         ArrayList<String> secondUserContacts = new ArrayList<>();
 
         comparingSize = keys.size();
-        //Log.d(TAG, "Working 258");
+
         thread1 = new Thread(new Runnable() {
             @Override
             public void run() {
-                //Log.d(TAG, "Working 262");
+                interestUserProcessedTextView.append("Thread1 started");
                 for (int i = 0; i < keys.size(); i++) {
-                    //Log.d(TAG, "Working 264");
+
                     try {
-                        //Log.d(TAG, "Working 224");
+
                         Log.d(TAG, "Number of comparing Sem " + comparingSem.availablePermits());
-                        //comparingSem.release();
+
 
                         Log.d(TAG, "setting userStatus to wait from Interest Thread");
                         userStatus = "Wait";
-                        //comparingSem.acquire();
+                        interestUserProcessedTextView.append("Got another user to compare with...\n");
                         if (interestFoundStatus.equals("Not Found") == false) {
                             Log.d(TAG, "Interest found status is true");
-                            //interestThreadStatusTextView.setText("Finished Comparing");
-                            //interestUserProcessedTextView.setText("none");
                             break;
                         }
                         continueGettingSecondUser(snapshot, allUsersDocumentPath, keys, comparingSize, i);
@@ -397,24 +405,13 @@ public class InterestThread extends Thread {
                 }
 
                 if (interestFoundStatus.equals("Not Found")) {
+                    appendToInterestProcessedTextView("No interests found with any of the users");
                     checkIfUser1IsLookingForAnyUserOrOnlyInterestMatch(true, true);
                 } else {
+                    appendToInterestProcessedTextView("Starting all over");
                     Log.d(TAG, "Going to call the super.run() from Interest Thread");
                     runTheSuperThread();
                 }
-//                while (order.equals("Stop")){
-//
-//                }
-//                try {
-//                    comparingSem.acquire();
-//                    if (interestFoundStatus.equals("Not Found")) {
-//                        checkIfUser1IsLookingForAnyUserOrOnlyInterestMatch(true);
-//                    } else {
-//                        run();
-//                    }
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
             }
         });
         thread1.start();
@@ -430,16 +427,19 @@ public class InterestThread extends Thread {
         thread2 = new Thread(new Runnable() {
             @Override
             public void run() {
+                appendToInterestProcessedTextView("Thread2 started");
                 comparingCurrentSize = i;
                 user2UID = keys.get(i);
 
                 //getting user2 email
+                appendToInterestProcessedTextView("Getting second user email");
                 databaseManager.getFieldValue(allUsersDocumentPath, user2UID, new FirebaseCallback() {
                     @Override
                     public void onCallback(Object value) {
                         user2Email = value.toString();
-
-                        interestUserProcessedTextView.setText("Comparing " + user1Email + " and " + user2Email + " from Interest Thread");
+                        appendToInterestProcessedTextView("second user is " + user2Email);
+                        //interestUserProcessedTextView.setText("Comparing " + user1Email + " and " + user2Email + " from Interest Thread");
+                        appendToInterestProcessedTextView("Comparing " + user1Email + " and " + user2Email);
                         user2Value = snapshot.get(user2UID).toString();
 
                         final String documentPath = user2Email + "/Search Canceling";
@@ -449,29 +449,28 @@ public class InterestThread extends Thread {
                         //databaseManager.updateTheField(documentPath, fieldName, "false");
 
                         //checking if user wants to cancel the searching
+                        appendToInterestProcessedTextView("Checking if " + user2Email + " is canceling");
                         String user2MoreInfoDocPath = user2Email + "/More Info";
                         String cancelingFieldName = "Canceling";
 
-                        //Log.d(TAG, "Working 250");
                         databaseManager.getFieldValue(user2MoreInfoDocPath, cancelingFieldName, new FirebaseCallback() {
                             @Override
                             public void onCallback(Object value) {
                                 String status = value.toString();
-                                //Log.d(TAG, "Working 255");
+
                                 if (status.equals("true")) {//user 2 wants to cancel the search
                                     //unlocking user2
-                                    //Log.d(TAG, "Working 258");
+                                    appendToInterestProcessedTextView(user2Email + " is canceling");
                                     databaseManager.updateTheField(documentPath, fieldName, "true");
                                     try {
                                         sleep(1000);
                                     } catch (InterruptedException e) {
                                         e.printStackTrace();
                                     }
-                                    //comparingSem.release();
                                     userStatus = "Continue";
                                 } else {
-                                    //Log.d(TAG, "Working 262");
                                     //locking user2
+                                    appendToInterestProcessedTextView(user2Email + " is not canceling");
                                     databaseManager.updateTheField(documentPath, fieldName, "false");
                                     checkIfUser2IsAlreadyAContactWithUser1();
                                 }
@@ -488,6 +487,7 @@ public class InterestThread extends Thread {
     private void checkIfUser2IsAlreadyAContactWithUser1() {
         Log.d(TAG, "checkIfUser2IsAlreadyAContactWithUser1 From Interest Thread");
         //checking if this user already a contact with user1 or not
+        appendToInterestProcessedTextView("Checking if " + user1Email + " and " + user1Email + " are already contacts");
         final String user1ContactsDocPath = user1Email + "/Contacts";
         String fieldName = "All Users";
 
@@ -498,6 +498,7 @@ public class InterestThread extends Thread {
                 String dbValue = value.toString();
 
                 if (dbValue.equals("none")) {//user don't have any contacts
+                    appendToInterestProcessedTextView(user1Email + " and " + user2Email + " are not contacts");
                     checkIfUser2IsBlockedByUser1();
                 } else {//user has contacts
                     ArrayList<String> user1ContactsList = (ArrayList) value;
@@ -505,11 +506,14 @@ public class InterestThread extends Thread {
                     for (int i = 0; i < user1ContactsList.size(); i++) {
                         if (user1ContactsList.get(i).equals(user2Email)) {//user2 is already a contact with user1
                             //unlocking user2
+                            appendToInterestProcessedTextView(user2Email + " is already a contact with " + user1Email);
                             String user2MoreInfoDocPath = user2Email + "/Search Canceling";
                             String searchingFieldName = "Can Cancel Searching";
+                            appendToInterestProcessedTextView("Unlocking " + user2Email);
                             databaseManager.updateTheField(user2MoreInfoDocPath, searchingFieldName, "true");
-                            interestUserProcessedTextView.setText("User 2 is already a contact with user 1 from Interest Thread");
+                            //interestUserProcessedTextView.setText("User 2 is already a contact with user 1 from Interest Thread");
                             //try next person in the list o compare with
+                            appendToInterestProcessedTextView("Getting next person in the line");
                             try {
                                 sleep(1000);
                             } catch (InterruptedException e) {
@@ -517,15 +521,12 @@ public class InterestThread extends Thread {
                             }
                             //comparingSem.release();
                             userStatus = "Continue";
-//                            try {
-//                                sleep(1000);
-//                            } catch (InterruptedException e) {
-//                                e.printStackTrace();
-//                            }
+
                             break;
                         }
 
                         if (i == user1ContactsList.size() - 1) {//user2 is not a contact with user1
+                            appendToInterestProcessedTextView(user2Email + " is not a contact with " + user1Email);
                             checkIfUser2IsBlockedByUser1();
                         }
                     }
@@ -535,6 +536,7 @@ public class InterestThread extends Thread {
     }
 
     private void checkIfUser2IsBlockedByUser1() {
+        appendToInterestProcessedTextView("Checking if " + user2Email + " is blocked by " + user1Email);
         Log.d(TAG, "checkIfUser2IsBlockedByUser1 from Interest Thread");
         String user1ContactsDocPath = user1Email + "/Contacts";
         final String blockedUsersFieldName = "Blocked Users";
@@ -546,17 +548,20 @@ public class InterestThread extends Thread {
                 String dbValue = value.toString();
 
                 if (dbValue.equals("none")) {//user 1 has not blocked anyone
-                    getFirstUserInterests();
+                    appendToInterestProcessedTextView(user1Email + " has not blocked " + user2Email);
+                    checkIfUser1IsBlockedByUser2();
                 } else {//user1 has blocked some users
                     ArrayList<String> blockedUsers = (ArrayList) value;
 
                     for (int i = 0; i < blockedUsers.size(); i++) {
                         if (blockedUsers.get(i).equals(user2Email)) {//user2 has been blocked by user1
+                            appendToInterestProcessedTextView(user1Email + " has blocked " + user2Email);
                             //unlocking user2
                             String user2MoreInfoDocPath = user2Email + "/Search Canceling";
                             String searchingFieldName = "Can Cancel Searching";
                             databaseManager.updateTheField(user2MoreInfoDocPath, searchingFieldName, "true");
-                            interestUserProcessedTextView.setText("User 2 is blocked by user 1");
+                            //interestUserProcessedTextView.setText("User 2 is blocked by user 1");
+                            appendToInterestProcessedTextView("Getting next person in the list");
                             try {
                                 sleep(1000);
                             } catch (InterruptedException e) {
@@ -569,6 +574,55 @@ public class InterestThread extends Thread {
                         }
 
                         if (i == blockedUsers.size() - 1) {//user1 has not blocked user2
+                            appendToInterestProcessedTextView(user1Email + " has not blocked " + user2Email);
+                            checkIfUser1IsBlockedByUser2();
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    private void checkIfUser1IsBlockedByUser2() {
+        appendToInterestProcessedTextView("Checking if " + user1Email + " is blocked by " + user2Email);
+        Log.d(TAG, "checkIfUser1IsBlockedByUser2 from Interest Thread");
+        String user1ContactsDocPath = user2Email + "/Contacts";
+        final String blockedUsersFieldName = "Blocked Users";
+
+        databaseManager.getFieldValue(user1ContactsDocPath, blockedUsersFieldName, new FirebaseCallback() {
+            @Override
+            public void onCallback(Object value) {
+
+                String dbValue = value.toString();
+
+                if (dbValue.equals("none")) {//user 2 has not blocked anyone
+                    appendToInterestProcessedTextView(user2Email + " has not blocked " + user1Email);
+                    getFirstUserInterests();
+                } else {//user1 has blocked some users
+                    ArrayList<String> blockedUsers = (ArrayList) value;
+
+                    for (int i = 0; i < blockedUsers.size(); i++) {
+                        if (blockedUsers.get(i).equals(user1Email)) {//user1 has been blocked by user2
+                            appendToInterestProcessedTextView(user2Email + " has blocked " + user1Email);
+                            //unlocking user2
+                            String user2MoreInfoDocPath = user2Email + "/Search Canceling";
+                            String searchingFieldName = "Can Cancel Searching";
+                            databaseManager.updateTheField(user2MoreInfoDocPath, searchingFieldName, "true");
+                            //interestUserProcessedTextView.setText("User 1 is blocked by user 2");
+                            appendToInterestProcessedTextView("Getting next person in the list");
+                            try {
+                                sleep(1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            //try next person in the list o compare with
+                            //comparingSem.release();
+                            userStatus = "Continue";
+                            break;
+                        }
+
+                        if (i == blockedUsers.size() - 1) {//user2 has not blocked user1
+                            appendToInterestProcessedTextView(user2Email + " has not blocked " + user1Email);
                             getFirstUserInterests();
                         }
                     }
@@ -578,6 +632,7 @@ public class InterestThread extends Thread {
     }
 
     private void getFirstUserInterests() {
+        appendToInterestProcessedTextView("Getting " + user1Email + " interests");
         Log.d(TAG, "getFirstUserInterests");
 
         String documentPath = user1Email + "/More Info";
@@ -593,6 +648,7 @@ public class InterestThread extends Thread {
     }
 
     private void getSecondUserInterests() {
+        appendToInterestProcessedTextView("Getting " + user2Email + " interests");
         Log.d(TAG, "getSecondUserInterests");
         String documentPath = user2Email + "/More Info";
         String fieldName = "Interest Array";
@@ -607,6 +663,7 @@ public class InterestThread extends Thread {
     }
 
     private void compareTheInterests() {
+        appendToInterestProcessedTextView("Comparing " + user1Email + " and " + user2Email + " interests");
         Log.d(TAG, "compareTheInterests");
         outerLoop:
         for (int i = 0; i < user1Interests.size(); i++) {
@@ -614,6 +671,7 @@ public class InterestThread extends Thread {
                 if (user1Interests.get(i).equals(user2Interests.get(j))) {
                     interestMatched = user1Interests.get(i);
                     interestFoundStatus = "Found";
+                    appendToInterestProcessedTextView("Same interest found");
                     try {
                         sleep(1000);
                     } catch (InterruptedException e) {
@@ -626,21 +684,25 @@ public class InterestThread extends Thread {
             }
             if (i == user1Interests.size() - 1) {
                 //unlock user 2
+                appendToInterestProcessedTextView("No similar interest found");
                 String documentPath = user2Email + "/Search Canceling";
                 String fieldName = "Can Cancel Searching";
                 databaseManager.updateTheField(documentPath, fieldName, "true");
                 interestFoundStatus = "Not Found";
                 Log.d(TAG, "No Interest Matched");
                 if (comparingCurrentSize == comparingSize - 1) {//no interest match with any of the users
+                    appendToInterestProcessedTextView("Interests did not match with any of the users");
                     checkIfUser1IsLookingForAnyUserOrOnlyInterestMatch(true, false);
                 } else {
+                    appendToInterestProcessedTextView("Getting next person to compare with");
                     try {
                         sleep(1000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     //comparingSem.release();
-                    userStatus.equals("Continue");
+
+                    userStatus = "Continue";
                 }
             }
 
@@ -650,16 +712,25 @@ public class InterestThread extends Thread {
     }
 
     private void checkIfUser1IsLookingForAnyUserOrOnlyInterestMatch(boolean releaseComparingSem, boolean callRun) {
+        appendToInterestProcessedTextView("Checking if " + user1Email + " is looking for only Interest match");
         Log.d(TAG, "checkIfUser1IsLookingForAnyUserOrOnlyInterestMatch From Interest Thread");
 
         if (user1Value.equals("All")) {
+            appendToInterestProcessedTextView(user1Email + " is not only looking for interest match");
             String courseDocPath = "Connecting/Course Queue";
-            interestUserProcessedTextView.setText("Moving " + user1Email + " to Course Queue");
+            //interestUserProcessedTextView.setText("Moving " + user1Email + " to Course Queue");
+            appendToInterestProcessedTextView("Moving " + user1Email + " to the Course Thread");
             databaseManager.createNewField(courseDocPath, user1UID, user1Value);
             databaseManager.updateTheField(user1Email + "/More Info", "User Is In Queue", "Course Queue");
             unlockUser1(releaseComparingSem, callRun);
         } else {
-            interestUserProcessedTextView.setText("Adding user to interest list");
+//            activity.runOnUiThread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    interestUserProcessedTextView.setText("Adding user to interest list");
+//                }
+//            });
+            appendToInterestProcessedTextView("User is only looking for interest match");
             addUser1ToTheList(releaseComparingSem, callRun);
         }
     }
@@ -667,13 +738,21 @@ public class InterestThread extends Thread {
     private void addUser1ToTheList(boolean releaseComparingSem, boolean callRun) {
         Log.d(TAG, "addUser1ToTheList From Interest Thread");
 
-        interestUserProcessedTextView.setText("Adding " + user1Email + " to the list");
+//        activity.runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                interestUserProcessedTextView.setText("Adding " + user1Email + " to the list");
+//            }
+//        });
+
+        appendToInterestProcessedTextView("Adding " + user1Email + " to the Interests list");
 
         String interestDocPath = "Connecting/Interest";
 
         databaseManager.createNewField(interestDocPath, user1UID, user1Value);
 
         //updating user1 whereabout
+        appendToInterestProcessedTextView("Updating "  + user1Email + " whereabout in the database");
         databaseManager.updateTheField(user1Email + "/More Info", "User Is In Queue", "Interest");
 
         try {
@@ -686,6 +765,7 @@ public class InterestThread extends Thread {
     }
 
     private void unlockUser1(boolean releaseComparingSem, boolean callRun) {
+        appendToInterestProcessedTextView("Unlocking " + user1Email);
         Log.d(TAG, "unlockUser1() From Interest Thread");
 
         String user1DocumentPath = user1Email + "/Search Canceling";
@@ -693,19 +773,34 @@ public class InterestThread extends Thread {
         String fieldName = "Can Cancel Searching";
         databaseManager.updateTheField(user1DocumentPath, fieldName, "true");
         //databaseManager.updateTheField(user2DocumentPath, fieldName, "false");
-        interestUserProcessedTextView.setText("Starting all over");
+//
+//        activity.runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                interestUserProcessedTextView.setText("Starting all over");
+//            }
+//        });
+
+
         try {
             sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        if (releaseComparingSem == true) {
-            //comparingSem.release();
-            userStatus.equals("Continue");
-        }
 
-        if (callRun) {
+        if (releaseComparingSem == true && callRun == true) {
+            appendToInterestProcessedTextView("Starting all over again");
+            userStatus = "Continue";
+            canKillThread1and2 = true;
+            run();
+        } else if (releaseComparingSem == true) {
+            //comparingSem.release();
+            appendToInterestProcessedTextView("Getting next person in the line");
+            userStatus = "Continue";
+        } else if (callRun) {
+            appendToInterestProcessedTextView("Starting all over again");
             sem.release();
+            canKillThread1and2 = true;
             run();
         }
 //        sem.release();
@@ -713,12 +808,20 @@ public class InterestThread extends Thread {
     }
 
     private void connectUser1AndUser2() {
+        appendToInterestProcessedTextView("Connecting " + user1Email + " and " + user2Email);
         Log.d(TAG, "connectUser1AndUser2 From Interest Thread");
-        interestUserProcessedTextView.setText("Connecting users");
+//        activity.runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                interestUserProcessedTextView.setText("Connecting users");
+//            }
+//        });
+
         setUpUser1();
     }
 
     private void setUpUser1() {
+        appendToInterestProcessedTextView("Setting up " + user1Email);
         final String message = "You two have been linked because you both like " + interestMatched + "!";
 
         final String user1ContactsDocumentPath = user1Email + "/Contacts";
@@ -771,6 +874,7 @@ public class InterestThread extends Thread {
     }
 
     private void setUpUser2() {
+        appendToInterestProcessedTextView("Setting up " + user2Email);
         final String message = "You two have been linked because you both like " + interestMatched + "!";
         final String user2ContactsDocumentPath = user2Email + "/Contacts";
         final String user2ChatDocumentPath = user2Email + "/Contacts/" + user1Email + "/Chat";
@@ -820,8 +924,9 @@ public class InterestThread extends Thread {
     }
 
     private void removeUsers2FromInterestAndUnlockBothUsers() {
+        appendToInterestProcessedTextView("Resetting everything for " + user1Email + " and " + user2Email);
         Log.d(TAG, "removeUsers2FromInterestAndUnlockBothUsers");
-        interestUserProcessedTextView.setText("Connecting complete, removing users from the Interest list");
+        //interestUserProcessedTextView.setText("Connecting complete, removing users from the Interest list");
         //removing the user1 and 2 from interest list
         databaseManager.deleteField("Connecting/Interest", user1UID);
         databaseManager.deleteField("Connecting/Interest", user2UID);
@@ -898,8 +1003,9 @@ public class InterestThread extends Thread {
 //        databaseManager.updateTheField(user2CanCancelSearchingDocPath, "Can Cancel Searching", "true");
 //        databaseManager.updateTheField(user2MoreInfoDocumentPath, "Done Searching", "true");
 
-        interestUserProcessedTextView.setText("Starting all over");
-
+        //interestUserProcessedTextView.setText("Starting all over");
+        appendToInterestProcessedTextView("Everything's Complete");
+        appendToInterestProcessedTextView("Starting all over again");
         resetSomeVariables();
 
         try {
@@ -933,8 +1039,12 @@ public class InterestThread extends Thread {
         this.order = order;
     }
 
-    public void setUser0Number(int number) {
-        user0Number = number;
+    public boolean isReadyToStop() {
+        return isReadyToStop;
+    }
+
+    public void setReadyToStop(boolean readyToStop) {
+        isReadyToStop = readyToStop;
     }
 
     public void releaseSem() {
