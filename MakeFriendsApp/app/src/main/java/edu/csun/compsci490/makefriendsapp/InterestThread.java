@@ -215,15 +215,13 @@ public class InterestThread extends Thread {
     }
 
     private void appendToInterestProcessedTextView(final String string) {
-        interestUserProcessedTextView.append(string + "...\n");
-        interestUserProcessedTextView.setMovementMethod(new ScrollingMovementMethod());
-        //appendToInterestProcessedTextView(string + "...\n");
-//        activity.runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//            }
-//        });
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                interestUserProcessedTextView.append(string + "...\n");
+                interestUserProcessedTextView.setMovementMethod(new ScrollingMovementMethod());
+            }
+        });
     }
 
     private void checkIfTheresAnyOneInTheQueue() {

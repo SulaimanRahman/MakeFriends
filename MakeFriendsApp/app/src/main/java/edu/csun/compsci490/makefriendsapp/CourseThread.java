@@ -190,8 +190,13 @@ public class CourseThread extends Thread {
     }
 
     private void appendToCourseProcessedTextView(final String string) {
-        courseUserProcessedTextView.append(string + "...\n");
-        courseUserProcessedTextView.setMovementMethod(new ScrollingMovementMethod());
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                courseUserProcessedTextView.append(string + "...\n");
+                courseUserProcessedTextView.setMovementMethod(new ScrollingMovementMethod());
+            }
+        });
     }
 
     private void checkIfTheresAnyOneInTheQueue() {
