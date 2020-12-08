@@ -113,7 +113,7 @@ public class LocationThread extends Thread {
         if (order.equals("Keep Going")) {
             locationThreadStatusTextView.setTextColor(greenColor.getColor());
             locationUserProcessedTextView.setTextColor(greenColor.getColor());
-            appendToLocationProcessedTextView("running method processed");
+            locationUserProcessedTextView.append("running method processed...\n");
             Log.d(TAG, "Starting Location Run()");
 
             try {
@@ -159,7 +159,7 @@ public class LocationThread extends Thread {
                 //do nothing
                 locationThreadStatusTextView.setText("Waiting");
                 locationThreadStatusTextView.setTextColor(redColor.getColor());
-                appendToLocationProcessedTextView("Waiting for next request");
+                locationUserProcessedTextView.append("Waiting for next request...\n");
 
             } else {
                 Log.d(TAG, "Status: " + status);
@@ -181,13 +181,8 @@ public class LocationThread extends Thread {
     }
 
     private void appendToLocationProcessedTextView(final String string) {
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                locationUserProcessedTextView.append(string + "...\n");
-                locationUserProcessedTextView.setMovementMethod(new ScrollingMovementMethod());
-            }
-        });
+        locationUserProcessedTextView.setText(string + "...\n");
+        locationUserProcessedTextView.setMovementMethod(new ScrollingMovementMethod());
     }
 
     private void checkIfTheresAnyOneInTheQueue() {
@@ -214,8 +209,8 @@ public class LocationThread extends Thread {
                     locationThreadStatusTextView.setText("Waiting");
                     locationThreadStatusTextView.setTextColor(redColor.getColor());
                     //locationUserProcessedTextView.setText("No one's in the queue from checkIfTheresAnyOneInTheQueue()");
-                    appendToLocationProcessedTextView("No one is in the queue");
-                    appendToLocationProcessedTextView("Waiting for next request");
+                    locationUserProcessedTextView.append("No one is in the queue...\n");
+                    locationUserProcessedTextView.append("Waiting for next request...\n");
                 } else {
                     appendToLocationProcessedTextView("Getting first person in the queue");
                     getFirstPersonInTheQueueAndLockIt(snapshot);

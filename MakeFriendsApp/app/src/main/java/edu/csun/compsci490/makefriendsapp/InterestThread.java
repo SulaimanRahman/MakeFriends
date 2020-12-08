@@ -195,14 +195,15 @@ public class InterestThread extends Thread {
                 interestUserProcessedTextView.append("Waiting for next request...\n");
             } else {
                 Log.d(TAG, "Status: " + status);
-                try {
-                    sem.acquire();
-                    Log.d(TAG, "From Run() sem acquired");
-                    checkIfTheresAnyOneInTheQueue();
-                    //lock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    sem.acquire();
+//                    Log.d(TAG, "From Run() sem acquired");
+//
+//                    //lock.wait();
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+                checkIfTheresAnyOneInTheQueue();
             }
 
         } else {
@@ -215,13 +216,10 @@ public class InterestThread extends Thread {
     }
 
     private void appendToInterestProcessedTextView(final String string) {
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                interestUserProcessedTextView.append(string + "...\n");
-                interestUserProcessedTextView.setMovementMethod(new ScrollingMovementMethod());
-            }
-        });
+        interestUserProcessedTextView.setText(string + "...\n");
+        interestUserProcessedTextView.setMovementMethod(new ScrollingMovementMethod());
+        Log.d(TAG, "TextView Lenth is: " + interestUserProcessedTextView.length());
+
     }
 
     private void checkIfTheresAnyOneInTheQueue() {

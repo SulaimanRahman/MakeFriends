@@ -122,7 +122,7 @@ public class CourseThread extends Thread {
         if (order.equals("Keep Going")) {
             courseThreadStatusTextView.setTextColor(greenColor.getColor());
             courseUserProcessedTextView.setTextColor(greenColor.getColor());
-            appendToCourseProcessedTextView("running method processed");
+            courseUserProcessedTextView.append("running method processed...\n");
             haveGotUser1Courses = false;
             Log.d(TAG, "Starting Course Run()");
 
@@ -168,7 +168,7 @@ public class CourseThread extends Thread {
                 //do nothing
                 courseThreadStatusTextView.setText("Waiting");
                 courseThreadStatusTextView.setTextColor(redColor.getColor());
-                appendToCourseProcessedTextView("Waiting for next request");
+                courseUserProcessedTextView.append("Waiting for next request...\n");
 
             } else {
                 Log.d(TAG, "Status: " + status);
@@ -184,19 +184,16 @@ public class CourseThread extends Thread {
             courseUserProcessedTextView.setTextColor(redColor.getColor());
             courseThreadStatusTextView.setTextColor(redColor.getColor());
             courseThreadStatusTextView.setText("Stopped");
-            appendToCourseProcessedTextView("Stopped");
+            courseUserProcessedTextView.append("Stopped.\n");
             isReadyToStop = true;
         }
     }
 
     private void appendToCourseProcessedTextView(final String string) {
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                courseUserProcessedTextView.append(string + "...\n");
-                courseUserProcessedTextView.setMovementMethod(new ScrollingMovementMethod());
-            }
-        });
+
+        courseUserProcessedTextView.setText(string + "...\n");
+        courseUserProcessedTextView.setMovementMethod(new ScrollingMovementMethod());
+
     }
 
     private void checkIfTheresAnyOneInTheQueue() {
@@ -223,8 +220,8 @@ public class CourseThread extends Thread {
                     courseThreadStatusTextView.setText("Waiting");
                     courseThreadStatusTextView.setTextColor(redColor.getColor());
                     //courseUserProcessedTextView.setText("No one's in the queue from checkIfTheresAnyOneInTheQueue()");
-                    appendToCourseProcessedTextView("No one is in the queue");
-                    appendToCourseProcessedTextView("Waiting for next request");
+                    courseUserProcessedTextView.append("No one is in the queue..\n");
+                    courseUserProcessedTextView.append("Waiting for next request...\n");
                 } else {
                     appendToCourseProcessedTextView("Getting first person in the queue");
                     getFirstPersonInTheQueueAndLockIt(snapshot);
