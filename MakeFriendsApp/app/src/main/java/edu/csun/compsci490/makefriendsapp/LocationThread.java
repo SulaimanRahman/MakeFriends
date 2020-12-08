@@ -181,8 +181,13 @@ public class LocationThread extends Thread {
     }
 
     private void appendToLocationProcessedTextView(final String string) {
-        locationUserProcessedTextView.append(string + "...\n");
-        locationUserProcessedTextView.setMovementMethod(new ScrollingMovementMethod());
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                locationUserProcessedTextView.append(string + "...\n");
+                locationUserProcessedTextView.setMovementMethod(new ScrollingMovementMethod());
+            }
+        });
     }
 
     private void checkIfTheresAnyOneInTheQueue() {
