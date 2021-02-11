@@ -53,4 +53,12 @@ public class UserSingleton {
     public String getPassword() {
         return password;
     }
+
+    public void reset() {//this is to clear all of the Singleton data
+        profile = null;
+        email = null;
+        password = null;
+        bio = null;
+    }
+
 }
