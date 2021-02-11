@@ -1,5 +1,6 @@
 package edu.csun.compsci490.makefriendsapp;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -77,6 +78,19 @@ public class MessagingActivity extends AppCompatActivity {
 
         databaseManager = new DatabaseManager();
         chatSingleton = ChatSingleton.getInstance();
+
+        Intent intent = getIntent();
+
+        if (intent.getExtras() != null) {
+            String contactEmail = intent.getStringExtra("contactEmail");
+            String contactFullName = intent.getStringExtra("contactFullName");
+            Uri contactProfileUri = Uri.parse(intent.getStringExtra("contactProfileUri"));
+            Log.d(TAG, "ContactProfileUri: " + intent.getStringExtra("contactProfileUri"));
+            chatSingleton.setContactEmail(contactEmail);
+            chatSingleton.setContactName(contactFullName);
+            chatSingleton.setContactProfilePicUri(contactProfileUri);
+        }
+
         userSingleton = UserSingleton.getInstance();
         messages = new HashMap<>();
         messagesKeySet = new ArrayList<>();

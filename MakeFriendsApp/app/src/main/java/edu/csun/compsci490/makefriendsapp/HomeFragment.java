@@ -1,7 +1,11 @@
 package edu.csun.compsci490.makefriendsapp;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -682,6 +686,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
     public void logUserOut(){
         firebaseAuth.signOut();
+        SharedPreferences userLocalDatabase = getActivity().getSharedPreferences("userDetails", 0);
+        SharedPreferences.Editor sharePreferenceEditor = userLocalDatabase.edit();
+        sharePreferenceEditor.putString("AutoLogin", "false");
+        sharePreferenceEditor.commit();
+        Intent serviceIntent = new Intent(getContext(), NotificationService.class);
+        getActivity().stopService(serviceIntent);
         startActivity(new Intent(getContext(), MainActivity.class));
         getActivity().finish();
     }

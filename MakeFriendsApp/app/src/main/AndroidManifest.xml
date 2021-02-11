@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:allowBackup="true"
@@ -14,10 +15,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <service
-            android:name=".BackgroundService"
-            android:enabled="true"
-            android:exported="true"></service>
+        <service android:name=".NotificationService"/>
+
         <activity android:name=".MainNavigation" />
         <activity android:name=".PlaceHolder" />
         <activity android:name=".SignUp" />
@@ -45,7 +44,9 @@
 
         <meta-data
             android:name="preloaded_fonts"
-            android:resource="@array/preloaded_fonts" />
+            android:resource="@array/preloaded_fonts"
+            />
+        <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/launcher_icon2" />
     </application>
 
 </manifest>

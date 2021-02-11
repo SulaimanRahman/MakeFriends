@@ -1,8 +1,13 @@
 package edu.csun.compsci490.makefriendsapp;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -16,6 +21,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -117,12 +124,12 @@ public class MainActivity extends AppCompatActivity {
                             userSingleton.setPassword(mPassword.getText().toString());
                             Toast.makeText(MainActivity.this,"Logged In Successfully!",Toast.LENGTH_SHORT).show();
                             Log.d("Main Activity", "Email: " + mEmail.getText().toString());
-//                            finish();
 
                             if (userSingleton.getEmail().equals("admin@my.csun.edu")) {
                                 Intent serverPage = new Intent(getApplicationContext(), ServerPage.class);
                                 startActivity(serverPage);
                             } else {
+
                                 startActivity(new Intent(getApplicationContext(),MainNavigation.class));
 
                             }
@@ -185,6 +192,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor sharePreferenceEditor = userLocalDatabase.edit();
         sharePreferenceEditor.putString("email", mEmail.getText().toString());
         sharePreferenceEditor.putString("password", mPassword.getText().toString());
+        sharePreferenceEditor.putString("AutoLogin", "true");
         sharePreferenceEditor.commit();
     }
 
