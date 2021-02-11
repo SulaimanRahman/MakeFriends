@@ -1,12 +1,10 @@
 package edu.csun.compsci490.makefriendsapp;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,43 +13,24 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.Toolbar;
 
 //import com.firebase.ui.firestore.FirestoreRecyclerOptions;
-import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link FriendsFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+interface userCallback {
+    void isUserExist(boolean exist);
+}
 public class FriendsFragment extends Fragment {
 
     // TODO: Rename parameter arguments, choose names that match
@@ -62,17 +41,14 @@ public class FriendsFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-
     private static final String TAG = "FriendFragment";
-
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private DatabaseManager databaseManager;
-    private UserSingleton userSingleton;
+    private UserSingleton userSingleton = UserSingleton.getInstance();
     private String userEmail;
-    private ArrayList allContactsEmails;
-    private HashMap<String, HashMap<String, Object>> contactsData;
-    private ArrayList<Contact> userData = new ArrayList<Contact>();
-    private List<String> allEmails = new ArrayList<String>();
+    //private userCallback cab;
+    private ArrayList<Contact> userData = new ArrayList<>();
+    private List<String> allEmails = new ArrayList<>();
     private EditText searchQuery;
     private ContactsAdapter.RecyclerviewClickListener listener;
     private RecyclerView contactsRecyclerView;
@@ -81,6 +57,7 @@ public class FriendsFragment extends Fragment {
     public FriendsFragment() {
         // Required empty public constructor
     }
+
 
     /**
      * Use this factory method to create a new instance of
@@ -99,54 +76,43 @@ public class FriendsFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-
+    @Nullable
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-//        if (getArguments() != null) {
-//            mParam1 = getArguments().getString(ARG_PARAM1);
-//            mParam2 = getArguments().getString(ARG_PARAM2);
-//        }
-//
-//        //Log.d(TAG,"onCreate: started.");
-
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_friends,container,false);
 
-        return view;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-
-        databaseManager = new DatabaseManager();
+        //databaseManager = new DatabaseManager();
         userSingleton = UserSingleton.getInstance();
         userEmail = userSingleton.getEmail();
-        allContactsEmails = new ArrayList();
-        contactsData = new HashMap<>();
-        searchQuery = view.findViewById(R.id.contactSearchBar);
-        ContactsAdapter mAdapter;
-        gettingEmails();
-        setOnClickListener(userData);
-
-        mAdapter = new ContactsAdapter(getContext(), userData, listener);
 
         contactsRecyclerView = view.findViewById(R.id.myRecyclerView);
         contactsRecyclerView.setHasFixedSize(true);
-        contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        searchQuery = view.findViewById(R.id.contactSearchBar);
+        final ArrayList<Contact> curData = new ArrayList<>();
+        final TextView test = view.findViewById(R.id.textView2);
+        gettingEmails(new userCallback() {
+            @Override
+            public void isUserExist(boolean exist) {
+                if(exist){
+                    test.setText(userData.get(0).getContactName());
+                    test.setAlpha(0.0f);
+                }
+                else{
+                    Toast.makeText(getContext(),"no bueno!",Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+        setOnClickListener(userData);
+        ContactsAdapter mAdapter = new ContactsAdapter(getContext(), userData, listener);
         contactsRecyclerView.setAdapter(mAdapter);
+
 
         searchQuery.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
             }
 
             @Override
@@ -160,9 +126,36 @@ public class FriendsFragment extends Fragment {
             }
 
         });
+
+        return view;
     }
 
-    private void filter(String query){
+    public void gettingEmails(final userCallback cb) {
+        db.collection(userEmail)
+                .document("Contacts")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        DocumentSnapshot document = task.getResult();
+
+                        String test = document.get("All Users").toString();
+                        //Object test = document.get("All Users");
+                        if(!test.equals("none")) {
+                            //Toast.makeText(getContext(), "we cool", Toast.LENGTH_LONG).show();
+                            allEmails = (List<String>) document.get("All Users");
+                            if(!allEmails.get(0).equals("")) {
+                                gettingData(allEmails,cb);
+                            }
+
+                            //test(allEmails);
+                        }
+                        //cb.isUserExist(true);
+                    }
+
+                });
+    }
+    public void filter(String query){
         ArrayList<Contact> filteredList = new ArrayList<>();
         for(Contact item : userData) {
             if (item.getContactName().toLowerCase().contains(query.toLowerCase())) {
@@ -176,7 +169,7 @@ public class FriendsFragment extends Fragment {
 
     }
 
-    public void gettingData(final List<String> emails){
+    public void gettingData(final List<String> emails,final userCallback cb){
         for(int i = 0; i < emails.size();i++) {
             final String curEmail = emails.get(i);
             db.collection(emails.get(i)).document("Profile")
@@ -191,29 +184,26 @@ public class FriendsFragment extends Fragment {
                                 user.setUserImg(documentSnapshot.getString("Profile Picture Uri"));
                                 user.setContactBio(documentSnapshot.getString("Biography"));
                                 user.setContactMajor("Computer Science");
-                                getInterests(curEmail,user);
-                                //Toast.makeText(getContext(),test,Toast.LENGTH_LONG).show();
-                                //user.setContactInterest(interests);
-
-                                //userData.add(user);
-                                //interests = "";
+                                getInterests(curEmail,user,cb);
                             } else {
                                 data = "else case";
                                 Log.d("Tag           ", "else case");
                                 // Toast.makeText(this, "Document Does Not exists", Toast.LENGTH_SHORT).show();
                             }
                         }
-                    }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    // Log.d("Tag",e.toString());
-                    data = "Failed";
-                }
-            });
+                    });
+//                    .addOnFailureListener(new OnFailureListener() {
+//                @Override
+//                public void onFailure(@NonNull Exception e) {
+//                    // Log.d("Tag",e.toString());
+//                    data = "Failed";
+//                }
+//            });
 
         }
     }
-    public void getInterests(String e, final Contact user){
+    public void getInterests( String e, final Contact user, final userCallback cb){
+        ArrayList<Contact> test123 = new ArrayList<>();
         db.collection(e)
                 .document("More Info").get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -221,175 +211,27 @@ public class FriendsFragment extends Fragment {
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         DocumentSnapshot document = task.getResult();
                         String test = document.get("Interest Array").toString();
-                        //Toast.makeText(getContext(),test,Toast.LENGTH_LONG).show();
                         if(!test.equals("none")) {
-                            //Toast.makeText(getContext(), "we cool", Toast.LENGTH_LONG).show();
                             List<String> allInterests = (List<String>) document.get("Interest Array");
                             for(String s : allInterests){
                                 //Log.d("interest",s);
                                 s += " ";
                                 interests += s;
-                                //Toast.makeText(getContext(),interests, Toast.LENGTH_LONG).show();
                             }
                         }
-                        //Toast.makeText(getContext(),interests, Toast.LENGTH_LONG).show();
+
                         user.setContactInterest(interests);
                         userData.add(user);
+                        //mUserData.addUser(user);
                         interests="";
+                        cb.isUserExist(true);
                     }
 
                 });
-        //Toast.makeText(getContext(),interests, Toast.LENGTH_LONG).show();
-    }
-    public void gettingEmails() {
-        db.collection(userEmail)
-                .document("Contacts").get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        DocumentSnapshot document = task.getResult();
-
-                            String test = document.get("All Users").toString();
-                            //Object test = document.get("All Users");
-                            if(!test.equals("none")) {
-                                //Toast.makeText(getContext(), "we cool", Toast.LENGTH_LONG).show();
-                                allEmails = (List<String>) document.get("All Users");
-                                    if(!allEmails.get(0).equals("")) {
-                                        gettingData(allEmails);
-                                    }
-                                }
-                            }
-
-
-                });
-    }
-
-    public void getAllContacts() {
-        String documentPath = userEmail + "/Contacts";
-        databaseManager.getFieldValue(documentPath, "All Users", new FirebaseCallback() {
-            @Override
-            public void onCallback(Object value) {
-                if (value == null) {
-                    //failed to get data;
-                    return;
-                }
-
-                allContactsEmails = (ArrayList) value;
-
-                removeTheBlockedUsersAndContinueWithTheProcess(allContactsEmails);
-            }
-        });
-    }
-
-    public void removeTheBlockedUsersAndContinueWithTheProcess(final ArrayList allContactsEmails) {
-        String documentPath = userEmail + "/Blocked";
-        databaseManager.getAllDocumentDataInHashMap(documentPath, new FirebaseCallback() {
-            @Override
-            public void onCallback(Object value) {
-                if (value == null) {
-                    //failed to get the data
-                    return;
-                }
-
-                HashMap<String, Object> data = (HashMap) value;
-
-                for (int i = 0; i < data.size(); i++) {
-                    String key = "Blocked" + (i + 1);
-                    allContactsEmails.remove(data.get(key));
-                }
-
-                getAllTheContactsDataAndPicturesUrisAndContinueWithTheProcess(allContactsEmails);
-
-            }
-        });
-    }
-
-    public void getAllTheContactsDataAndPicturesUrisAndContinueWithTheProcess(final ArrayList allContactsEmails) {
-
-        for (int i = 0; i < allContactsEmails.size(); i++) {
-            String documentPath = allContactsEmails.get(i).toString() + "/Profile";
-
-            databaseManager.getAllDocumentDataInHashMap(documentPath, new FirebaseCallback() {
-                @Override
-                public void onCallback(Object value) {
-                    if (value == null) {
-                        //failed to get the data
-                        return;
-                    }
-
-                    HashMap<String, Object> data = new HashMap<>();
-                    String email = data.get("Email").toString();
-
-                    contactsData.put(email, data);
-
-                    Uri uri = null;
-                    if (data.get("Profile Picture Uri") != null) {
-                        uri = (Uri) data.get("Profile Picture Uri");
-                    }
-
-                    /*
-                    below this comment, write all that code that sets creates the contact bubble and
-                    use the uri, if uri is null then show no picture icon, and if the uri is not
-                    null, then use that uri to show the picture
-                     */
-
-
-                }
-            });
-        }
-    }
-
-    //when the user is clicked on the contact to bring up their data:
-    public void getTheContactData(String contactEmail) {
-        HashMap<String, Object> contactData = contactsData.get(contactEmail);
-        String firstName = contactData.get("First Name").toString();
-        String lastName = contactData.get("Last Name").toString();
-        String biography = contactData.get("Biography").toString();
-        String profilePictureUri = contactData.get("Profile Picture Uri").toString();
-
-        String documentPath = contactEmail + "/More Info";
-
-        databaseManager.getFieldValue(documentPath, "Interest Array", new FirebaseCallback() {
-            @Override
-            public void onCallback(Object value) {
-                if (value == null) {
-                    //failed to get the data
-                    return;
-                }
-
-                ArrayList interest = (ArrayList) value;
-
-                /*
-                use the variables defined above and the interests array to show the contact profile.
-                write the code of displaying the data on the profile below this comment
-                 */
-
-            }
-        });
-    }
-
-    //When search is clicked
-    public void getTheSearchResult() {//I think this is wrong
-        ArrayList<String> contactsNames = new ArrayList();
-
-        for (int i = 0; i < contactsData.size(); i++) {
-            String contactEmail = allContactsEmails.get(i).toString();
-            String firstName = contactsData.get(contactEmail).get("First Name").toString();
-            String lastName = contactsData.get(contactEmail).get("Last Name").toString();
-            contactsNames.add(firstName + " " + lastName);
-        }
-
-        String searchText = null;//instead of null, write searchTextField.getText();
-
-        for (int i = 0; i < contactsNames.size(); i++) {
-            if (contactsNames.get(i).contains(searchText)) {
-                //add contactsName.get(i) in the list under the search bar.
-            }
-        }
 
     }
 
-    private void setOnClickListener(final ArrayList<Contact> newUserData){
+    public void setOnClickListener(final ArrayList<Contact> newUserData){
         listener = new ContactsAdapter.RecyclerviewClickListener() {
             @Override
             public void onClick(View view, int pos) {
