@@ -27,6 +27,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.auth.User;
+import com.google.protobuf.StringValue;
 
 import java.lang.reflect.Array;
 import java.sql.Time;
@@ -130,10 +131,23 @@ public class MessagingActivity extends AppCompatActivity {
                 //saving the data at the contact database
                 String contactDocumentPath = contactEmail + "/Contacts/" + userEmail + "/Chat";
                 String contactTimeDocumentPath = contactEmail + "/Contacts/" + userEmail + "/Chat Time";
-                String contactMoreInfoDocPath = contactEmail + "/Contacts/" + userEmail + "/More Info";
+                final String contactMoreInfoDocPath = contactEmail + "/Contacts/" + userEmail + "/More Info";
                 databaseManager.createNewField(contactDocumentPath, "Recipient" + numberOfMessages, message);
                 databaseManager.createNewField(contactTimeDocumentPath, "Time" + numberOfMessages, time);
                 databaseManager.updateTheField(contactMoreInfoDocPath, "All Messages Been Read", "false");
+
+                databaseManager.getFieldValue(contactMoreInfoDocPath, "Number Of Unread Messages", new FirebaseCallback() {
+                    @Override
+                    public void onCallback(Object value) {
+                        if (value == null) {
+                            databaseManager.createNewField(contactMoreInfoDocPath, "Number Of Unread Messages", String.valueOf(1));
+                        } else {
+                            int numberOfUnreadMessages = Integer.valueOf(value.toString());
+                            numberOfUnreadMessages++;
+                            databaseManager.updateTheField(contactMoreInfoDocPath, "Number Of Unread Messages", String.valueOf(numberOfUnreadMessages));
+                        }
+                    }
+                });
 
                 messageAdapter.notifyDataSetChanged();
                 chatBoxEditText.setText("");
@@ -314,6 +328,13 @@ public class MessagingActivity extends AppCompatActivity {
         //set all the messages been viewed:
         String documentPath = userSingleton.getEmail() + "/Contacts/" + chatSingleton.getContactEmail() + "/More Info";
         databaseManager.updateTheField(documentPath, "All Messages Been Read", "true");
+        try {
+            databaseManager.updateTheField(documentPath, "Number Of Unread Messages", "0");
+        } catch (Exception e) {
+            //just leave this empty for now, to avoid errors for some of the accounts that don't have
+            //the field "Number Of Unread Messages" on his database
+        }
+
 
         progressBar.setVisibility(View.GONE);
 
@@ -404,6 +425,12 @@ public class MessagingActivity extends AppCompatActivity {
 
                     } else if (data.get("All Messages Been Read").equals("false")) {
                         databaseManager.updateTheField(contactMoreInfoDocPath, "All Messages Been Read", "true");
+                        try {
+                            databaseManager.updateTheField(contactMoreInfoDocPath, "Number Of Unread Messages", "0");
+                        } catch (Exception e) {
+                            //just leave this empty for now, to avoid errors for some of the accounts that don't have
+                            //the field "Number Of Unread Messages" on his database
+                        }
                     }
 
 
