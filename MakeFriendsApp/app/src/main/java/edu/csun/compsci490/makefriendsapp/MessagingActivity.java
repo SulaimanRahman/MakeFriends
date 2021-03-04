@@ -1,15 +1,19 @@
 package edu.csun.compsci490.makefriendsapp;
 
+import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -29,12 +33,15 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.auth.User;
 
 import java.lang.reflect.Array;
+import java.net.URLConnection;
 import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 public class MessagingActivity extends AppCompatActivity {
@@ -49,6 +56,7 @@ public class MessagingActivity extends AppCompatActivity {
 
     private EditText chatBoxEditText;
     private Button sendButton;
+    private ImageButton attachButton;
 
     private DatabaseManager databaseManager;
     private ChatSingleton chatSingleton;
@@ -73,6 +81,7 @@ public class MessagingActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.activity_messaging_progress_bar);
         chatBoxEditText = findViewById(R.id.edittext_chatbox);
         sendButton = findViewById(R.id.button_chatbox_send);
+        attachButton = findViewById(R.id.btn_attach);
 
         progressBar.setVisibility(View.VISIBLE);
 
@@ -144,6 +153,15 @@ public class MessagingActivity extends AppCompatActivity {
                 Log.d(TAG, "Message Saved in the Database");
             }
         });
+
+        attachButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent getAttachFile = new Intent(Intent.ACTION_GET_CONTENT);
+                getAttachFile.setType("*/*");
+                startActivityForResult(getAttachFile, 10);
+            }
+        });
 //        chatBoxEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 //            @Override
 //            public void onFocusChange(View view, boolean b) {
@@ -177,6 +195,60 @@ public class MessagingActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case 10:
+                String path = data.getData().getPath();
+                Uri uri = data.getData();
+                //send the uri
+                fileSent(uri);
+
+//                try {
+//                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+//                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+//                    intent.setType(data.resolveType(this));
+//                    intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
+//                    String fileMimeType = URLConnection.guessContentTypeFromName(contentResolver.getType(uri));
+//                    Log.d(TAG, "mime type is: " + fileMimeType);
+//                    //intent.setDataAndType(uri, data.resolveType(this));
+//                    startActivityForResult(intent, requestCode);
+//                } catch (ActivityNotFoundException e) {
+//                    // no Activity to handle this kind of files
+//                }
+//                String mimeType = URLConnection.guessContentTypeFromName(uri.toString());
+//                if (mimeType != null) {
+//                    Log.d(TAG, "mime type is: " + mimeType);
+//                } else {
+//                    Log.d(TAG, "mime type is: null");
+//                }
+        }
+    }
+
+    public void fileSent(Uri uri) {
+        ContentResolver contentResolver = getApplicationContext().getContentResolver();
+        String type = contentResolver.getType(uri);
+
+//                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("H:mm a");
+//                LocalDateTime now = LocalDateTime.now();
+//
+//                String time = dtf.format(now);
+
+        SimpleDateFormat formatter= new SimpleDateFormat("HH:mm a");
+        Date date = new Date(System.currentTimeMillis());
+        String time = formatter.format(date);
+        Log.d(TAG, "Time is: " + time);
+
+        if (type.contains("image")) {
+            Log.d(TAG, "Image is included");
+            messageItems.add(new MessageItem(uri, time, "imageSent"));
+            messageAdapter.notifyDataSetChanged();
+        } else if (type.contains("video")) {
+            messageItems.add(new MessageItem(uri, time, "videoSent"));
+            messageAdapter.notifyDataSetChanged();
+        }
+    }
 
     // position will always be last since newest messages are added at bottom
     public void addNewMessage(int position){

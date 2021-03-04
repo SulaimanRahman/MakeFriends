@@ -5,6 +5,7 @@ import android.net.Uri;
 public class MessageItem {
     private Uri mImgResource;
     private String mName, mMessageBody, mMessageTime, mType;
+    private Uri messageContentUri;
 
     public MessageItem(Uri imageRes, String messengerName, String messageBody, String messageTime, String type){
         mImgResource = imageRes;
@@ -24,6 +25,14 @@ public class MessageItem {
         mMessageBody = searchResultMessage;
         mType = type;
     }
+
+    public MessageItem(Uri messageContentUri, String messageTime, String type) {
+        this.messageContentUri = messageContentUri;
+        mMessageTime = messageTime;
+        mType = type;
+    }
+
+    public Uri getMessageContentUri() {return messageContentUri;}
 
     public Uri getMessageImgResource() { return mImgResource; }
 
