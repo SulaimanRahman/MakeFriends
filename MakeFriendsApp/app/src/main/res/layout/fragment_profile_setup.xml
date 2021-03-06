@@ -154,4 +154,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ImageButton
+        android:id="@+id/addClassButton1"
+        android:layout_width="39dp"
+        android:layout_height="37dp"
+        android:layout_marginStart="188dp"
+        android:layout_marginLeft="188dp"
+        android:layout_marginTop="592dp"
+        android:background="@color/white"
+        android:src="@drawable/ic_baseline_add_circle_24"
+        android:tint="@android:color/holo_blue_dark"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
