@@ -45,14 +45,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="fullName"
-        android:textColor="#000" />
+        android:textColor="@color/colorPrimaryDark" />
 
         <TextView
             android:id="@+id/userMajor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:hint="Major:"
-            android:textColor="#000" />
+            android:textColor="@color/colorPrimaryDark" />
     </LinearLayout>
 
 </LinearLayout>

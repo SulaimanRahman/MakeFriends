@@ -44,7 +44,8 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/app_message_imgChatAvatar"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed" />
+        app:layout_constraintVertical_chainStyle="packed"
+        android:textColor="@color/colorPrimaryDark"/>
 
     <ImageView
         android:id="@+id/app_message_icon"
