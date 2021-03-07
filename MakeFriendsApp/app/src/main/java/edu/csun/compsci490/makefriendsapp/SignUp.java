@@ -126,6 +126,7 @@ public class SignUp extends AppCompatActivity {
                             user.put("Last Name", lastName);
                             user.put("Email",email);
                             user.put("Password", password);
+                            user.put("UID",userID);
                             user.put("Biography", "null");
                             user.put("Profile Picture Uri", "Default/BlankProfilePic");
                             //user.put("Phone",123456);

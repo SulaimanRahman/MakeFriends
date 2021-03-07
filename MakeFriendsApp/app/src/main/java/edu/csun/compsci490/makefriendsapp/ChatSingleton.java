@@ -7,6 +7,10 @@ public class ChatSingleton {
     private String contactEmail;
     private Uri contactProfilePicUri;
     private String contactName;
+    private String UID;
+
+
+
 
     private boolean isConversationEnded;
     private boolean isConversationEndedByMe;
@@ -39,7 +43,13 @@ public class ChatSingleton {
     public void setContactProfilePicUri(Uri contactProfilePicUri) {
         this.contactProfilePicUri = contactProfilePicUri;
     }
+    public String getUID() {
+        return UID;
+    }
 
+    public void setUID(String UID) {
+        this.UID = UID;
+    }
     public void setContactName(String contactName) {
         this.contactName = contactName;
     }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -69,6 +70,16 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
+//    class CallActivity extends RecyclerView.ViewHolder{
+//
+//        Button button;
+//
+//        public CallActivity(@NonNull View itemView) {
+//            super(itemView);
+//            button = itemView.findViewById(R.id.btn_audio);
+//        }
+//    }
+
     class ReceivedViewHolder extends RecyclerView.ViewHolder {
         public TextView messageBody, messageName, messageTime;
         public ImageView messageImage;
@@ -92,6 +103,7 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             messageBody = itemView.findViewById(R.id.sent_message_body);
             messageTime = itemView.findViewById(R.id.sent_message_time);
             parentLayout = itemView.findViewById(R.id.message_sent_parent_layout);
+
         }
 
     }

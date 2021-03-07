@@ -1,5 +1,7 @@
 package edu.csun.compsci490.makefriendsapp;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -11,10 +13,12 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,12 +26,31 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldPath;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.auth.User;
 import com.google.protobuf.StringValue;
+import com.sinch.android.rtc.PushPair;
+import com.sinch.android.rtc.Sinch;
+import com.sinch.android.rtc.SinchClient;
+import com.sinch.android.rtc.SinchClientListener;
+import com.sinch.android.rtc.calling.Call;
+import com.sinch.android.rtc.calling.CallClient;
+import com.sinch.android.rtc.calling.CallClientListener;
+import com.sinch.android.rtc.calling.CallListener;
 
 import java.lang.reflect.Array;
 import java.sql.Time;
@@ -37,6 +60,8 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+
 
 public class MessagingActivity extends AppCompatActivity {
     RecyclerView messagesRecyclerView;
@@ -63,6 +88,19 @@ public class MessagingActivity extends AppCompatActivity {
     private String contactEmail;
     private boolean firstLoad;
 
+    FirebaseAuth firebaseAuth;
+    FirebaseUser firebaseUser;
+    private Button callBtn;
+    SinchClient sinchClient = null;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    Button hangupBtn;
+    private String mUID;
+    private String UID = "";
+    private Call call;
+    TextView callState;
+    TextView caller;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,6 +112,11 @@ public class MessagingActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.activity_messaging_progress_bar);
         chatBoxEditText = findViewById(R.id.edittext_chatbox);
         sendButton = findViewById(R.id.button_chatbox_send);
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseUser = firebaseAuth.getCurrentUser();
+        mUID = firebaseUser.getUid();
+        callBtn = findViewById(R.id.btn_audio);
+        //hangupBtn = findViewById(R.id.hangupButton);
 
         progressBar.setVisibility(View.VISIBLE);
 
@@ -88,6 +131,7 @@ public class MessagingActivity extends AppCompatActivity {
             Uri contactProfileUri = Uri.parse(intent.getStringExtra("contactProfileUri"));
             Log.d(TAG, "ContactProfileUri: " + intent.getStringExtra("contactProfileUri"));
             chatSingleton.setContactEmail(contactEmail);
+            //Toast.makeText(getApplicationContext(),chatSingleton.getContactEmail(),Toast.LENGTH_LONG).show();
             chatSingleton.setContactName(contactFullName);
             chatSingleton.setContactProfilePicUri(contactProfileUri);
         }
@@ -158,6 +202,38 @@ public class MessagingActivity extends AppCompatActivity {
                 Log.d(TAG, "Message Saved in the Database");
             }
         });
+
+        sinchClient = Sinch.getSinchClientBuilder()
+                .context(getApplicationContext())
+                .applicationKey("218b541c-7b15-40e6-838c-27ea3bfda70d")
+                .applicationSecret("GKKHHnhcIEWctgcgzrA75A==")
+                .environmentHost("clientapi.sinch.com")
+                .userId(mUID)
+                .build();
+
+        sinchClient.setSupportCalling(true);
+        sinchClient.startListeningOnActiveConnection();
+
+        sinchClient.getCallClient().addCallClientListener(new SinchCallClientListener(){
+
+        });
+
+        sinchClient.start();
+
+        getUserID(new userCallback() {
+            @Override
+            public void isUserExist(boolean exist) {
+                if(exist){
+                    //Toast.makeText(getApplicationContext(),UID,Toast.LENGTH_LONG).show();
+                    callUser(UID);
+                }
+            }
+        });
+
+        //Toast.makeText(getApplicationContext(),UID,Toast.LENGTH_LONG).show();
+
+
+
 //        chatBoxEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 //            @Override
 //            public void onFocusChange(View view, boolean b) {
@@ -190,6 +266,121 @@ public class MessagingActivity extends AppCompatActivity {
 //        });
 
     }
+    private class SinchCallListener implements CallListener{
+
+
+        @Override
+        public void onCallProgressing(Call call) {
+
+            //Toast.makeText(getApplicationContext(),"Calling!",Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onCallEstablished(Call call) {
+            //Toast.makeText(getApplicationContext(),"connected!",Toast.LENGTH_LONG).show();
+        }
+
+        @Override
+        public void onCallEnded(Call callEnded) {
+            Toast.makeText(getApplicationContext(),"Call ended",Toast.LENGTH_LONG).show();
+            call = null;
+            callEnded.hangup();
+        }
+
+        @Override
+        public void onShouldSendPushNotification(Call call, List<PushPair> list) {
+
+        }
+    }
+
+
+    private class SinchCallClientListener implements CallClientListener {
+
+        @Override
+        public void onIncomingCall(CallClient callClient, final Call incomingCall) {
+            Log.d(TAG, "Incoming call");
+            android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(MessagingActivity.this).create();
+            alertDialog.setTitle(chatSingleton.getContactName() +  "Calling");
+            alertDialog.setButton(android.app.AlertDialog.BUTTON_NEUTRAL, "Reject", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    call.hangup();
+                }
+            });
+            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "accept", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Toast.makeText(getApplicationContext(),"call connected!",Toast.LENGTH_LONG).show();
+                    call = incomingCall;
+                    call.answer();
+                    call.addCallListener(new SinchCallListener());
+                    dialog.dismiss();
+                    setContentView(R.layout.activity_call_screen);
+                    caller = findViewById(R.id.caller);
+                    caller.setText(chatSingleton.getContactName() + " is talking");
+                    hangupBtn = findViewById(R.id.hangupButton);
+                    hangupBtn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            call.hangup();
+                            //setContentView(R.layout.activity_messaging);
+                        }
+                    });
+                    //Toast.makeText(getApplicationContext(),"call connected!",Toast.LENGTH_LONG).show();
+                }
+            });
+
+            alertDialog.show();
+        }
+    }
+    public void getUserID(userCallback callback)
+    {
+        callBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //setContentView(R.layout.activity_call_screen);
+                db.collection(contactEmail).document("Profile")
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                DocumentSnapshot result = task.getResult();
+                                UID = result.get("UID").toString();
+                                callback.isUserExist(true);
+                                //callUser(UID);
+                                //Toast.makeText(getApplicationContext(),UID,Toast.LENGTH_LONG).show();
+                                //Toast.makeText(getApplicationContext(),mUID,Toast.LENGTH_LONG).show();
+                            }
+                        });
+
+            }
+        });
+
+    }
+
+    public void callUser(String UID){
+        if(this.call == null) {
+            this.call = this.sinchClient.getCallClient().callUser(UID);
+            this.call.addCallListener(new SinchCallListener());
+            callState = findViewById(R.id.callState);
+            hangupBtn = findViewById(R.id.hangupButton);
+            caller = findViewById(R.id.caller);
+            setContentView(R.layout.activity_call_screen);
+            if (call != null) {
+                Toast.makeText(getApplicationContext(), "connected", Toast.LENGTH_LONG).show();
+                //setContentView(R.layout.activity_call_screen);
+                //caller.setText(chatSingleton.getContactName() + " is talking");
+                hangupBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        call.hangup();
+                    }
+                });
+            }
+        }
+    }
+
 
 
     // position will always be last since newest messages are added at bottom
