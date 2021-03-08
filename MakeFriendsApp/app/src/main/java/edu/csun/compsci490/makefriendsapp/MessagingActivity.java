@@ -104,8 +104,6 @@ public class MessagingActivity extends AppCompatActivity {
     Boolean callEstablished = false;
     ConstraintLayout MainLayout;
     View callLayout;
-    Button button2;
-    Button button1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,6 +126,8 @@ public class MessagingActivity extends AppCompatActivity {
         callLayout = inflater.inflate(R.layout.activity_call_screen,MainLayout,false);
         hangupBtn = callLayout.findViewById(R.id.hangupButton);
         progressBar.setVisibility(View.VISIBLE);
+        callState = callLayout.findViewById(R.id.callState);
+        caller = callLayout.findViewById(R.id.caller);
 
         databaseManager = new DatabaseManager();
         chatSingleton = ChatSingleton.getInstance();
@@ -283,15 +283,13 @@ public class MessagingActivity extends AppCompatActivity {
         public void onCallProgressing(Call call) {
 
             //Toast.makeText(getApplicationContext(),"Calling!",Toast.LENGTH_LONG).show();
-            callState = findViewById(R.id.callState);
-            callState.setText(chatSingleton.getContactName() + " is Calling");
+            callState.setText("connected");
 
         }
 
         @Override
         public void onCallEstablished(Call call) {
             //Toast.makeText(getApplicationContext(),"connected!",Toast.LENGTH_LONG).show();
-            caller = findViewById(R.id.caller);
             caller.setText(chatSingleton.getContactName() + " is talking");
         }
 
@@ -382,6 +380,10 @@ public class MessagingActivity extends AppCompatActivity {
                 MainLayout.addView(callLayout);
                 long t= System.currentTimeMillis();
                 long end = t+15000;
+                if(callEstablished){
+                    callState.setText("connected");
+                    caller.setText(chatSingleton.getContactName() + " is talking");
+                }
                 if(System.currentTimeMillis() > end && !callEstablished) {
                     call.hangup();
                     Toast.makeText(getApplicationContext(),"Call has ended!",Toast.LENGTH_LONG).show();
