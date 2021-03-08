@@ -41,30 +41,6 @@ public class MainNavigation extends AppCompatActivity {
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation_bar);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
-
-//        BadgeDrawable badgeDrawable = bottomNav.getOrCreateBadge(R.id.chatsFragment);
-//        badgeDrawable.setBackgroundColor(getResources().getColor(R.color.white));
-//        // Use the Database manager to access document "All Messages Been Read" boolean value
-//        if(allRead){
-//            // dont show the badge
-//        } else {
-//            // display the badge color holo blue light
-//        }
-//            if(){   // new messages = 0
-//                // dont display the badge
-//            } else if () { // new messages > 9
-//                // display 9+
-//            } else { // there are [1, 9] new messages
-//                // display number
-//            }
-//        boolean allMessagesRead = false;
-//        if(allMessagesRead){
-//            badgeDrawable.setVisible(false);
-//        } else {
-//            badgeDrawable.setVisible(true);
-//        }
-
-
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_layout, new HomeFragment()).commit();
 
 
