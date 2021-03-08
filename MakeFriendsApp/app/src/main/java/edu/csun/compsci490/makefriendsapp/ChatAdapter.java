@@ -1,5 +1,6 @@
 package edu.csun.compsci490.makefriendsapp;
 
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;

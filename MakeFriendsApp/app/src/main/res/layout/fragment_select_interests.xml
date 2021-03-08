@@ -5,7 +5,8 @@
     android:id="@+id/frameLayout2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".select_interests">
+    tools:context=".select_interests"
+    android:background="@color/white">
 
     <TextView
         android:id="@+id/interestText1"
@@ -68,6 +69,7 @@
         android:drawableLeft="@drawable/ic_baseline_search_24"
         android:drawableTint="@color/grey"
         android:hint="Search interests/hobbies"
+        android:textColorHint="@color/grey"
         android:inputType="textPersonName"
         android:lines="1"
         android:paddingStart="15dp"
