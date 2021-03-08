@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".tour">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tourText1"
+            android:layout_width="415dp"
+            android:layout_height="87dp"
+            android:layout_marginTop="4dp"
+            android:background="#FF5C5A"
+            android:fontFamily="@font/montserrat"
+            android:gravity="center"
+            android:text="Home"
+            android:textColor="#373737"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.25"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tourText2"
+            android:layout_width="324dp"
+            android:layout_height="61dp"
+            android:layout_marginStart="44dp"
+            android:layout_marginLeft="44dp"
+
+            android:layout_marginTop="120dp"
+            android:fontFamily="@font/montserrat"
+            android:lines="4"
+            android:text="The home section is where you can view and edit your profile picture, school schedule, and interests."
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/variousIcons"
+            android:layout_width="214dp"
+            android:layout_height="130dp"
+            android:layout_marginStart="96dp"
+            android:layout_marginLeft="96dp"
+            android:layout_marginTop="188dp"
+            android:src="@drawable/home_icons"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tourText3"
+            android:layout_width="415dp"
+            android:layout_height="83dp"
+            android:layout_marginTop="316dp"
+            android:background="#FF5C5A"
+            android:fontFamily="@font/montserrat"
+            android:gravity="center"
+            android:text="Chats"
+            android:textColor="#373737"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tourText4"
+            android:layout_width="316dp"
+            android:layout_height="46dp"
+            android:layout_marginStart="52dp"
+            android:layout_marginLeft="52dp"
+
+            android:layout_marginTop="428dp"
+            android:fontFamily="@font/montserrat"
+            android:lines="4"
+            android:text="Here you will see all the conversations you currently have with other CSUN students."
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/chatLogsPic"
+            android:layout_width="286dp"
+            android:layout_height="122dp"
+            android:layout_marginStart="60dp"
+            android:layout_marginLeft="60dp"
+            android:layout_marginTop="484dp"
+            android:src="@drawable/chat_bubble_icons"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tourText5"
+            android:layout_width="320dp"
+            android:layout_height="61dp"
+            android:layout_marginStart="48dp"
+            android:layout_marginLeft="48dp"
+
+            android:layout_marginTop="636dp"
+            android:fontFamily="@font/montserrat"
+            android:lines="4"
+            android:text="You can also meet someone new by clicking on the person finder icon on the bottom right."
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/homePic"
+            android:layout_width="46dp"
+            android:layout_height="38dp"
+            android:layout_marginStart="112dp"
+            android:layout_marginLeft="112dp"
+            android:layout_marginTop="28dp"
+            android:src="@drawable/ic_baseline_home_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/chatsPic"
+            android:layout_width="33dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="124dp"
+            android:layout_marginLeft="124dp"
+            android:layout_marginTop="344dp"
+            android:src="@drawable/ic_baseline_chat_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/searchPic"
+            android:layout_width="136dp"
+            android:layout_height="92dp"
+            android:layout_marginStart="136dp"
+            android:layout_marginLeft="136dp"
+            android:layout_marginTop="700dp"
+            android:src="@drawable/circle_chat_search_icon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tourText1" />
+
+        <TextView
+            android:id="@+id/tourText6"
+            android:layout_width="415dp"
+            android:layout_height="71dp"
+            android:layout_marginTop="824dp"
+            android:background="#FF5C5A"
+            android:fontFamily="@font/montserrat"
+            android:gravity="center"
+            android:text="Friends"
+            android:textColor="#373737"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tourText7"
+            android:layout_width="346dp"
+            android:layout_height="55dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginLeft="32dp"
+
+            android:layout_marginTop="916dp"
+            android:fontFamily="@font/montserrat"
+            android:lines="4"
+            android:text="Here you can view the profiles of friends that you have been connected to."
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/friendsPic"
+            android:layout_width="43dp"
+            android:layout_height="43dp"
+            android:layout_marginStart="104dp"
+            android:layout_marginLeft="104dp"
+            android:layout_marginTop="838dp"
+            android:src="@drawable/ic_baseline_folder_shared_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/friends_bar_icons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="52dp"
+            android:layout_marginLeft="52dp"
+            android:layout_marginTop="976dp"
+            android:src="@drawable/friends_icons"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tourText8"
+            android:layout_width="415dp"
+            android:layout_height="87dp"
+            android:layout_marginTop="1230dp"
+            android:background="#FF5C5A"
+            android:fontFamily="@font/montserrat"
+            android:gravity="center"
+            android:text="Settings"
+            android:textColor="#373737"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.666"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/gearPic"
+            android:layout_width="58dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="90dp"
+            android:layout_marginLeft="90dp"
+            android:layout_marginTop="1255dp"
+            android:src="@drawable/ic_baseline_settings_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tourText9"
+            android:layout_width="322dp"
+            android:layout_height="81dp"
+            android:layout_marginStart="44dp"
+            android:layout_marginLeft="44dp"
+
+            android:layout_marginTop="1330dp"
+            android:fontFamily="@font/montserrat"
+            android:lines="4"
+            android:text="This is where you can take care of administrative settings such as notifications, location, account deactivation, and more."
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"  />
+
+        <Button
+            android:id="@+id/finishButton1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="152dp"
+            android:layout_marginLeft="152dp"
+            android:layout_marginTop="1450dp"
+            android:background="@color/colorPrimaryDark"
+            android:text="Finish"
+            android:textColor="#FFFFFF"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
