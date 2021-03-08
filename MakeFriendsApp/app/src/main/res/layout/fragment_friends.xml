@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".FriendsFragment">
+    tools:context=".FriendsFragment"
+    android:background="@color/white">
 
 
 <!--    <GridLayout-->
@@ -24,7 +25,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="70dp"
-        android:scrollbars="vertical" />
+        android:scrollbars="vertical"
+        android:background="@color/white"/>
 
 
     <EditText
@@ -47,7 +49,8 @@
         android:paddingEnd="15dp"
         android:paddingRight="15dp"
         android:paddingBottom="2dp"
-        android:textSize="18sp" />
+        android:textSize="18sp"
+        android:textColorHint="@color/grey"/>
 
     <TextView
         android:id="@+id/Title"

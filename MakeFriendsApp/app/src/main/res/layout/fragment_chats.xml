@@ -23,6 +23,7 @@
             android:drawableTint="@color/grey"
             android:fontFamily="@font/montserrat"
             android:hint="Search conversations"
+            android:textColorHint="@color/grey"
             android:inputType="textPersonName"
             android:lines="1"
             android:paddingStart="15dp"

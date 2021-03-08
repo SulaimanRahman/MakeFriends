@@ -93,7 +93,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private Button interestBubble;
     private Balloon balloon;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-
     public HomeFragment() {
         // Required empty public constructor
         Log.d("HomeFagment", "worked constructor");
@@ -159,8 +158,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         interestSearchBar = view.findViewById(R.id.interestSearchBar);
         getAllDefaultInterests();
         interestSearchBar.setAdapter(new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_spinner_dropdown_item, defaultInterests));
-
-
 
         // if user clicks outside the searchbar the text inside clears
         interestSearchBar.setOnFocusChangeListener(new View.OnFocusChangeListener() {

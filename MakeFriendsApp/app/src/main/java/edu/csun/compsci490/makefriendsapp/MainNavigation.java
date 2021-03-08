@@ -17,14 +17,18 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+
+import java.util.ArrayList;
 
 public class MainNavigation extends AppCompatActivity {
     private UserSingleton userSingleton = UserSingleton.getInstance();
     private FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private String TAG = this.getClass().getName();
+    private DatabaseManager databaseManager = new DatabaseManager();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +41,6 @@ public class MainNavigation extends AppCompatActivity {
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation_bar);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
-
         getSupportFragmentManager().beginTransaction().replace(R.id.fragment_layout, new HomeFragment()).commit();
 
 
@@ -62,7 +65,6 @@ public class MainNavigation extends AppCompatActivity {
                     selectedFragment = new SettingsFragment();
                     break;
             }
-
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_layout, selectedFragment).commit();
             return true;
         }
