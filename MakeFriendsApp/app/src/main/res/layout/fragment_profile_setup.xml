@@ -5,11 +5,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".profile_setup">
+    tools:context=".profile_setup"
+    android:background="@color/white">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/white">
 
 
         <TextView
@@ -67,7 +69,7 @@
             android:layout_marginStart="140dp"
             android:layout_marginLeft="140dp"
             android:layout_marginTop="212dp"
-            android:src="@drawable/Profile_head"
+            android:src="@drawable/profile_guy"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
