@@ -41,6 +41,7 @@ import com.sinch.android.rtc.calling.Call;
 import com.sinch.android.rtc.calling.CallClient;
 import com.sinch.android.rtc.calling.CallClientListener;
 import com.sinch.android.rtc.calling.CallListener;
+import android.os.CountDownTimer;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -79,17 +80,19 @@ public class MessagingActivity extends AppCompatActivity {
     private Button callBtn;
     SinchClient sinchClient = null;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    Button hangupBtn;
+    private Button hangupBtn;
     private String mUID;
     private String UID = "";
     private Call call;
-    TextView callState;
-    TextView caller;
-    Boolean callEstablished = false;
+    private TextView callState;
+    private TextView caller;
+    private Boolean callEstablished = false;
     ConstraintLayout MainLayout;
     View callLayout;
     MediaPlayer ringTone = null;
-    ImageView calleeImg;
+    private ImageView calleeImg;
+    private Boolean noPick = false;
+
 
 
     @Override
@@ -284,7 +287,7 @@ public class MessagingActivity extends AppCompatActivity {
 
         @Override
         public void onCallEnded(Call callEnded) {
-            Toast.makeText(getApplicationContext(),"Call ended",Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(),"Call ended",Toast.LENGTH_SHORT).show();
             call = null;
             callEnded.hangup();
         }
@@ -365,40 +368,74 @@ public class MessagingActivity extends AppCompatActivity {
             //setContentView(R.layout.activity_call_screen);
             //MainLayout.addView(callLayout);
             if (call != null) {
+                long t = System.currentTimeMillis();
+                long end = t + 15000;
                 //Toast.makeText(getApplicationContext(), "connected", Toast.LENGTH_LONG).show();
                 MainLayout.addView(callLayout);
                 ringTone.start();
                 Glide.with(getApplicationContext())
                         .load(chatSingleton.getContactProfilePicUri().toString())
                         .into(calleeImg);
-                long t= System.currentTimeMillis();
-                long end = t+15000;
-                if(callEstablished){
-                    callState.setText("connected");
-                    caller.setText(chatSingleton.getContactName() + " is talking");
-                    ringTone.stop();
-                }
-                if(System.currentTimeMillis() > end && !callEstablished) {
-                    call.hangup();
-                    ringTone.stop();
-                    callState.setText("call ended");
-                    Toast.makeText(getApplicationContext(),"No Answer",Toast.LENGTH_LONG).show();
-                }
                 hangupBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         call.hangup();
                         callState.setText("disconnected");
                         ringTone.stop();
+                        startActivity(new Intent(getApplicationContext(), MainNavigation.class));
+
                         //Toast.makeText(getApplicationContext(),"Call has ended!",Toast.LENGTH_LONG).show();
                         //MainLayout.addView(MainLayout);
                     }
                 });
+                if (callEstablished) {
+                    callState.setText("connected");
+                    caller.setText(chatSingleton.getContactName() + " is talking");
+                    ringTone.stop();
+                }
+                new CountDownTimer(12000, 1000) {
+
+                    public void onTick(long millisUntilFinished) {
+
+                    }
+
+                    public void onFinish() {
+                        noPick=true;
+                        endCall(noPick);
+                    }
+                }.start();
+//                Runnable myRunnable = new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        while (!callEstablished) {
+//                            if(System.currentTimeMillis() > end && !callEstablished) {
+//                                break;
+//                            }
+//                        }
+//                    }
+//                };
+//                Thread mThread = new Thread(myRunnable);
+//                mThread.start();
+//                if(!mThread.isAlive()){
+//                    call.hangup();
+//                    ringTone.stop();
+//                    callState.setText("call ended");
+//                    Toast.makeText(getApplicationContext(), "No Answer", Toast.LENGTH_LONG).show();
+//                    startActivity(new Intent(getApplicationContext(), MainNavigation.class));
+//                }
             }
         }
     }
 
-
+    public void endCall(Boolean res){
+        if(res){
+            call.hangup();
+            ringTone.stop();
+            callState.setText("call ended");
+            Toast.makeText(getApplicationContext(), "No Answer", Toast.LENGTH_LONG).show();
+            startActivity(new Intent(getApplicationContext(), MainNavigation.class));
+        }
+    }
 
     // position will always be last since newest messages are added at bottom
     public void addNewMessage(int position){
