@@ -51,6 +51,7 @@
     </LinearLayout>
 
     <ImageView
+        android:id="@+id/calleePic"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:src="@drawable/ic_baseline_call_24"

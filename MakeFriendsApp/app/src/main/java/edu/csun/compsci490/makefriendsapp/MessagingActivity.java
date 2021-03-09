@@ -3,18 +3,16 @@ package edu.csun.compsci490.makefriendsapp;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,33 +30,19 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.auth.User;
-import com.google.protobuf.StringValue;
 import com.sinch.android.rtc.PushPair;
 import com.sinch.android.rtc.Sinch;
 import com.sinch.android.rtc.SinchClient;
-import com.sinch.android.rtc.SinchClientListener;
 import com.sinch.android.rtc.calling.Call;
 import com.sinch.android.rtc.calling.CallClient;
 import com.sinch.android.rtc.calling.CallClientListener;
 import com.sinch.android.rtc.calling.CallListener;
 
-import java.lang.reflect.Array;
-import java.sql.Time;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -104,6 +88,9 @@ public class MessagingActivity extends AppCompatActivity {
     Boolean callEstablished = false;
     ConstraintLayout MainLayout;
     View callLayout;
+    MediaPlayer ringTone = null;
+    ImageView calleeImg;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,6 +115,8 @@ public class MessagingActivity extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         callState = callLayout.findViewById(R.id.callState);
         caller = callLayout.findViewById(R.id.caller);
+        ringTone = MediaPlayer.create(getApplicationContext(),R.raw.phone_ring);
+        calleeImg = callLayout.findViewById(R.id.calleePic);
 
         databaseManager = new DatabaseManager();
         chatSingleton = ChatSingleton.getInstance();
@@ -378,20 +367,29 @@ public class MessagingActivity extends AppCompatActivity {
             if (call != null) {
                 //Toast.makeText(getApplicationContext(), "connected", Toast.LENGTH_LONG).show();
                 MainLayout.addView(callLayout);
+                ringTone.start();
+                Glide.with(getApplicationContext())
+                        .load(chatSingleton.getContactProfilePicUri().toString())
+                        .into(calleeImg);
                 long t= System.currentTimeMillis();
                 long end = t+15000;
                 if(callEstablished){
                     callState.setText("connected");
                     caller.setText(chatSingleton.getContactName() + " is talking");
+                    ringTone.stop();
                 }
                 if(System.currentTimeMillis() > end && !callEstablished) {
                     call.hangup();
-                    Toast.makeText(getApplicationContext(),"Call has ended!",Toast.LENGTH_LONG).show();
+                    ringTone.stop();
+                    callState.setText("call ended");
+                    Toast.makeText(getApplicationContext(),"No Answer",Toast.LENGTH_LONG).show();
                 }
                 hangupBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         call.hangup();
+                        callState.setText("disconnected");
+                        ringTone.stop();
                         //Toast.makeText(getApplicationContext(),"Call has ended!",Toast.LENGTH_LONG).show();
                         //MainLayout.addView(MainLayout);
                     }
