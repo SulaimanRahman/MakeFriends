@@ -275,21 +275,27 @@ public class MessagingActivity extends AppCompatActivity {
         public void onCallProgressing(Call call) {
 
             //Toast.makeText(getApplicationContext(),"Calling!",Toast.LENGTH_LONG).show();
-            callState.setText("connected");
+            callState.setText("Ringing");
+            ringTone.start();
 
         }
 
         @Override
         public void onCallEstablished(Call call) {
-            //Toast.makeText(getApplicationContext(),"connected!",Toast.LENGTH_LONG).show();
+            ringTone.stop();
             caller.setText(chatSingleton.getContactName() + " is talking");
+            callState.setText("connected");
+
+
         }
 
         @Override
         public void onCallEnded(Call callEnded) {
+            ringTone.stop();
             Toast.makeText(getApplicationContext(),"Call ended",Toast.LENGTH_SHORT).show();
-            call = null;
             callEnded.hangup();
+            call = null;
+            startActivity(new Intent(getApplicationContext(), MainNavigation.class));
         }
 
         @Override
@@ -316,12 +322,14 @@ public class MessagingActivity extends AppCompatActivity {
             alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "accept", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    Toast.makeText(getApplicationContext(),"call connected!",Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getApplicationContext(),"call connected!",Toast.LENGTH_LONG).show();
                     call = incomingCall;
                     call.answer();
                     callEstablished = true;
                     call.addCallListener(new SinchCallListener());
                     dialog.dismiss();
+                    callState.setText("connected");
+                    caller.setText(chatSingleton.getContactName()+" is talking");
                     //setContentView(R.layout.activity_call_screen);
                     MainLayout.addView(callLayout);
                     hangupBtn.setOnClickListener(new View.OnClickListener() {
@@ -365,57 +373,81 @@ public class MessagingActivity extends AppCompatActivity {
         if(this.call == null) {
             this.call = this.sinchClient.getCallClient().callUser(UID);
             this.call.addCallListener(new SinchCallListener());
+            MainLayout.addView(callLayout);
+            ringTone.start();
+            Glide.with(getApplicationContext())
+                    .load(chatSingleton.getContactProfilePicUri().toString())
+                    .into(calleeImg);
+            hangupBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    call.hangup();
+                    callState.setText("disconnected");
+                    ringTone.stop();
+                    startActivity(new Intent(getApplicationContext(), MainNavigation.class));
+                }
+            });
             //setContentView(R.layout.activity_call_screen);
             //MainLayout.addView(callLayout);
-            if (call != null) {
-                long t = System.currentTimeMillis();
-                long end = t + 15000;
-                //Toast.makeText(getApplicationContext(), "connected", Toast.LENGTH_LONG).show();
-                MainLayout.addView(callLayout);
-                ringTone.start();
-                Glide.with(getApplicationContext())
-                        .load(chatSingleton.getContactProfilePicUri().toString())
-                        .into(calleeImg);
-                hangupBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        call.hangup();
-                        callState.setText("disconnected");
-                        ringTone.stop();
-                        startActivity(new Intent(getApplicationContext(), MainNavigation.class));
-
-                        //Toast.makeText(getApplicationContext(),"Call has ended!",Toast.LENGTH_LONG).show();
-                        //MainLayout.addView(MainLayout);
-                    }
-                });
-                if (callEstablished) {
-                    callState.setText("connected");
-                    caller.setText(chatSingleton.getContactName() + " is talking");
-                    ringTone.stop();
-                }
-                new CountDownTimer(12000, 1000) {
-
-                    public void onTick(long millisUntilFinished) {
-
-                    }
-
-                    public void onFinish() {
-                        noPick=true;
-                        endCall(noPick);
-                    }
-                }.start();
+//            if (call != null) {
+//                long t = System.currentTimeMillis();
+//                long end = t + 15000;
+//                //Toast.makeText(getApplicationContext(), "connected", Toast.LENGTH_LONG).show();
+//                MainLayout.addView(callLayout);
+//                ringTone.start();
+//                Glide.with(getApplicationContext())
+//                        .load(chatSingleton.getContactProfilePicUri().toString())
+//                        .into(calleeImg);
+//                hangupBtn.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        call.hangup();
+//                        callState.setText("disconnected");
+//                        ringTone.stop();
+//                        startActivity(new Intent(getApplicationContext(), MainNavigation.class));
+//
+//                        //Toast.makeText(getApplicationContext(),"Call has ended!",Toast.LENGTH_LONG).show();
+//                        //MainLayout.addView(MainLayout);
+//                    }
+//                });
+//                if (callEstablished) {
+//                    callState.setText("connected");
+//                    caller.setText(chatSingleton.getContactName() + " is talking");
+//                    ringTone.stop();
+//                }
+//                if(call == null){
+//                    ringTone.stop();
+//                    callState.setText("call ended");
+//                    Toast.makeText(getApplicationContext(), "No Answer", Toast.LENGTH_LONG).show();
+//                    startActivity(new Intent(getApplicationContext(), MainNavigation.class));
+//                }
+//                new CountDownTimer(12000, 1000) {
+//
+//                    public void onTick(long millisUntilFinished) {
+//
+//                    }
+//
+//                    public void onFinish() {
+//                        if(call)
+//                        noPick=true;
+//                        endCall(noPick);
+//                    }
+//                }.start();
 //                Runnable myRunnable = new Runnable() {
 //                    @Override
 //                    public void run() {
-//                        while (!callEstablished) {
-//                            if(System.currentTimeMillis() > end && !callEstablished) {
-//                                break;
+//                        while (call != null) {
+//                            if(callEstablished){
+//                                pickup();
 //                            }
 //                        }
+//                        //ringTone.stop();
+//                        endCall();
 //                    }
 //                };
 //                Thread mThread = new Thread(myRunnable);
 //                mThread.start();
+
 //                if(!mThread.isAlive()){
 //                    call.hangup();
 //                    ringTone.stop();
@@ -423,17 +455,7 @@ public class MessagingActivity extends AppCompatActivity {
 //                    Toast.makeText(getApplicationContext(), "No Answer", Toast.LENGTH_LONG).show();
 //                    startActivity(new Intent(getApplicationContext(), MainNavigation.class));
 //                }
-            }
-        }
-    }
 
-    public void endCall(Boolean res){
-        if(res){
-            call.hangup();
-            ringTone.stop();
-            callState.setText("call ended");
-            Toast.makeText(getApplicationContext(), "No Answer", Toast.LENGTH_LONG).show();
-            startActivity(new Intent(getApplicationContext(), MainNavigation.class));
         }
     }
 
