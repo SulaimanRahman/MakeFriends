@@ -312,6 +312,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         final Course courseAddition = new Course();
 
         sectionCell.setTextSize(16);
+        sectionCell.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
         sectionCell.setGravity(Gravity.CENTER_HORIZONTAL);
         sectionCell.setPadding(10,0,10,15);
         sectionCell.setLayoutParams(rowParams);
@@ -336,6 +337,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         });
 
         courseCell.setTextSize(16);
+        courseCell.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
         courseCell.setGravity(Gravity.CENTER_HORIZONTAL);
         courseCell.setPadding(10,0,10,15);
         courseCell.setLayoutParams(rowParams);
@@ -360,6 +362,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         rowParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, .25f);
         courseNumCell.setTextSize(16);
+        courseNumCell.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
         courseNumCell.setGravity(Gravity.CENTER_HORIZONTAL);
         courseNumCell.setPadding(10,0,10,15);
         courseNumCell.setLayoutParams(rowParams);
