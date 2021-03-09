@@ -169,6 +169,7 @@
             android:layout_marginRight="45dp"
             android:background="@drawable/input_bubble"
             android:ems="10"
+            android:textColor="@color/colorPrimaryDark"
             android:fontFamily="@font/montserrat"
             android:inputType="textPassword"
             android:textSize="12sp"
@@ -187,6 +188,7 @@
             android:fontFamily="@font/montserrat"
             android:inputType="textPassword"
             android:textSize="12sp"
+            android:textColor="@color/colorPrimaryDark"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/old_password_et" />
 
