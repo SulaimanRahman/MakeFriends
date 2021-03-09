@@ -49,6 +49,7 @@
         android:layout_marginLeft="16dp"
         android:fontFamily="@font/montserrat_bold"
         android:text="name"
+        android:textColor="@color/colorPrimaryDark"
         android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/tvChatPreview"
         app:layout_constraintEnd_toStartOf="@+id/notificationDot"
@@ -65,6 +66,7 @@
         android:maxLines="1"
         android:text="chat preview"
         android:textSize="16sp"
+        android:textColor="@color/colorPrimaryDark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/icDelete"
         app:layout_constraintStart_toStartOf="@+id/tvChatName"
@@ -78,7 +80,7 @@
         android:layout_marginRight="10dp"
         android:layout_marginBottom="7dp"
         android:background="@drawable/circle"
-        android:backgroundTint="@android:color/holo_orange_light"
+        android:backgroundTint="@color/notification_dot"
         android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@id/tvChatPreview"
         app:layout_constraintEnd_toStartOf="@+id/icDelete" />
@@ -110,6 +112,7 @@
         android:layout_marginBottom="17dp"
         android:background="@drawable/ic_baseline_person_remove_alt_1_24"
         android:visibility="visible"
+        android:backgroundTint="@color/colorPrimaryDark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -120,6 +123,7 @@
         android:layout_marginEnd="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginBottom="4dp"
+        android:backgroundTint="@color/colorPrimaryDark"
         android:background="@drawable/ic_baseline_delete_forever_24"
         android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@id/tvChatPreview"

@@ -1,8 +1,6 @@
 package edu.csun.compsci490.makefriendsapp;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,17 +11,15 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
-import androidx.core.app.NotificationCompat;
 import androidx.recyclerview.widget.RecyclerView;
-import android.app.NotificationManager;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -33,6 +29,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private OnChatClickListener mListener;
     private UserSingleton userSingleton;
     private DatabaseManager databaseManager;
+    private BottomNavigationView bottomNavigationView;
+    private BadgeDrawable badgeDrawable;
 
     public interface OnChatClickListener {
         void onChatClick(int position);
@@ -68,6 +66,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+        bottomNavigationView = parent.getRootView().findViewById(R.id.bottom_navigation_bar);
+        badgeDrawable = bottomNavigationView.getOrCreateBadge(R.id.chatsFragment);
+        badgeDrawable.setBackgroundColor(parent.getResources().getColor(R.color.notification_dot));
+//        badgeDrawable.setBadgeTextColor(parent.getResources().getColor(R.color.white));
+//        badgeDrawable.setNumber(numberOfUnreadMessages);
+        badgeDrawable.setVisible(false);
         View view;
         if( viewType == 0){
             view = layoutInflater.inflate(R.layout.app_message_item, parent, false);
@@ -111,8 +115,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         }
                     }
                     if (currentItem.isAllMessagesBeenRead()) {
+                        badgeDrawable.setVisible(false);
                         ((ChatViewHolder) holder).notificationDot.setVisibility(View.INVISIBLE);
                     } else {
+                        badgeDrawable.setVisible(true);
                         ((ChatViewHolder) holder).notificationDot.setVisibility(View.VISIBLE);
                     }
                 }
@@ -131,8 +137,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 }
 
                 if (currentItem.isAllMessagesBeenRead()) {
+                    badgeDrawable.setVisible(false);
                     ((ChatViewHolder) holder).notificationDot.setVisibility(View.INVISIBLE);
                 } else {
+                    badgeDrawable.setVisible(true);
                     ((ChatViewHolder) holder).notificationDot.setVisibility(View.VISIBLE);
                 }
 
@@ -207,21 +215,25 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
                                 if (conversationEndedStatus.equals("true")) {
                                     ((ChatViewHolder) holder).mChatPreview.setText("This conversation has ended");
+                                    badgeDrawable.setVisible(true);
                                     ((ChatViewHolder) holder).notificationDot.setVisibility(View.VISIBLE);
                                 }
 
 
 
                                 if (otherUserDeactivatedAccount.equals("true")) {
+                                    badgeDrawable.setVisible(true);
                                     ((ChatViewHolder) holder).notificationDot.setVisibility(View.VISIBLE);
                                     ((ChatViewHolder) holder).mChatPreview.setText("User has deactivated their account");
                                 }
 
                                 if (allMessagesBeenRead.equals("false")){
+                                    badgeDrawable.setVisible(true);
                                     ((ChatViewHolder) holder).notificationDot.setVisibility(View.VISIBLE);
                                 }
 
                                 if (allMessagesBeenRead.equals("true")){
+                                    badgeDrawable.setVisible(false);
                                     ((ChatViewHolder) holder).notificationDot.setVisibility(View.INVISIBLE);
                                 }
 
