@@ -316,7 +316,9 @@ public class MessagingActivity extends AppCompatActivity {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.dismiss();
+                    call = incomingCall;
                     call.hangup();
+                    call = null;
                 }
             });
             alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "accept", new DialogInterface.OnClickListener() {
