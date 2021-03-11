@@ -1,8 +1,11 @@
 package edu.csun.compsci490.makefriendsapp;
 
+import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -22,6 +25,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -91,7 +96,14 @@ public class MessagingActivity extends AppCompatActivity {
     View callLayout;
     MediaPlayer ringTone = null;
     private ImageView calleeImg;
-    private Boolean noPick = false;
+    private int all_per = 1;
+    private String[] PERMISSIONS = {
+            Manifest.permission.ACCESS_NETWORK_STATE,
+            Manifest.permission.MODIFY_AUDIO_SETTINGS,
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.CAMERA
+    };
 
 
 
@@ -120,7 +132,6 @@ public class MessagingActivity extends AppCompatActivity {
         caller = callLayout.findViewById(R.id.caller);
         ringTone = MediaPlayer.create(getApplicationContext(),R.raw.phone_ring);
         calleeImg = callLayout.findViewById(R.id.calleePic);
-
         databaseManager = new DatabaseManager();
         chatSingleton = ChatSingleton.getInstance();
 
@@ -268,6 +279,7 @@ public class MessagingActivity extends AppCompatActivity {
 
 
     }
+
     private class SinchCallListener implements CallListener{
 
 
@@ -285,6 +297,9 @@ public class MessagingActivity extends AppCompatActivity {
             ringTone.stop();
             caller.setText(chatSingleton.getContactName() + " is talking");
             callState.setText("connected");
+            Glide.with(getApplicationContext())
+                    .load(chatSingleton.getContactProfilePicUri().toString())
+                    .into(calleeImg);
 
 
         }
@@ -351,24 +366,42 @@ public class MessagingActivity extends AppCompatActivity {
         callBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //setContentView(R.layout.activity_call_screen);
-                db.collection(contactEmail).document("Profile")
-                        .get()
-                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                DocumentSnapshot result = task.getResult();
-                                UID = result.get("UID").toString();
-                                callback.isUserExist(true);
-                                //callUser(UID);
-                                //Toast.makeText(getApplicationContext(),UID,Toast.LENGTH_LONG).show();
-                                //Toast.makeText(getApplicationContext(),mUID,Toast.LENGTH_LONG).show();
-                            }
-                        });
+
+                if(!hasPermissions(MessagingActivity.this,PERMISSIONS)){
+                    ActivityCompat.requestPermissions(MessagingActivity.this,PERMISSIONS,all_per);
+                }
+                if(hasPermissions(MessagingActivity.this,PERMISSIONS)) {
+                    //setContentView(R.layout.activity_call_screen);
+                    db.collection(contactEmail).document("Profile")
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                    DocumentSnapshot result = task.getResult();
+                                    UID = result.get("UID").toString();
+                                    callback.isUserExist(true);
+                                    //callUser(UID);
+                                    //Toast.makeText(getApplicationContext(),UID,Toast.LENGTH_LONG).show();
+                                    //Toast.makeText(getApplicationContext(),mUID,Toast.LENGTH_LONG).show();
+                                }
+                            });
+                }
+
 
             }
+
         });
 
+    }
+    public static boolean hasPermissions(Context context, String... permissions) {
+        if (context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public void callUser(String UID){
@@ -377,9 +410,6 @@ public class MessagingActivity extends AppCompatActivity {
             this.call.addCallListener(new SinchCallListener());
             MainLayout.addView(callLayout);
             ringTone.start();
-            Glide.with(getApplicationContext())
-                    .load(chatSingleton.getContactProfilePicUri().toString())
-                    .into(calleeImg);
             hangupBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
