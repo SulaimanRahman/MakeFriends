@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/CallScreenLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,10 +11,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:orientation="vertical"
         android:layout_weight="1"
-        android:background="#fffafafa"
-        >
+        android:background="#673AB7"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/remoteUser"
@@ -23,30 +23,29 @@
             android:layout_margin="10dp"
             android:text=""
             android:textColor="@color/green"
-            android:textSize="28sp"/>
+            android:textSize="28sp" />
 
         <TextView
             android:id="@+id/callState"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="Ringing"
-            android:textColor="@color/green"
-            android:textSize="16sp"
+            android:text="Ringing..."
             android:textAllCaps="true"
-            />
+            android:textColor="@color/white"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/caller"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="8dp"
             android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp"
             android:text=""
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/green"
-            android:textSize="16sp"/>
+            android:textColor="@android:color/holo_blue_dark"
+            android:textSize="16sp" />
 
     </LinearLayout>
 
@@ -54,7 +53,7 @@
         android:id="@+id/calleePic"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:src="@drawable/ic_baseline_call_24"
+        android:src="@drawable/profile_guy"
         android:padding="0dip"
         android:layout_weight="3"
         android:contentDescription="Call background">
@@ -65,16 +64,48 @@
         android:id="@+id/bottomPanel"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/lightGrey"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:background="@android:color/holo_purple">
+
         <Button
             android:id="@+id/hangupButton"
-            android:paddingBottom="20dp"
-            android:paddingTop="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:background="@drawable/ic_baseline_call_end_24"/>
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="50dp"
+            android:layout_marginBottom="46dp"
+            android:background="@drawable/ic_baseline_call_end_24"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp"
+            android:visibility="visible" />
+
+        <Button
+            android:id="@+id/hangupButtonMid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="160dp"
+            android:layout_marginBottom="46dp"
+            android:background="@drawable/ic_baseline_call_end_24"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp"
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/pickupButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="50dp"
+            android:layout_marginBottom="46dp"
+            android:background="@drawable/ic_baseline_call_24"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp"
+            android:visibility="visible"
+            app:backgroundTint="#4CAF50" />
 
     </RelativeLayout>
 

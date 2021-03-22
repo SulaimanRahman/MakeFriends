@@ -10,6 +10,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,6 +47,12 @@ import com.sinch.android.rtc.calling.Call;
 import com.sinch.android.rtc.calling.CallClient;
 import com.sinch.android.rtc.calling.CallClientListener;
 import com.sinch.android.rtc.calling.CallListener;
+import com.sinch.android.rtc.video.VideoCallListener;
+
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import android.os.CountDownTimer;
 
 import java.time.LocalDateTime;
@@ -86,6 +93,8 @@ public class MessagingActivity extends AppCompatActivity {
     SinchClient sinchClient = null;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private Button hangupBtn;
+    private Button hangupBtnMid;
+    private Button pickupBtn;
     private String mUID;
     private String UID = "";
     private Call call;
@@ -94,6 +103,7 @@ public class MessagingActivity extends AppCompatActivity {
     private Boolean callEstablished = false;
     ConstraintLayout MainLayout;
     View callLayout;
+    long startTime = 0;
     MediaPlayer ringTone = null;
     private ImageView calleeImg;
     private int all_per = 1;
@@ -127,6 +137,8 @@ public class MessagingActivity extends AppCompatActivity {
         LayoutInflater inflater = getLayoutInflater();
         callLayout = inflater.inflate(R.layout.activity_call_screen,MainLayout,false);
         hangupBtn = callLayout.findViewById(R.id.hangupButton);
+        hangupBtnMid = callLayout.findViewById(R.id.hangupButtonMid);
+        pickupBtn = callLayout.findViewById(R.id.pickupButton);
         progressBar.setVisibility(View.VISIBLE);
         callState = callLayout.findViewById(R.id.callState);
         caller = callLayout.findViewById(R.id.caller);
@@ -134,6 +146,7 @@ public class MessagingActivity extends AppCompatActivity {
         calleeImg = callLayout.findViewById(R.id.calleePic);
         databaseManager = new DatabaseManager();
         chatSingleton = ChatSingleton.getInstance();
+
 
         Intent intent = getIntent();
 
@@ -279,6 +292,58 @@ public class MessagingActivity extends AppCompatActivity {
 
 
     }
+    Handler timerHandler = new Handler();
+    Runnable timerRunnable = new Runnable() {
+
+        @Override
+        public void run() {
+            long millis = System.currentTimeMillis() - startTime;
+            int seconds = (int) (millis / 1000);
+            int minutes = seconds / 60;
+            seconds = seconds % 60;
+
+            callState.setText(String.format(Locale.US, "%02d:%02d", minutes, seconds));
+
+            timerHandler.postDelayed(this, 500);
+        }
+    };
+    private class SinchVideoCallListener implements VideoCallListener{
+
+        @Override
+        public void onVideoTrackAdded(Call call) {
+
+        }
+
+        @Override
+        public void onVideoTrackPaused(Call call) {
+
+        }
+
+        @Override
+        public void onVideoTrackResumed(Call call) {
+
+        }
+
+        @Override
+        public void onCallProgressing(Call call) {
+
+        }
+
+        @Override
+        public void onCallEstablished(Call call) {
+
+        }
+
+        @Override
+        public void onCallEnded(Call call) {
+
+        }
+
+        @Override
+        public void onShouldSendPushNotification(Call call, List<PushPair> list) {
+
+        }
+    }
 
     private class SinchCallListener implements CallListener{
 
@@ -286,8 +351,10 @@ public class MessagingActivity extends AppCompatActivity {
         @Override
         public void onCallProgressing(Call call) {
 
-            //Toast.makeText(getApplicationContext(),"Calling!",Toast.LENGTH_LONG).show();
-            callState.setText("Ringing");
+            callState.setText("Ringing...");
+            Glide.with(getApplicationContext())
+                    .load(chatSingleton.getContactProfilePicUri().toString())
+                    .into(calleeImg);
             ringTone.start();
 
         }
@@ -295,11 +362,19 @@ public class MessagingActivity extends AppCompatActivity {
         @Override
         public void onCallEstablished(Call call) {
             ringTone.stop();
+            startTime = System.currentTimeMillis();
+            timerHandler.postDelayed(timerRunnable, 0);
             caller.setText(chatSingleton.getContactName() + " is talking");
-            callState.setText("connected");
-            Glide.with(getApplicationContext())
-                    .load(chatSingleton.getContactProfilePicUri().toString())
-                    .into(calleeImg);
+            //callState.setText("connected");
+            pickupBtn.setVisibility(View.INVISIBLE);
+            hangupBtn.setVisibility(View.INVISIBLE);
+            hangupBtnMid.setVisibility(View.VISIBLE);
+            hangupBtnMid.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    call.hangup();
+                }
+            });
 
 
         }
@@ -307,10 +382,12 @@ public class MessagingActivity extends AppCompatActivity {
         @Override
         public void onCallEnded(Call callEnded) {
             ringTone.stop();
+            timerHandler.removeCallbacks(timerRunnable);
             Toast.makeText(getApplicationContext(),"Call ended",Toast.LENGTH_SHORT).show();
             callEnded.hangup();
             call = null;
-            startActivity(new Intent(getApplicationContext(), MainNavigation.class));
+            startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
+            finish();
         }
 
         @Override
@@ -325,40 +402,67 @@ public class MessagingActivity extends AppCompatActivity {
         @Override
         public void onIncomingCall(CallClient callClient, final Call incomingCall) {
             Log.d(TAG, "Incoming call");
-            android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(MessagingActivity.this).create();
-            alertDialog.setTitle(chatSingleton.getContactName() +  "Calling");
-            alertDialog.setButton(android.app.AlertDialog.BUTTON_NEUTRAL, "Reject", new DialogInterface.OnClickListener() {
+
+//            android.app.AlertDialog alertDialog = new android.app.AlertDialog.Builder(MessagingActivity.this).create();
+//            alertDialog.setTitle(chatSingleton.getContactName() +  "Calling");
+//            alertDialog.setButton(android.app.AlertDialog.BUTTON_NEUTRAL, "Reject", new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface dialog, int which) {
+//                    dialog.dismiss();
+//                    call = incomingCall;
+//                    call.hangup();
+//                    call = null;
+//                }
+//            });
+//            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "accept", new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface dialog, int which) {
+//                    //Toast.makeText(getApplicationContext(),"call connected!",Toast.LENGTH_LONG).show();
+//                    call = incomingCall;
+//                    call.answer();
+//                    callEstablished = true;
+//                    call.addCallListener(new SinchCallListener());
+//                    //callState.setText("connected");
+//                    //caller.setText(chatSingleton.getContactName()+" is talking");
+//                    //setContentView(R.layout.activity_call_screen);
+//                    MainLayout.addView(callLayout);
+//                    hangupBtn.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//                            call.hangup();
+//                        }
+//                    });
+//                    //Toast.makeText(getApplicationContext(),"call connected!",Toast.LENGTH_LONG).show();
+//                }
+//            });
+//            alertDialog.show();
+            Glide.with(getApplicationContext())
+                    .load(chatSingleton.getContactProfilePicUri().toString())
+                    .into(calleeImg);
+
+            caller.setText(chatSingleton.getContactName() + " is calling");
+
+
+
+            MainLayout.addView(callLayout);
+            hangupBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
+                public void onClick(View v) {
                     call = incomingCall;
                     call.hangup();
-                    call = null;
+                    startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
+                    finish();
                 }
             });
-            alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "accept", new DialogInterface.OnClickListener() {
+            pickupBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    //Toast.makeText(getApplicationContext(),"call connected!",Toast.LENGTH_LONG).show();
+                public void onClick(View v) {
                     call = incomingCall;
                     call.answer();
                     callEstablished = true;
                     call.addCallListener(new SinchCallListener());
-                    dialog.dismiss();
-                    callState.setText("connected");
-                    caller.setText(chatSingleton.getContactName()+" is talking");
-                    //setContentView(R.layout.activity_call_screen);
-                    MainLayout.addView(callLayout);
-                    hangupBtn.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            call.hangup();
-                        }
-                    });
-                    //Toast.makeText(getApplicationContext(),"call connected!",Toast.LENGTH_LONG).show();
                 }
             });
-            alertDialog.show();
         }
     }
     public void getUserID(userCallback callback)
@@ -410,83 +514,22 @@ public class MessagingActivity extends AppCompatActivity {
             this.call.addCallListener(new SinchCallListener());
             MainLayout.addView(callLayout);
             ringTone.start();
-            hangupBtn.setOnClickListener(new View.OnClickListener() {
+            Glide.with(getApplicationContext())
+                    .load(chatSingleton.getContactProfilePicUri().toString())
+                    .into(calleeImg);
+            hangupBtn.setVisibility(View.INVISIBLE);
+            pickupBtn.setVisibility(View.INVISIBLE);
+            hangupBtnMid.setVisibility(View.VISIBLE);
+            hangupBtnMid.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     call.hangup();
                     callState.setText("disconnected");
                     ringTone.stop();
-                    startActivity(new Intent(getApplicationContext(), MainNavigation.class));
+                    startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
+                    finish();
                 }
             });
-            //setContentView(R.layout.activity_call_screen);
-            //MainLayout.addView(callLayout);
-//            if (call != null) {
-//                long t = System.currentTimeMillis();
-//                long end = t + 15000;
-//                //Toast.makeText(getApplicationContext(), "connected", Toast.LENGTH_LONG).show();
-//                MainLayout.addView(callLayout);
-//                ringTone.start();
-//                Glide.with(getApplicationContext())
-//                        .load(chatSingleton.getContactProfilePicUri().toString())
-//                        .into(calleeImg);
-//                hangupBtn.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        call.hangup();
-//                        callState.setText("disconnected");
-//                        ringTone.stop();
-//                        startActivity(new Intent(getApplicationContext(), MainNavigation.class));
-//
-//                        //Toast.makeText(getApplicationContext(),"Call has ended!",Toast.LENGTH_LONG).show();
-//                        //MainLayout.addView(MainLayout);
-//                    }
-//                });
-//                if (callEstablished) {
-//                    callState.setText("connected");
-//                    caller.setText(chatSingleton.getContactName() + " is talking");
-//                    ringTone.stop();
-//                }
-//                if(call == null){
-//                    ringTone.stop();
-//                    callState.setText("call ended");
-//                    Toast.makeText(getApplicationContext(), "No Answer", Toast.LENGTH_LONG).show();
-//                    startActivity(new Intent(getApplicationContext(), MainNavigation.class));
-//                }
-//                new CountDownTimer(12000, 1000) {
-//
-//                    public void onTick(long millisUntilFinished) {
-//
-//                    }
-//
-//                    public void onFinish() {
-//                        if(call)
-//                        noPick=true;
-//                        endCall(noPick);
-//                    }
-//                }.start();
-//                Runnable myRunnable = new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        while (call != null) {
-//                            if(callEstablished){
-//                                pickup();
-//                            }
-//                        }
-//                        //ringTone.stop();
-//                        endCall();
-//                    }
-//                };
-//                Thread mThread = new Thread(myRunnable);
-//                mThread.start();
-
-//                if(!mThread.isAlive()){
-//                    call.hangup();
-//                    ringTone.stop();
-//                    callState.setText("call ended");
-//                    Toast.makeText(getApplicationContext(), "No Answer", Toast.LENGTH_LONG).show();
-//                    startActivity(new Intent(getApplicationContext(), MainNavigation.class));
-//                }
 
         }
     }
