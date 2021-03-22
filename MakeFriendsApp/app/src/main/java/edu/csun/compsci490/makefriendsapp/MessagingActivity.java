@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -100,7 +101,10 @@ public class MessagingActivity extends AppCompatActivity {
     private Call call;
     private TextView callState;
     private TextView caller;
-    private Boolean callEstablished = false;
+    private Boolean speaker = false;
+    private Button muteBtn;
+    private Button unmuteBtn;
+    private Button speakerBtn;
     ConstraintLayout MainLayout;
     View callLayout;
     long startTime = 0;
@@ -146,6 +150,9 @@ public class MessagingActivity extends AppCompatActivity {
         calleeImg = callLayout.findViewById(R.id.calleePic);
         databaseManager = new DatabaseManager();
         chatSingleton = ChatSingleton.getInstance();
+        unmuteBtn = callLayout.findViewById(R.id.unmuteBtn);
+        muteBtn = callLayout.findViewById(R.id.muteBtn);
+        speakerBtn = callLayout.findViewById(R.id.speakerBtn);
 
 
         Intent intent = getIntent();
@@ -369,6 +376,37 @@ public class MessagingActivity extends AppCompatActivity {
             pickupBtn.setVisibility(View.INVISIBLE);
             hangupBtn.setVisibility(View.INVISIBLE);
             hangupBtnMid.setVisibility(View.VISIBLE);
+            muteBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    sinchClient.getAudioController().mute();
+                    muteBtn.setVisibility(View.INVISIBLE);
+                    unmuteBtn.setVisibility(View.VISIBLE);
+                }
+            });
+            unmuteBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    sinchClient.getAudioController().unmute();
+                    unmuteBtn.setVisibility(View.INVISIBLE);
+                    muteBtn.setVisibility(View.VISIBLE);
+                }
+            });
+            speakerBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(!speaker) {
+                        sinchClient.getAudioController().enableSpeaker();
+                        Toast.makeText(getApplication(),"speaker on",Toast.LENGTH_SHORT).show();
+                        speaker = true;
+                    }
+                    else{
+                        sinchClient.getAudioController().disableSpeaker();
+                        Toast.makeText(getApplication(),"speaker off",Toast.LENGTH_SHORT).show();
+                        speaker = false;
+                    }
+                }
+            });
             hangupBtnMid.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -386,6 +424,7 @@ public class MessagingActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(),"Call ended",Toast.LENGTH_SHORT).show();
             callEnded.hangup();
             call = null;
+            setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
             startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
             finish();
         }
@@ -459,7 +498,6 @@ public class MessagingActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     call = incomingCall;
                     call.answer();
-                    callEstablished = true;
                     call.addCallListener(new SinchCallListener());
                 }
             });
