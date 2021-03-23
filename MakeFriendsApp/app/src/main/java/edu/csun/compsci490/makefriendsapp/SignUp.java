@@ -122,6 +122,7 @@ public class SignUp extends AppCompatActivity {
                             Map<String,Object> user = new HashMap<>();
 
                             // may need to edit these values on here and in the firebase console
+                            user.put("vidCall","false");
                             user.put("First Name",firstName);
                             user.put("Last Name", lastName);
                             user.put("Email",email);
@@ -144,7 +145,7 @@ public class SignUp extends AppCompatActivity {
                             databaseManager.createNewField(userMoreInfoDocPath, "User Is In Queue", "none");
                             databaseManager.createNewField(userMoreInfoDocPath, "Latitude", "none");
                             databaseManager.createNewField(userMoreInfoDocPath, "Longitude", "none");
-                            databaseManager.createNewField(email + "/Profile", "vidCall", "false");
+                            //databaseManager.createNewField(email + "/Profile", "vidCall", "false");
 
                             String profileSettingsDocPath = email + "/Profile Page Settings";
                             databaseManager.createDocument(profileSettingsDocPath, "Can Edit Interests", "true");
