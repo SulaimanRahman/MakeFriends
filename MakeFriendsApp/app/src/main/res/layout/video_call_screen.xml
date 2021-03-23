@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/videoCallScreen"
+    android:background="#ffffffff"
+    android:orientation="vertical"
+    android:weightSum="5">
+
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="0dp"-->
+<!--        android:layout_weight="1"-->
+<!--        android:background="#fffafafa"-->
+<!--        android:orientation="vertical">-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/remoteUser"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="center_horizontal"-->
+<!--            android:layout_margin="10dp"-->
+<!--            android:text=""-->
+<!--            android:textSize="28sp" />-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/callState1"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="center_horizontal"-->
+<!--            android:text="Ringing"-->
+<!--            android:textAllCaps="true"-->
+<!--            android:textSize="16sp" />-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/callDuration"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_gravity="center_horizontal"-->
+<!--            android:layout_marginBottom="8dp"-->
+<!--            android:layout_marginTop="4dp"-->
+<!--            android:text="00:00"-->
+<!--            android:textAppearance="?android:attr/textAppearanceMedium"-->
+<!--            android:textSize="16sp" />-->
+
+<!--    </LinearLayout>-->
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="4"
+        android:background="@android:color/darker_gray"
+        android:orientation="vertical"
+        android:padding="0dip">
+
+        <LinearLayout
+            android:id="@+id/remoteVideo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:orientation="horizontal" />
+
+        <RelativeLayout
+            android:id="@+id/localVideo"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/bottomPane2"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@android:color/holo_purple">
+
+        <Button
+            android:id="@+id/hangupButtonVideo"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="50dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/ic_baseline_call_end_24"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp"
+            android:visibility="visible" />
+
+        <Button
+            android:id="@+id/hangupButtonMidVideo"
+            android:layout_width="100dp"
+            android:layout_height="60dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="160dp"
+            android:layout_marginBottom="25dp"
+            android:background="@drawable/ic_baseline_call_end_24"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp"
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/pickupButtonVideo"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="55dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/ic_baseline_call_24"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp"
+            android:visibility="visible"
+            app:backgroundTint="#4CAF50" />
+
+        <Button
+            android:id="@+id/unmuteBtnVideo"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginTop="50dp"
+            android:visibility="invisible"
+            android:background="@drawable/no_microphone"
+            app:backgroundTint="#3F51B5" />
+
+        <Button
+            android:id="@+id/muteBtnVideo"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="50dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/microphone"
+            app:backgroundTint="#3F51B5" />
+
+        <Button
+            android:id="@+id/speakerBtnVideo"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="310dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/speaker"
+
+            app:backgroundTint="#3F51B5" />
+
+    </RelativeLayout>
+
+</LinearLayout>
