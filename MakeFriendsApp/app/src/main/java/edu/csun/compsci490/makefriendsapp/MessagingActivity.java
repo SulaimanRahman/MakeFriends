@@ -45,6 +45,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.sinch.android.rtc.AudioController;
 import com.sinch.android.rtc.PushPair;
 import com.sinch.android.rtc.Sinch;
 import com.sinch.android.rtc.SinchClient;
@@ -111,7 +112,7 @@ public class MessagingActivity extends AppCompatActivity {
     private String isVideoCalling = "false";
     private Button muteBtn, unmuteBtn, speakerBtn, endVideoCall, pkupBtnVid,hangupBtnVid, muteVid,unmuteVid,speakerVid;
     RelativeLayout localView;
-    LinearLayout remoteView;
+    RelativeLayout remoteView;
 
     private DatabaseReference mDatabase;
 
@@ -129,7 +130,8 @@ public class MessagingActivity extends AppCompatActivity {
             Manifest.permission.MODIFY_AUDIO_SETTINGS,
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.CAMERA
+            Manifest.permission.CAMERA,
+            Manifest.permission.BLUETOOTH
     };
 
 
@@ -407,6 +409,8 @@ public class MessagingActivity extends AppCompatActivity {
             //timerHandler1.postDelayed(timerRunnable1, 500);
             //vidCallState.setText("Connected");
             //vidCaller.setText(chatSingleton.getContactName()+" is talking");
+            AudioController am = sinchClient.getAudioController();
+            am.enableAutomaticAudioRouting(true,AudioController.UseSpeakerphone.SPEAKERPHONE_AUTO);
             pkupBtnVid.setVisibility(View.INVISIBLE);
             hangupBtnVid.setVisibility(View.INVISIBLE);
             endVideoCall.setVisibility(View.VISIBLE);
@@ -432,6 +436,8 @@ public class MessagingActivity extends AppCompatActivity {
                     if(!speaker) {
                         sinchClient.getAudioController().enableSpeaker();
                         Toast.makeText(getApplication(),"speaker on",Toast.LENGTH_SHORT).show();
+                        muteBtn.setVisibility(View.VISIBLE);
+                        unmuteBtn.setVisibility(View.INVISIBLE);
                         speaker = true;
                     }
                     else{
@@ -453,7 +459,8 @@ public class MessagingActivity extends AppCompatActivity {
         public void onCallEnded(Call callEnded) {
 
             ringTone.stop();
-            callEnded.hangup();
+            call = callEnded;
+            call.hangup();
             call = null;
             Toast.makeText(getApplicationContext(),"Call ended",Toast.LENGTH_SHORT).show();
             MainLayout.removeView(videoCallLayout);
@@ -491,6 +498,8 @@ public class MessagingActivity extends AppCompatActivity {
             timerHandler.postDelayed(timerRunnable, 500);
             caller.setText(chatSingleton.getContactName() + " is talking");
             //callState.setText("connected");
+            AudioController am = sinchClient.getAudioController();
+            am.enableAutomaticAudioRouting(true,AudioController.UseSpeakerphone.SPEAKERPHONE_AUTO);
             pickupBtn.setVisibility(View.INVISIBLE);
             hangupBtn.setVisibility(View.INVISIBLE);
             hangupBtnMid.setVisibility(View.VISIBLE);
@@ -540,7 +549,9 @@ public class MessagingActivity extends AppCompatActivity {
             ringTone.stop();
             timerHandler.removeCallbacks(timerRunnable);
             Toast.makeText(getApplicationContext(),"Call ended",Toast.LENGTH_SHORT).show();
-            callEnded.hangup();
+            //callEnded.hangup();
+            call = callEnded;
+            call.hangup();
             call = null;
             MainLayout.removeView(callLayout);
             setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
