@@ -48,19 +48,20 @@
 
     <RelativeLayout
         android:layout_width="wrap_content"
+        android:id="@+id/remoteVideo"
         android:layout_height="0dp"
         android:layout_weight="4"
         android:background="@android:color/darker_gray"
         android:orientation="vertical"
         android:padding="0dip">
 
-        <LinearLayout
-            android:id="@+id/remoteVideo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:orientation="horizontal" />
+<!--        <LinearLayout-->
+<!--            android:id="@+id/remoteVideo"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_alignParentLeft="true"-->
+<!--            android:layout_alignParentTop="true"-->
+<!--            android:orientation="horizontal" />-->
 
         <RelativeLayout
             android:id="@+id/localVideo"
@@ -123,7 +124,7 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginLeft="50dp"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="20dp"
             android:visibility="invisible"
             android:background="@drawable/no_microphone"
             app:backgroundTint="#3F51B5" />
