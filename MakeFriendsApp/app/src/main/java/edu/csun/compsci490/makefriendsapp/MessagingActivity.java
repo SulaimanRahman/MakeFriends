@@ -98,6 +98,8 @@ public class MessagingActivity extends AppCompatActivity {
     FirebaseUser firebaseUser;
     private Button callBtn, callBtnVideo;
     SinchClient sinchClient = null;
+    private VideoController vc;
+    private AudioController ac;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private Button hangupBtn;
     private Button hangupBtnMid;
@@ -106,7 +108,7 @@ public class MessagingActivity extends AppCompatActivity {
     private String UID = "";
     private Call call;
     private TextView callState;
-    private TextView caller,vidCaller,vidTimer,vidCallState;
+    private TextView caller,vidCallState;
     private Boolean speaker = false;
     private Boolean videoCalling = false;
     private String isVideoCalling = "false";
@@ -123,6 +125,7 @@ public class MessagingActivity extends AppCompatActivity {
     View callLayout;
     long startTime = 0;
     MediaPlayer ringTone = null;
+    MediaPlayer ringTone2 = null;
     private ImageView calleeImg;
     private int all_per = 1;
     private String[] PERMISSIONS = {
@@ -175,12 +178,14 @@ public class MessagingActivity extends AppCompatActivity {
         callState = callLayout.findViewById(R.id.callState);
         caller = callLayout.findViewById(R.id.caller);
         ringTone = MediaPlayer.create(getApplicationContext(),R.raw.phone_ring);
+        ringTone2 = MediaPlayer.create(getApplicationContext(),R.raw.discord_call_remix);
         calleeImg = callLayout.findViewById(R.id.calleePic);
         databaseManager = new DatabaseManager();
         chatSingleton = ChatSingleton.getInstance();
         unmuteBtn = callLayout.findViewById(R.id.unmuteBtn);
         muteBtn = callLayout.findViewById(R.id.muteBtn);
         speakerBtn = callLayout.findViewById(R.id.speakerBtn);
+        vidCallState = videoCallLayout.findViewById(R.id.vidCallState);
         //vidCallState = videoCallLayout.findViewById(R.id.callState1);
         //mDatabase = FirebaseDatabase.getInstance().getReference();
 
@@ -362,7 +367,7 @@ public class MessagingActivity extends AppCompatActivity {
             int minutes = seconds / 60;
             seconds = seconds % 60;
 
-            vidTimer.setText(String.format(Locale.US, "%02d:%02d", minutes, seconds));
+            vidCallState.setText(String.format(Locale.US, "%02d:%02d", minutes, seconds));
 
             timerHandler1.postDelayed(this, 500);
         }
@@ -372,7 +377,7 @@ public class MessagingActivity extends AppCompatActivity {
 
         @Override
         public void onVideoTrackAdded(Call call) {
-            final VideoController vc = sinchClient.getVideoController();
+            vc = sinchClient.getVideoController();
 
             localView.addView(vc.getLocalView());
             localView.setOnClickListener(new View.OnClickListener() {
@@ -391,26 +396,38 @@ public class MessagingActivity extends AppCompatActivity {
 
         @Override
         public void onVideoTrackResumed(Call call) {
+            vc = sinchClient.getVideoController();
+
+            localView.addView(vc.getLocalView());
+            localView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    vc.toggleCaptureDevicePosition();
+                }
+            });
+            remoteView.addView(vc.getRemoteView());
 
         }
 
         @Override
         public void onCallProgressing(Call call) {
-            ringTone.start();
 
         }
 
         @Override
         public void onCallEstablished(Call call) {
             ringTone.stop();
-            MainLayout.removeView(callLayout);
-            MainLayout.addView(videoCallLayout);
-            //startTime = System.currentTimeMillis();
-            //timerHandler1.postDelayed(timerRunnable1, 500);
+            //MainLayout.removeView(callLayout);
+            //MainLayout.addView(videoCallLayout);
+            if(videoCallLayout.getParent() == null){
+                MainLayout.addView(videoCallLayout);
+            }
+            startTime = System.currentTimeMillis();
+            timerHandler1.postDelayed(timerRunnable1, 500);
             //vidCallState.setText("Connected");
             //vidCaller.setText(chatSingleton.getContactName()+" is talking");
-            AudioController am = sinchClient.getAudioController();
-            am.enableAutomaticAudioRouting(true,AudioController.UseSpeakerphone.SPEAKERPHONE_AUTO);
+            ac = sinchClient.getAudioController();
+            ac.enableAutomaticAudioRouting(true,AudioController.UseSpeakerphone.SPEAKERPHONE_AUTO);
             pkupBtnVid.setVisibility(View.INVISIBLE);
             hangupBtnVid.setVisibility(View.INVISIBLE);
             endVideoCall.setVisibility(View.VISIBLE);
@@ -462,12 +479,17 @@ public class MessagingActivity extends AppCompatActivity {
             call = callEnded;
             call.hangup();
             call = null;
+            vc = sinchClient.getVideoController();
+            if (vc != null) {
+                remoteView.removeView(vc.getRemoteView());
+                localView.removeView(vc.getLocalView());
+            }
             Toast.makeText(getApplicationContext(),"Call ended",Toast.LENGTH_SHORT).show();
             MainLayout.removeView(videoCallLayout);
             setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
+            sinchClient.stop();
             startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
             finish();
-
         }
 
         @Override
@@ -482,12 +504,6 @@ public class MessagingActivity extends AppCompatActivity {
         @Override
         public void onCallProgressing(Call call) {
 
-            callState.setText("Ringing...");
-            Glide.with(getApplicationContext())
-                    .load(chatSingleton.getContactProfilePicUri().toString())
-                    .into(calleeImg);
-            ringTone.start();
-
         }
 
         @Override
@@ -498,8 +514,8 @@ public class MessagingActivity extends AppCompatActivity {
             timerHandler.postDelayed(timerRunnable, 500);
             caller.setText(chatSingleton.getContactName() + " is talking");
             //callState.setText("connected");
-            AudioController am = sinchClient.getAudioController();
-            am.enableAutomaticAudioRouting(true,AudioController.UseSpeakerphone.SPEAKERPHONE_AUTO);
+            ac = sinchClient.getAudioController();
+            ac.enableAutomaticAudioRouting(true,AudioController.UseSpeakerphone.SPEAKERPHONE_AUTO);
             pickupBtn.setVisibility(View.INVISIBLE);
             hangupBtn.setVisibility(View.INVISIBLE);
             hangupBtnMid.setVisibility(View.VISIBLE);
@@ -554,6 +570,7 @@ public class MessagingActivity extends AppCompatActivity {
             call.hangup();
             call = null;
             MainLayout.removeView(callLayout);
+            sinchClient.stop();
             setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
             startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
             finish();
@@ -571,8 +588,10 @@ public class MessagingActivity extends AppCompatActivity {
         @Override
         public void onIncomingCall(CallClient callClient, final Call incomingCall) {
             Log.d(TAG, "Incoming call");
-            MainLayout.addView(callLayout);
-
+            if(callLayout.getParent() == null) {
+                MainLayout.addView(callLayout);
+            }
+            ringTone2.start();
             getVideoCallUpdate(new userCallback() {
                 @Override
                 public void isUserExist(boolean exist) {
@@ -595,6 +614,7 @@ public class MessagingActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     call = incomingCall;
                     call.hangup();
+                    ringTone2.stop();
                     startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
                     finish();
                 }
@@ -606,14 +626,17 @@ public class MessagingActivity extends AppCompatActivity {
 
                         call = incomingCall;
                         call.answer();
+                        ringTone2.stop();
                         updateVideoCall("true");
                         callState.setText("");
                         call.addCallListener(new SinchVideoCallListener());
+                        MainLayout.removeView(callLayout);
 
                     }
                     else {
                         call = incomingCall;
                         call.answer();
+                        ringTone2.stop();
                         updateVideoCall("false");
                         call.addCallListener(new SinchCallListener());
                     }
@@ -711,20 +734,18 @@ public class MessagingActivity extends AppCompatActivity {
     public void callVideoUser(String UID){
         if(this.call == null) {
             //videoCalling = true;
-
+            MainLayout.addView(videoCallLayout);
+            vidCallState.setText("Calling "+chatSingleton.getContactName());
             updateVideoCall("true");
             ringTone.start();
             this.call = sinchClient.getCallClient().callUserVideo(UID);
             this.call.addCallListener(new SinchVideoCallListener());
-            MainLayout.addView(callLayout);
-            ringTone.start();
-            Glide.with(getApplicationContext())
-                    .load(chatSingleton.getContactProfilePicUri().toString())
-                    .into(calleeImg);
-            hangupBtn.setVisibility(View.INVISIBLE);
-            pickupBtn.setVisibility(View.INVISIBLE);
-            hangupBtnMid.setVisibility(View.VISIBLE);
-            hangupBtnMid.setOnClickListener(new View.OnClickListener() {
+            hangupBtnVid.setVisibility(View.VISIBLE);
+            pkupBtnVid.setVisibility(View.VISIBLE);
+            endVideoCall.setVisibility(View.INVISIBLE);
+
+
+            hangupBtnVid.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     call.hangup();
@@ -732,6 +753,13 @@ public class MessagingActivity extends AppCompatActivity {
                     ringTone.stop();
                     startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
                     finish();
+                }
+            });
+            pkupBtnVid.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    call.answer();
+                    ringTone.stop();
                 }
             });
 
@@ -749,6 +777,7 @@ public class MessagingActivity extends AppCompatActivity {
     public void callUser(String UID){
         if(this.call == null) {
             //videoCalling = false;
+
             updateVideoCall("false");
             this.call = this.sinchClient.getCallClient().callUser(UID);
             this.call.addCallListener(new SinchCallListener());
@@ -766,7 +795,7 @@ public class MessagingActivity extends AppCompatActivity {
                     call.hangup();
                     callState.setText("disconnected");
                     ringTone.stop();
-                    startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
+                    startActivity(new Intent(getApplicationContext(),MessagingActivity.class));
                     finish();
                 }
             });
