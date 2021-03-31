@@ -18,6 +18,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.firestore.v1.StructuredQuery;
@@ -423,6 +424,11 @@ public class DatabaseManager {
                 @Override
                 public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                     Log.d(TAG, "File successfully saved");
+                    firebaseCallback.onCallback("Successful");
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
                     firebaseCallback.onCallback(null);
                 }
             });
@@ -445,6 +451,42 @@ public class DatabaseManager {
                 firebaseCallback.onCallback(null);
             }
         });
+    }
+
+    public void getTheUriLinkNameAndSizeFromFirebaseStorageInHashMap(String filePath, final FirebaseCallback firebaseCallback) {
+        storageReference = FirebaseStorage.getInstance().getReference().child(filePath);
+        storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(final Uri uri) {
+                Log.d(TAG, "Successfully got the file Uri: " + uri);
+                storageReference.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
+                    @Override
+                    public void onSuccess(StorageMetadata storageMetadata) {
+                        String name = storageMetadata.getName();
+                        long size = storageMetadata.getSizeBytes();
+                        HashMap<String, Object> data = new HashMap<>();
+                        data.put("Uri", uri);
+                        data.put("name", name);
+                        data.put("size", size);
+
+                        firebaseCallback.onCallback(data);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        firebaseCallback.onCallback(null);
+                    }
+                });
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "Failed to get the file Uri: " + e);
+                firebaseCallback.onCallback(null);
+            }
+        });
+
     }
 
     public void deleteFileFromFirebaseStorage(String filePath) {

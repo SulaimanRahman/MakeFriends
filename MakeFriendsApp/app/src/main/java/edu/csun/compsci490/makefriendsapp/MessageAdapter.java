@@ -1,11 +1,22 @@
 package edu.csun.compsci490.makefriendsapp;
 
+import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.provider.OpenableColumns;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.TextView;
@@ -16,8 +27,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -30,10 +39,21 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     private static final int IMAGE_SENT_TYPE = 3;
     private static final int IMAGE_RECEIVED_TYPE = 4;
-
     private static final int VIDEO_SENT_TYPE = 5;
-
     private static final int VIDEO_RECEIVED_TYPE = 6;
+
+    private static final int PDF_SENT_TYPE = 7;
+    private static final int PDF_RECEIVED_TYPE = 8;
+    private static final int TEXT_SENT_TYPE = 9;
+    private static final int TEXT_RECEIVED_TYPE = 10;
+    private static final int WORD_SENT_TYPE = 11;
+    private static final int WORD_RECEIVED_TYPE = 12;
+    private static final int EXCEL_SENT_TYPE = 13;
+    private static final int EXCEL_RECEIVED_TYPE = 14;
+    private static final int POWERPOINT_SENT_TYPE = 15;
+    private static final int POWERPOINT_RECEIVED_TYPE = 16;
+
+    private static final int FILE_SENT_TYPE = 17;
 
     public MessageAdapter(Context context, ArrayList<MessageItem> messageItems){
         mContext = context;
@@ -57,28 +77,73 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             return new ResultViewHolder(view);
         } else if (viewType == IMAGE_SENT_TYPE) {
             Log.d("MessagingAdapter", "Type is IMAGE_SENT_TYPE");
-            view = LayoutInflater.from(mContext).inflate(R.layout.item_sent_image, parent, false);
-            return  new SentImageViewHolder(view);
+//            view = LayoutInflater.from(mContext).inflate(R.layout.item_sent_image, parent, false);
+//            return  new SentImageViewHolder(view);
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_sent_file, parent, false);
+            return  new SentFileViewHolder(view);
         } else if (viewType == IMAGE_RECEIVED_TYPE) {
-            view = LayoutInflater.from(mContext).inflate(R.layout.item_received_image, parent, false);
-            return new ReceivedImageViewHolder(view);
+//            view = LayoutInflater.from(mContext).inflate(R.layout.item_received_image, parent, false);
+//            return new ReceivedImageViewHolder(view);
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_received_file, parent, false);
+            return  new ReceivedFileViewHolder(view);
         } else if (viewType == VIDEO_SENT_TYPE) {
-            view = LayoutInflater.from(mContext).inflate(R.layout.item_sent_video, parent, false);
-            return  new SentVideoViewHolder(view);
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_sent_file, parent, false);
+            return  new SentFileViewHolder(view);
         } else if (viewType == VIDEO_RECEIVED_TYPE) {
-            view = LayoutInflater.from(mContext).inflate(R.layout.item_received_video, parent, false);
-            return new ReceivedVideoViewHolder(view);
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_received_file, parent, false);
+            return  new ReceivedFileViewHolder(view);
+        } else if (viewType == PDF_SENT_TYPE) {
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_sent_file, parent, false);
+            return  new SentFileViewHolder(view);
+        } else if (viewType == PDF_RECEIVED_TYPE) {
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_received_file, parent, false);
+            return  new ReceivedFileViewHolder(view);
+        } else if (viewType == TEXT_SENT_TYPE) {
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_sent_file, parent, false);
+            return  new SentFileViewHolder(view);
+        } else if (viewType == TEXT_RECEIVED_TYPE) {
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_received_file, parent, false);
+            return  new ReceivedFileViewHolder(view);
+        } else if (viewType == WORD_SENT_TYPE) {
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_sent_file, parent, false);
+            return  new SentFileViewHolder(view);
+        } else if (viewType == WORD_RECEIVED_TYPE) {
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_received_file, parent, false);
+            return  new ReceivedFileViewHolder(view);
+        } else if (viewType == EXCEL_SENT_TYPE) {
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_sent_file, parent, false);
+            return  new SentFileViewHolder(view);
+        } else if (viewType == EXCEL_RECEIVED_TYPE) {
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_received_file, parent, false);
+            return  new ReceivedFileViewHolder(view);
+        } else if (viewType == POWERPOINT_SENT_TYPE) {
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_sent_file, parent, false);
+            return  new SentFileViewHolder(view);
+        } else if (viewType == POWERPOINT_RECEIVED_TYPE) {
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_received_file, parent, false);
+            return  new ReceivedFileViewHolder(view);
+        }
+        else if (viewType == FILE_SENT_TYPE) {
+            view = LayoutInflater.from(mContext).inflate(R.layout.item_sent_file, parent, false);
+            return new SentFileViewHolder(view);
         }
         else {
             Log.d("MessagingAdapter", "Type is none");
             return null;
         }
+
+//                else if (viewType == VIDEO_SENT_TYPE) {
+//            view = LayoutInflater.from(mContext).inflate(R.layout.item_sent_video, parent, false);
+//            return  new SentVideoViewHolder(view);
+//        } else if (viewType == VIDEO_RECEIVED_TYPE) {
+//            view = LayoutInflater.from(mContext).inflate(R.layout.item_received_video, parent, false);
+//            return new ReceivedVideoViewHolder(view);
+//        }
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
         final int messageType = getItemViewType(position);
-        Log.d("Line 66", "Message Type is: " + messageType);
         if(messageType == MESSAGE_RECEIVED_TYPE) {
             ReceivedViewHolder receivedViewHolder = (ReceivedViewHolder) holder;
             Glide.with(((ReceivedViewHolder) holder).messageImage.getContext())
@@ -96,47 +161,534 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             ResultViewHolder resultViewHolder = (ResultViewHolder) holder;
             resultViewHolder.messageBody.setText(mMessageItems.get(position).getMessageBody());
         } else if (messageType == IMAGE_SENT_TYPE) {//sending a image
-            Log.d("Adapter", "Image Loaded");
-            SentImageViewHolder sentImageViewHolder = (SentImageViewHolder) holder;
-            sentImageViewHolder.imageTime.setText(mMessageItems.get(position).getMessageTime());
-            Glide.with(((SentImageViewHolder) holder).imageView.getContext())
+            final Uri contentUri = mMessageItems.get(position).getMessageContentUri();
+            String messageTime = mMessageItems.get(position).getMessageTime();
+
+            final SentFileViewHolder sentFileViewHolder = (SentFileViewHolder) holder;
+            sentFileViewHolder.fileTime.setText(messageTime);
+            sentFileViewHolder.mediaPlayerIcon.setVisibility(View.INVISIBLE);
+            String name = mMessageItems.get(position).getFileName();
+            double size = mMessageItems.get(position).getFileSize();//gives you size in bytes
+            String linkToDownload = String.format("<a href=\"%s\">%s</a>", contentUri, name);
+
+            sentFileViewHolder.downloadTextView.setText(Html.fromHtml(linkToDownload));
+            sentFileViewHolder.downloadTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+            //setting the size of the file
+            if (size > 1000 && size < 1000000) {
+                size = size/1000;
+                sentFileViewHolder.sizeTextView.setText(size + " kB");
+            } else if (size >= 1000000) {
+                size = size/1000000;
+                sentFileViewHolder.sizeTextView.setText(size + " MB");
+            } else {
+                sentFileViewHolder.sizeTextView.setText(size + " Bytes");
+            }
+
+            ImageView fileView = sentFileViewHolder.fileView;
+
+            Glide.with(((SentFileViewHolder) holder).fileView.getContext())
                     .load(mMessageItems.get(position).getMessageContentUri().toString())
-                    .into(((SentImageViewHolder) holder).imageView);
+                    .into(((SentFileViewHolder) holder).fileView);
+
+            fileView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(sentFileViewHolder.fileView.getContext(), ImageViewPopActivity.class);
+                    intent.putExtra("imageUri", contentUri.toString());
+                    mContext.startActivity(intent);
+                }
+            });
+            sentFileViewHolder.fileView.setScaleType(ImageView.ScaleType.MATRIX);
+
         } else if (messageType == IMAGE_RECEIVED_TYPE) {
-            ReceivedImageViewHolder receivedImageViewHolder = (ReceivedImageViewHolder) holder;
-            Glide.with(((ReceivedImageViewHolder) holder).profileImage.getContext())
-                    .load(mMessageItems.get(position).getMessageImgResource().toString())
-                    .into(((ReceivedImageViewHolder) holder).profileImage);
+            Uri contactProfilePicUri = mMessageItems.get(position).getMessageImgResource();
+            String contactName = mMessageItems.get(position).getMessageName();
+            final Uri contentUri = mMessageItems.get(position).getMessageContentUri();
+            String messageTime = mMessageItems.get(position).getMessageTime();
 
-            receivedImageViewHolder.messageName.setText(mMessageItems.get(position).getMessageName());
-            receivedImageViewHolder.imageTime.setText(mMessageItems.get(position).getMessageTime());
+            String name = mMessageItems.get(position).getFileName();
+            double size = mMessageItems.get(position).getFileSize();//gives you size in bytes
 
-            Glide.with(((ReceivedImageViewHolder) holder).imageView.getContext())
-                    .load(mMessageItems.get(position).getMessageContentUri().toString())
-                    .into(((ReceivedImageViewHolder) holder).imageView);
+            String linkToDownload = String.format("<a href=\"%s\">%s</a>", contentUri, name);
+
+            final ReceivedFileViewHolder receivedFileViewHolder = (ReceivedFileViewHolder) holder;
+            Glide.with(receivedFileViewHolder.profileView.getContext())
+                    .load(contactProfilePicUri).into(receivedFileViewHolder.profileView);
+            receivedFileViewHolder.contactName.setText(contactName);
+            receivedFileViewHolder.fileTime.setText(messageTime);
+
+            receivedFileViewHolder.downloadTextView.setText(Html.fromHtml(linkToDownload));
+            receivedFileViewHolder.downloadTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+            //setting the size of the file
+            if (size > 1000 && size < 1000000) {
+                size = size/1000;
+                receivedFileViewHolder.sizeTextView.setText(size + " kB");
+            } else if (size >= 1000000) {
+                size = size/1000000;
+                receivedFileViewHolder.sizeTextView.setText(size + " MB");
+            } else {
+                receivedFileViewHolder.sizeTextView.setText(size + " Bytes");
+            }
+
+            Glide.with(receivedFileViewHolder.fileView.getContext())
+                    .load(contentUri.toString()).into(receivedFileViewHolder.fileView);
+
+            receivedFileViewHolder.mediaPlayerIcon.setVisibility(View.INVISIBLE);
+
+            receivedFileViewHolder.fileView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(receivedFileViewHolder.fileView.getContext(), ImageViewPopActivity.class);
+                    intent.putExtra("imageUri", contentUri.toString());
+                    mContext.startActivity(intent);
+                }
+            });
+            receivedFileViewHolder.fileView.setScaleType(ImageView.ScaleType.MATRIX);
+
         } else if (messageType == VIDEO_SENT_TYPE) {
-            SentVideoViewHolder sentVideoViewHolder = (SentVideoViewHolder) holder;
-            sentVideoViewHolder.videoTime.setText(mMessageItems.get(position).getMessageTime());
-            VideoView videoView = sentVideoViewHolder.videoView;
-            sentVideoViewHolder.videoView.setVideoURI(mMessageItems.get(position).getMessageContentUri());
-            MediaController mediaController = new MediaController(videoView.getContext());
-            videoView.setMediaController(mediaController);
-        } else if (messageType == VIDEO_RECEIVED_TYPE) {
-            ReceivedVideoViewHolder receivedVideoViewHolder = (ReceivedVideoViewHolder) holder;
-            Glide.with(((ReceivedVideoViewHolder) holder).profileImage.getContext())
-                    .load(mMessageItems.get(position).getMessageImgResource().toString())
-                    .into(((ReceivedVideoViewHolder) holder).profileImage);
-            receivedVideoViewHolder.messageName.setText(mMessageItems.get(position).getMessageName());
-            receivedVideoViewHolder.videoTime.setText(mMessageItems.get(position).getMessageTime());
+            final Uri contentUri = mMessageItems.get(position).getMessageContentUri();
+            String messageTime = mMessageItems.get(position).getMessageTime();
 
-            VideoView videoView = receivedVideoViewHolder.videoView;
-            receivedVideoViewHolder.videoView.setVideoURI(mMessageItems.get(position).getMessageContentUri());
-            MediaController mediaController = new MediaController(videoView.getContext());
-            videoView.setMediaController(mediaController);
+            final SentFileViewHolder sentFileViewHolder = (SentFileViewHolder) holder;
+            sentFileViewHolder.fileTime.setText(messageTime);
+
+            String name = mMessageItems.get(position).getFileName();
+            double size = mMessageItems.get(position).getFileSize();//gives you size in bytes
+
+            String linkToDownload = String.format("<a href=\"%s\">%s</a>", contentUri, name);
+
+            sentFileViewHolder.downloadTextView.setText(Html.fromHtml(linkToDownload));
+            sentFileViewHolder.downloadTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+            //setting the size of the file
+            if (size > 1000 && size < 1000000) {
+                size = size/1000;
+                sentFileViewHolder.sizeTextView.setText(size + " kB");
+            } else if (size >= 1000000) {
+                size = size/1000000;
+                sentFileViewHolder.sizeTextView.setText(size + " MB");
+            } else {
+                sentFileViewHolder.sizeTextView.setText(size + " Bytes");
+            }
+
+            Glide.with(((SentFileViewHolder) holder).fileView.getContext())
+                    .load(contentUri.toString())
+                    .into(((SentFileViewHolder) holder).fileView);
+            sentFileViewHolder.fileView.setScaleType(ImageView.ScaleType.MATRIX);
+            sentFileViewHolder.mediaPlayerIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(sentFileViewHolder.fileView.getContext(), VideoViewPopActivity.class);
+                    intent.putExtra("videoUri", contentUri.toString());
+                    mContext.startActivity(intent);
+                }
+            });
+        } else if (messageType == VIDEO_RECEIVED_TYPE) {
+            Uri contactProfilePicUri = mMessageItems.get(position).getMessageImgResource();
+            String contactName = mMessageItems.get(position).getMessageName();
+            final Uri contentUri = mMessageItems.get(position).getMessageContentUri();
+            String messageTime = mMessageItems.get(position).getMessageTime();
+
+            String name = mMessageItems.get(position).getFileName();
+            double size = mMessageItems.get(position).getFileSize();//gives you size in bytes
+
+            String linkToDownload = String.format("<a href=\"%s\">%s</a>", contentUri, name);
+
+            final ReceivedFileViewHolder receivedFileViewHolder = (ReceivedFileViewHolder) holder;
+            Glide.with(receivedFileViewHolder.profileView.getContext())
+                    .load(contactProfilePicUri).into(receivedFileViewHolder.profileView);
+            receivedFileViewHolder.contactName.setText(contactName);
+            receivedFileViewHolder.fileTime.setText(messageTime);
+
+            receivedFileViewHolder.downloadTextView.setText(Html.fromHtml(linkToDownload));
+            receivedFileViewHolder.downloadTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+            //setting the size of the file
+            if (size > 1000 && size < 1000000) {
+                size = size/1000;
+                receivedFileViewHolder.sizeTextView.setText(size + " kB");
+            } else if (size >= 1000000) {
+                size = size/1000000;
+                receivedFileViewHolder.sizeTextView.setText(size + " MB");
+            } else {
+                receivedFileViewHolder.sizeTextView.setText(size + " Bytes");
+            }
+
+            Glide.with(receivedFileViewHolder.fileView.getContext())
+                    .load(contentUri.toString()).into(receivedFileViewHolder.fileView);
+            receivedFileViewHolder.fileView.setScaleType(ImageView.ScaleType.MATRIX);
+            receivedFileViewHolder.mediaPlayerIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(receivedFileViewHolder.mediaPlayerIcon.getContext(), VideoViewPopActivity.class);
+                    intent.putExtra("videoUri", contentUri.toString());
+                    mContext.startActivity(intent);
+                }
+            });
+        } else if (messageType == PDF_SENT_TYPE) {
+            Uri contentUri = mMessageItems.get(position).getMessageContentUri();
+            String messageTime = mMessageItems.get(position).getMessageTime();
+
+            SentFileViewHolder sentFileViewHolder = (SentFileViewHolder) holder;
+            sentFileViewHolder.fileTime.setText(messageTime);
+            sentFileViewHolder.mediaPlayerIcon.setVisibility(View.INVISIBLE);
+
+            String name = mMessageItems.get(position).getFileName();
+            double size = mMessageItems.get(position).getFileSize();//gives you size in bytes
+
+            String linkToDownload = String.format("<a href=\"%s\">%s</a>", contentUri, name);
+
+            sentFileViewHolder.downloadTextView.setText(Html.fromHtml(linkToDownload));
+            sentFileViewHolder.downloadTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+            //setting the size of the file
+            if (size > 1000 && size < 1000000) {
+                size = size/1000;
+                sentFileViewHolder.sizeTextView.setText(size + " kB");
+            } else if (size >= 1000000) {
+                size = size/1000000;
+                sentFileViewHolder.sizeTextView.setText(size + " MB");
+            } else {
+                sentFileViewHolder.sizeTextView.setText(size + " Bytes");
+            }
+
+            sentFileViewHolder.fileView.setImageResource(R.drawable.pdf_file_icon);
+        } else if (messageType == PDF_RECEIVED_TYPE) {
+            Uri contactProfilePicUri = mMessageItems.get(position).getMessageImgResource();
+            String contactName = mMessageItems.get(position).getMessageName();
+            final Uri contentUri = mMessageItems.get(position).getMessageContentUri();
+            String messageTime = mMessageItems.get(position).getMessageTime();
+
+            String name = mMessageItems.get(position).getFileName();
+            double size = mMessageItems.get(position).getFileSize();//gives you size in bytes
+
+            String linkToDownload = String.format("<a href=\"%s\">%s</a>", contentUri, name);
+
+            final ReceivedFileViewHolder receivedFileViewHolder = (ReceivedFileViewHolder) holder;
+            Glide.with(receivedFileViewHolder.profileView.getContext())
+                    .load(contactProfilePicUri).into(receivedFileViewHolder.profileView);
+            receivedFileViewHolder.contactName.setText(contactName);
+            receivedFileViewHolder.fileTime.setText(messageTime);
+
+            receivedFileViewHolder.downloadTextView.setText(Html.fromHtml(linkToDownload));
+            receivedFileViewHolder.downloadTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+            //setting the size of the file
+            if (size > 1000 && size < 1000000) {
+                size = size/1000;
+                receivedFileViewHolder.sizeTextView.setText(size + " kB");
+            } else if (size >= 1000000) {
+                size = size/1000000;
+                receivedFileViewHolder.sizeTextView.setText(size + " MB");
+            } else {
+                receivedFileViewHolder.sizeTextView.setText(size + " Bytes");
+            }
+
+            receivedFileViewHolder.fileView.setImageResource(R.drawable.pdf_file_icon);
+
+            receivedFileViewHolder.mediaPlayerIcon.setVisibility(View.INVISIBLE);
+
+        } else if (messageType == TEXT_SENT_TYPE) {
+            Uri contentUri = mMessageItems.get(position).getMessageContentUri();
+            String messageTime = mMessageItems.get(position).getMessageTime();
+
+            SentFileViewHolder sentFileViewHolder = (SentFileViewHolder) holder;
+            sentFileViewHolder.fileTime.setText(messageTime);
+            sentFileViewHolder.mediaPlayerIcon.setVisibility(View.INVISIBLE);
+
+            String name = mMessageItems.get(position).getFileName();
+            double size = mMessageItems.get(position).getFileSize();//gives you size in bytes
+
+            String linkToDownload = String.format("<a href=\"%s\">%s</a>", contentUri, name);
+
+            sentFileViewHolder.downloadTextView.setText(Html.fromHtml(linkToDownload));
+            sentFileViewHolder.downloadTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+            //setting the size of the file
+            if (size > 1000 && size < 1000000) {
+                size = size/1000;
+                sentFileViewHolder.sizeTextView.setText(size + " kB");
+            } else if (size >= 1000000) {
+                size = size/1000000;
+                sentFileViewHolder.sizeTextView.setText(size + " MB");
+            } else {
+                sentFileViewHolder.sizeTextView.setText(size + " Bytes");
+            }
+
+            sentFileViewHolder.fileView.setImageResource(R.drawable.text_file_icon);
+        } else if (messageType == TEXT_RECEIVED_TYPE) {
+            Uri contactProfilePicUri = mMessageItems.get(position).getMessageImgResource();
+            String contactName = mMessageItems.get(position).getMessageName();
+            final Uri contentUri = mMessageItems.get(position).getMessageContentUri();
+            String messageTime = mMessageItems.get(position).getMessageTime();
+
+            String name = mMessageItems.get(position).getFileName();
+            double size = mMessageItems.get(position).getFileSize();//gives you size in bytes
+
+            String linkToDownload = String.format("<a href=\"%s\">%s</a>", contentUri, name);
+
+            final ReceivedFileViewHolder receivedFileViewHolder = (ReceivedFileViewHolder) holder;
+            Glide.with(receivedFileViewHolder.profileView.getContext())
+                    .load(contactProfilePicUri).into(receivedFileViewHolder.profileView);
+            receivedFileViewHolder.contactName.setText(contactName);
+            receivedFileViewHolder.fileTime.setText(messageTime);
+
+            receivedFileViewHolder.downloadTextView.setText(Html.fromHtml(linkToDownload));
+            receivedFileViewHolder.downloadTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+            //setting the size of the file
+            if (size > 1000 && size < 1000000) {
+                size = size/1000;
+                receivedFileViewHolder.sizeTextView.setText(size + " kB");
+            } else if (size >= 1000000) {
+                size = size/1000000;
+                receivedFileViewHolder.sizeTextView.setText(size + " MB");
+            } else {
+                receivedFileViewHolder.sizeTextView.setText(size + " Bytes");
+            }
+
+            receivedFileViewHolder.fileView.setImageResource(R.drawable.text_file_icon);
+
+            receivedFileViewHolder.mediaPlayerIcon.setVisibility(View.INVISIBLE);
+        } else if (messageType == WORD_SENT_TYPE) {
+            Uri contentUri = mMessageItems.get(position).getMessageContentUri();
+            String messageTime = mMessageItems.get(position).getMessageTime();
+
+            SentFileViewHolder sentFileViewHolder = (SentFileViewHolder) holder;
+            sentFileViewHolder.fileTime.setText(messageTime);
+            sentFileViewHolder.mediaPlayerIcon.setVisibility(View.INVISIBLE);
+
+            String name = mMessageItems.get(position).getFileName();
+            double size = mMessageItems.get(position).getFileSize();//gives you size in bytes
+
+            String linkToDownload = String.format("<a href=\"%s\">%s</a>", contentUri, name);
+
+            sentFileViewHolder.downloadTextView.setText(Html.fromHtml(linkToDownload));
+            sentFileViewHolder.downloadTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+            //setting the size of the file
+            if (size > 1000 && size < 1000000) {
+                size = size/1000;
+                sentFileViewHolder.sizeTextView.setText(size + " kB");
+            } else if (size >= 1000000) {
+                size = size/1000000;
+                sentFileViewHolder.sizeTextView.setText(size + " MB");
+            } else {
+                sentFileViewHolder.sizeTextView.setText(size + " Bytes");
+            }
+
+            sentFileViewHolder.fileView.setImageResource(R.drawable.word_file_icon);
+        } else if (messageType == WORD_RECEIVED_TYPE) {
+            Uri contactProfilePicUri = mMessageItems.get(position).getMessageImgResource();
+            String contactName = mMessageItems.get(position).getMessageName();
+            final Uri contentUri = mMessageItems.get(position).getMessageContentUri();
+            String messageTime = mMessageItems.get(position).getMessageTime();
+
+            String name = mMessageItems.get(position).getFileName();
+            double size = mMessageItems.get(position).getFileSize();//gives you size in bytes
+
+            String linkToDownload = String.format("<a href=\"%s\">%s</a>", contentUri, name);
+
+            final ReceivedFileViewHolder receivedFileViewHolder = (ReceivedFileViewHolder) holder;
+            Glide.with(receivedFileViewHolder.profileView.getContext())
+                    .load(contactProfilePicUri).into(receivedFileViewHolder.profileView);
+            receivedFileViewHolder.contactName.setText(contactName);
+            receivedFileViewHolder.fileTime.setText(messageTime);
+
+            receivedFileViewHolder.downloadTextView.setText(Html.fromHtml(linkToDownload));
+            receivedFileViewHolder.downloadTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+            //setting the size of the file
+            if (size > 1000 && size < 1000000) {
+                size = size/1000;
+                receivedFileViewHolder.sizeTextView.setText(size + " kB");
+            } else if (size >= 1000000) {
+                size = size/1000000;
+                receivedFileViewHolder.sizeTextView.setText(size + " MB");
+            } else {
+                receivedFileViewHolder.sizeTextView.setText(size + " Bytes");
+            }
+
+            receivedFileViewHolder.fileView.setImageResource(R.drawable.word_file_icon);
+
+            receivedFileViewHolder.mediaPlayerIcon.setVisibility(View.INVISIBLE);
+        } else if (messageType == EXCEL_SENT_TYPE) {
+            Uri contentUri = mMessageItems.get(position).getMessageContentUri();
+            String messageTime = mMessageItems.get(position).getMessageTime();
+
+            SentFileViewHolder sentFileViewHolder = (SentFileViewHolder) holder;
+            sentFileViewHolder.fileTime.setText(messageTime);
+            sentFileViewHolder.mediaPlayerIcon.setVisibility(View.INVISIBLE);
+
+            String name = mMessageItems.get(position).getFileName();
+            double size = mMessageItems.get(position).getFileSize();//gives you size in bytes
+
+            String linkToDownload = String.format("<a href=\"%s\">%s</a>", contentUri, name);
+
+            sentFileViewHolder.downloadTextView.setText(Html.fromHtml(linkToDownload));
+            sentFileViewHolder.downloadTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+            //setting the size of the file
+            if (size > 1000 && size < 1000000) {
+                size = size/1000;
+                sentFileViewHolder.sizeTextView.setText(size + " kB");
+            } else if (size >= 1000000) {
+                size = size/1000000;
+                sentFileViewHolder.sizeTextView.setText(size + " MB");
+            } else {
+                sentFileViewHolder.sizeTextView.setText(size + " Bytes");
+            }
+
+            sentFileViewHolder.fileView.setImageResource(R.drawable.xlsx_file_icon);
+        } else if (messageType == EXCEL_RECEIVED_TYPE) {
+            Uri contactProfilePicUri = mMessageItems.get(position).getMessageImgResource();
+            String contactName = mMessageItems.get(position).getMessageName();
+            final Uri contentUri = mMessageItems.get(position).getMessageContentUri();
+            String messageTime = mMessageItems.get(position).getMessageTime();
+
+            String name = mMessageItems.get(position).getFileName();
+            double size = mMessageItems.get(position).getFileSize();//gives you size in bytes
+
+            String linkToDownload = String.format("<a href=\"%s\">%s</a>", contentUri, name);
+
+            final ReceivedFileViewHolder receivedFileViewHolder = (ReceivedFileViewHolder) holder;
+            Glide.with(receivedFileViewHolder.profileView.getContext())
+                    .load(contactProfilePicUri).into(receivedFileViewHolder.profileView);
+            receivedFileViewHolder.contactName.setText(contactName);
+            receivedFileViewHolder.fileTime.setText(messageTime);
+
+            receivedFileViewHolder.downloadTextView.setText(Html.fromHtml(linkToDownload));
+            receivedFileViewHolder.downloadTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+            //setting the size of the file
+            if (size > 1000 && size < 1000000) {
+                size = size/1000;
+                receivedFileViewHolder.sizeTextView.setText(size + " kB");
+            } else if (size >= 1000000) {
+                size = size/1000000;
+                receivedFileViewHolder.sizeTextView.setText(size + " MB");
+            } else {
+                receivedFileViewHolder.sizeTextView.setText(size + " Bytes");
+            }
+
+            receivedFileViewHolder.fileView.setImageResource(R.drawable.xlsx_file_icon);
+
+            receivedFileViewHolder.mediaPlayerIcon.setVisibility(View.INVISIBLE);
+        } else if (messageType == POWERPOINT_SENT_TYPE) {
+            Uri contentUri = mMessageItems.get(position).getMessageContentUri();
+            String messageTime = mMessageItems.get(position).getMessageTime();
+
+            SentFileViewHolder sentFileViewHolder = (SentFileViewHolder) holder;
+            sentFileViewHolder.fileTime.setText(messageTime);
+            sentFileViewHolder.mediaPlayerIcon.setVisibility(View.INVISIBLE);
+
+            String name = mMessageItems.get(position).getFileName();
+            double size = mMessageItems.get(position).getFileSize();//gives you size in bytes
+
+            String linkToDownload = String.format("<a href=\"%s\">%s</a>", contentUri, name);
+
+            sentFileViewHolder.downloadTextView.setText(Html.fromHtml(linkToDownload));
+            sentFileViewHolder.downloadTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+            //setting the size of the file
+            if (size > 1000 && size < 1000000) {
+                size = size/1000;
+                sentFileViewHolder.sizeTextView.setText(size + " kB");
+            } else if (size >= 1000000) {
+                size = size/1000000;
+                sentFileViewHolder.sizeTextView.setText(size + " MB");
+            } else {
+                sentFileViewHolder.sizeTextView.setText(size + " Bytes");
+            }
+
+            sentFileViewHolder.fileView.setImageResource(R.drawable.powerpoint_file_icon);
+        } else if (messageType == POWERPOINT_RECEIVED_TYPE) {
+            Uri contactProfilePicUri = mMessageItems.get(position).getMessageImgResource();
+            String contactName = mMessageItems.get(position).getMessageName();
+            final Uri contentUri = mMessageItems.get(position).getMessageContentUri();
+            String messageTime = mMessageItems.get(position).getMessageTime();
+
+            String name = mMessageItems.get(position).getFileName();
+            double size = mMessageItems.get(position).getFileSize();//gives you size in bytes
+
+            String linkToDownload = String.format("<a href=\"%s\">%s</a>", contentUri, name);
+
+            final ReceivedFileViewHolder receivedFileViewHolder = (ReceivedFileViewHolder) holder;
+            Glide.with(receivedFileViewHolder.profileView.getContext())
+                    .load(contactProfilePicUri).into(receivedFileViewHolder.profileView);
+            receivedFileViewHolder.contactName.setText(contactName);
+            receivedFileViewHolder.fileTime.setText(messageTime);
+
+            receivedFileViewHolder.downloadTextView.setText(Html.fromHtml(linkToDownload));
+            receivedFileViewHolder.downloadTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+            //setting the size of the file
+            if (size > 1000 && size < 1000000) {
+                size = size/1000;
+                receivedFileViewHolder.sizeTextView.setText(size + " kB");
+            } else if (size >= 1000000) {
+                size = size/1000000;
+                receivedFileViewHolder.sizeTextView.setText(size + " MB");
+            } else {
+                receivedFileViewHolder.sizeTextView.setText(size + " Bytes");
+            }
+
+            receivedFileViewHolder.fileView.setImageResource(R.drawable.powerpoint_file_icon);
+
+            receivedFileViewHolder.mediaPlayerIcon.setVisibility(View.INVISIBLE);
+        } else if (messageType == FILE_SENT_TYPE) {
+            Uri contentUri = mMessageItems.get(position).getMessageContentUri();
+            String messageTime = mMessageItems.get(position).getMessageTime();
+
+            SentFileViewHolder sentFileViewHolder = (SentFileViewHolder) holder;
+            sentFileViewHolder.fileTime.setText(messageTime);
+            sentFileViewHolder.mediaPlayerIcon.setVisibility(View.INVISIBLE);
+
+            String name = mMessageItems.get(position).getFileName();
+            double size = mMessageItems.get(position).getFileSize();//gives you size in bytes
+
+            String linkToDownload = String.format("<a href=\"%s\">%s</a>", contentUri, name);
+
+            sentFileViewHolder.downloadTextView.setText(Html.fromHtml(linkToDownload));
+            sentFileViewHolder.downloadTextView.setMovementMethod(LinkMovementMethod.getInstance());
+
+            //setting the size of the file
+            if (size > 1000 && size < 1000000) {
+                size = size/1000;
+                sentFileViewHolder.sizeTextView.setText(size + " kB");
+            } else if (size >= 1000000) {
+                size = size/1000000;
+                sentFileViewHolder.sizeTextView.setText(size + " MB");
+            } else {
+                sentFileViewHolder.sizeTextView.setText(size + " Bytes");
+            }
+            //need add something to the textview below this comment
+        } else {
+
         }
-        else {
-            Log.d("MessagingAdapter", "OnBindNothing");
-        }
+
+//        else if (messageType == VIDEO_SENT_TYPE) {
+//            SentVideoViewHolder sentVideoViewHolder = (SentVideoViewHolder) holder;
+//            sentVideoViewHolder.videoTime.setText(mMessageItems.get(position).getMessageTime());
+//            VideoView videoView = sentVideoViewHolder.videoView;
+//            sentVideoViewHolder.videoView.setVideoURI(mMessageItems.get(position).getMessageContentUri());
+//            MediaController mediaController = new MediaController(videoView.getContext());
+//            videoView.setMediaController(mediaController);
+//        } else if (messageType == VIDEO_RECEIVED_TYPE) {
+//            ReceivedVideoViewHolder receivedVideoViewHolder = (ReceivedVideoViewHolder) holder;
+//            Glide.with(((ReceivedVideoViewHolder) holder).profileImage.getContext())
+//                    .load(mMessageItems.get(position).getMessageImgResource().toString())
+//                    .into(((ReceivedVideoViewHolder) holder).profileImage);
+//            receivedVideoViewHolder.messageName.setText(mMessageItems.get(position).getMessageName());
+//            receivedVideoViewHolder.videoTime.setText(mMessageItems.get(position).getMessageTime());
+//
+//            VideoView videoView = receivedVideoViewHolder.videoView;
+//            receivedVideoViewHolder.videoView.setVideoURI(mMessageItems.get(position).getMessageContentUri());
+//            MediaController mediaController = new MediaController(videoView.getContext());
+//            videoView.setMediaController(mediaController);
+//        }
     }
 
     class ReceivedViewHolder extends RecyclerView.ViewHolder {
@@ -235,14 +787,41 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     class SentFileViewHolder extends RecyclerView.ViewHolder {
-        public ImageView fileView;
-        public TextView fileTime;
+        public ImageView fileView, mediaPlayerIcon;
+        public TextView fileTime, fileInfoTextView, downloadTextView, sizeTextView;
+        public ImageButton downloadButton;
         public ConstraintLayout parentLayout;
 
         public SentFileViewHolder(@NonNull View itemView) {
             super(itemView);
+            fileView = itemView.findViewById(R.id.sent_file_body);
+            mediaPlayerIcon = itemView.findViewById(R.id.media_player_icon);
             fileTime = itemView.findViewById(R.id.sent_file_time);
+            fileInfoTextView = itemView.findViewById(R.id.download_textview);
+            downloadTextView = itemView.findViewById(R.id.download_textview);
+            sizeTextView = itemView.findViewById(R.id.file_size_textview);
+            downloadButton = itemView.findViewById(R.id.download_button);
             parentLayout = itemView.findViewById(R.id.file_sent_parent_layout);
+        }
+    }
+
+    class ReceivedFileViewHolder extends RecyclerView.ViewHolder {
+        public ImageView profileView, fileView, mediaPlayerIcon;
+        public TextView contactName, fileTime, downloadTextView, sizeTextView;
+        public ImageButton downloadButton;
+        public ConstraintLayout parentLayout;
+
+        public ReceivedFileViewHolder(@NonNull View itemView) {
+            super(itemView);
+            profileView = itemView.findViewById(R.id.file_received_profile_avatar);
+            fileView = itemView.findViewById(R.id.received_file_body);
+            mediaPlayerIcon = itemView.findViewById(R.id.media_player_icon_for_received_file);
+            contactName = itemView.findViewById(R.id.file_received_name);
+            fileTime = itemView.findViewById(R.id.file_received_time);
+            downloadTextView = itemView.findViewById(R.id.download_textview_for_received_file);
+            sizeTextView = itemView.findViewById(R.id.file_size_textview_for_received_file);
+            downloadButton = itemView.findViewById(R.id.download_button_for_received_file);
+            parentLayout = itemView.findViewById(R.id.file_received_parent_layout);
         }
     }
 
@@ -253,12 +832,10 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if(mMessageItems.get(position).getMessageType() == "received"){
             type = 0;
         } else if (mMessageItems.get(position).getMessageType() == "sent"){
-            Log.d("MessagingAdapter", "messaging type is sent");
             type = 1;
         } else if (mMessageItems.get(position).getMessageType() == "result"){
             type = 2;
         } else if (mMessageItems.get(position).getMessageType().equals("imageSent")) {
-            Log.d("MessagingAdapter", "messaging type is image");
             type = 3;
         } else if (mMessageItems.get(position).getMessageType().equals("imageReceived")) {
             type = 4;
@@ -266,6 +843,29 @@ public class MessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             type = 5;
         } else if (mMessageItems.get(position).getMessageType().equals("videoReceived")) {
             type = 6;
+        } else if (mMessageItems.get(position).getMessageType().equals("pdfSent")) {
+            type = 7;
+        } else if (mMessageItems.get(position).getMessageType().equals("pdfReceived")) {
+            type = 8;
+        } else if (mMessageItems.get(position).getMessageType().equals("textSent")) {
+            type = 9;
+        } else if (mMessageItems.get(position).getMessageType().equals("textReceived")) {
+            type = 10;
+        } else if (mMessageItems.get(position).getMessageType().equals("wordSent")) {
+            type = 11;
+        } else if (mMessageItems.get(position).getMessageType().equals("wordReceived")) {
+            type = 12;
+        } else if (mMessageItems.get(position).getMessageType().equals("excelSent")) {
+            type = 13;
+        } else if (mMessageItems.get(position).getMessageType().equals("excelReceived")) {
+            type = 14;
+        } else if (mMessageItems.get(position).getMessageType().equals("powerpointSent")) {
+            type = 15;
+        } else if (mMessageItems.get(position).getMessageType().equals("powerpointReceived")) {
+            type = 16;
+        }
+        else if (mMessageItems.get(position).getMessageType().equals("fileSent")) {
+            type = 17;
         }
         else {
             Log.d("MessagingAdapter", "getItemViewType didn't work");

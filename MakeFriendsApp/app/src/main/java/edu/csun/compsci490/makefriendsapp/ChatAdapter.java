@@ -159,16 +159,21 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             int totalKeys = dataKeys.size();
                             String lastKey = "";
                             for (int i = 0; i < dataKeys.size(); i++) {
-                                if (dataKeys.get(i).contains("Me" + (totalKeys - 1)) || dataKeys.get(i).contains("Recipient" + (totalKeys - 1))) {
+                                Log.d("ChatAdapter", "dataKeys is: " + dataKeys.get(i) + "   totalKeys are " + totalKeys);
+                                if (dataKeys.get(i).contains("Me" + (totalKeys - 2)) || dataKeys.get(i).contains("Recipient" + (totalKeys - 2)) || dataKeys.get(i).contains("Received" + (totalKeys - 2)) || dataKeys.get(i).contains("Sent" + (totalKeys - 2))) {
                                     lastKey = dataKeys.get(i);
                                     break;
-                                } else if (dataKeys.get(i).equals("Note0")) {
+                                } else if (dataKeys.get(i).equals("Note0") && lastKey.equals("")) {
                                     lastKey = dataKeys.get(i);
                                 }
                             }
-
+                            Log.d("ChatAdapter", "LastKey " + lastKey);
                             if (lastKey.equals("Note0")) {
                                 ((ChatViewHolder) holder).mChatPreview.setText("Friendship Found!");
+                            } else if (lastKey.contains("Received")) {
+                                ((ChatViewHolder) holder).mChatPreview.setText("File Received");
+                            } else if (lastKey.contains("Sent")) {
+                                ((ChatViewHolder) holder).mChatPreview.setText("File Sent");
                             } else {
                                 ((ChatViewHolder) holder).mChatPreview.setText(data.get(lastKey).toString());
                             }

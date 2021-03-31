@@ -142,7 +142,7 @@ public class NotificationService extends Service {
                         ArrayList<String> keys = new ArrayList<>();
                         keys.addAll(data.keySet());
 
-                        int lastKeyIndex = keys.size() - 1;
+                        int lastKeyIndex = keys.size() - 2;
 
                         String lastKey = "";
 
@@ -151,12 +151,15 @@ public class NotificationService extends Service {
                             if (keys.get(i).contains(String.valueOf(lastKeyIndex))) {
                                 lastKey = keys.get(i);
                                 break;
-                            } else if (keys.get(i).equals("Note0")) {
+                            } else if (keys.get(i).equals("Note0") && keys.get(i).equals("")) {
                                 lastKey = keys.get(i);
                             }
                         }
                         if (lastKey.contains("Me")) {
                             //don't do anything
+                        } else if (lastKey.contains("Received")) {
+                            String newMassage = "File Received";
+                            getContactData(contactEmail, newMassage, uniqueID);
                         } else {
                             String newMassage = data.get(lastKey).toString();
                             getContactData(contactEmail, newMassage, uniqueID);

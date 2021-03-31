@@ -21,6 +21,8 @@
         <activity android:name=".PlaceHolder" />
         <activity android:name=".SignUp" />
         <activity android:name=".MessagingActivity" />
+        <activity android:name=".VideoViewPopActivity"/>
+        <activity android:name=".ImageViewPopActivity"/>
         <activity
             android:name=".SplashScreen"
             android:theme="@style/SplashTheme">
