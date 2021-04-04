@@ -17,7 +17,6 @@
             android:id="@+id/tourText1"
             android:layout_width="415dp"
             android:layout_height="87dp"
-            android:layout_marginTop="4dp"
             android:background="#FF5C5A"
             android:fontFamily="@font/montserrat"
             android:gravity="center"
@@ -36,7 +35,6 @@
             android:layout_height="61dp"
             android:layout_marginStart="44dp"
             android:layout_marginLeft="44dp"
-
             android:layout_marginTop="120dp"
             android:fontFamily="@font/montserrat"
             android:lines="4"
@@ -123,6 +121,7 @@
             android:layout_marginStart="112dp"
             android:layout_marginLeft="112dp"
             android:layout_marginTop="28dp"
+            app:tint="@color/colorPrimaryDark"
             android:src="@drawable/ic_baseline_home_24"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -136,7 +135,8 @@
             android:layout_marginTop="344dp"
             android:src="@drawable/ic_baseline_chat_24"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/colorPrimaryDark"/>
 
         <ImageView
             android:id="@+id/searchPic"
@@ -190,7 +190,8 @@
             android:layout_marginTop="838dp"
             android:src="@drawable/ic_baseline_folder_shared_24"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/colorPrimaryDark"/>
 
         <ImageView
             android:id="@+id/friends_bar_icons"
@@ -229,7 +230,8 @@
             android:layout_marginTop="1255dp"
             android:src="@drawable/ic_baseline_settings_24"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/colorPrimaryDark"/>
 
         <TextView
             android:id="@+id/tourText9"
@@ -251,13 +253,15 @@
             android:id="@+id/finishButton1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="152dp"
-            android:layout_marginLeft="152dp"
-            android:layout_marginTop="1450dp"
-            android:background="@color/colorPrimaryDark"
-            android:text="Finish"
-            android:textColor="#FFFFFF"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/button"
+            android:text="FINISH"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tourText9" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

@@ -203,6 +203,7 @@
             android:layout_height="wrap_content"
             android:text="@string/tv_forgot_password_text"
             android:textSize="12sp"
+            android:textColor="@color/colorPrimaryDark"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"

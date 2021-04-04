@@ -18,12 +18,11 @@
             android:id="@+id/proftext1"
             android:layout_width="414dp"
             android:layout_height="76dp"
-            android:layout_marginTop="4dp"
             android:background="#FF5C5A"
             android:fontFamily="@font/montserrat"
             android:gravity="center"
-            android:text="Profile Setup"
-            android:textColor="#373737"
+            android:text="Profile Tour"
+            android:textColor="@color/colorPrimaryDark"
             android:textSize="30sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
@@ -41,7 +40,7 @@
             android:fontFamily="@font/montserrat"
             android:text="Add a profile picture"
             android:textStyle="bold"
-            android:textColor="#373737"
+            android:textColor="@color/colorPrimaryDark"
             android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -83,7 +82,7 @@
             android:fontFamily="@font/montserrat"
             android:text="Add Schedule"
             android:textStyle="bold"
-            android:textColor="#373737"
+            android:textColor="@color/colorPrimaryDark"
             android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -152,14 +151,16 @@
             android:id="@+id/profButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="288dp"
-            android:layout_marginLeft="288dp"
-            android:layout_marginTop="632dp"
-            android:background="@color/colorPrimaryDark"
-            android:text="Skip"
-            android:textColor="#FFFFFF"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_marginBottom="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/button"
+            android:text="HOME"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/intText2"
+            android:layout_marginRight="20dp" />
 
         <ImageButton
             android:id="@+id/addClassButton1"
@@ -173,6 +174,51 @@
             android:tint="@android:color/holo_blue_dark"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/add_interests"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="20dp"
+            android:fontFamily="@font/montserrat"
+            android:text="Add Interests"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/addClassButton1" />
+
+        <TextView
+            android:id="@+id/intText1"
+            android:layout_width="322dp"
+            android:layout_height="81dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="5dp"
+            android:fontFamily="@font/montserrat"
+            android:lines="4"
+            android:text="MakeFriends finds fellow Matadors for you to meet based on similar interests.  The more interests you select, the more potential friends you may be linked up with."
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="14sp"
+            app:layout_constraintTop_toBottomOf="@id/add_interests"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/intText2"
+            android:layout_width="319dp"
+            android:layout_height="65dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="10dp"
+            android:fontFamily="@font/montserrat"
+            android:lines="4"
+            android:text="You can explore and add more interests later, but for now, choose at least 3 topics of interest to get started."
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/intText1" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

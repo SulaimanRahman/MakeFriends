@@ -25,7 +25,7 @@
             android:layout_marginTop="10dp"
             android:fontFamily="@font/montserrat"
             android:gravity="center"
-            android:text="FName LName"
+            android:text=""
             android:textColor="@color/colorPrimaryDark"
             android:textSize="24sp"
             app:layout_constraintEnd_toEndOf="parent"
