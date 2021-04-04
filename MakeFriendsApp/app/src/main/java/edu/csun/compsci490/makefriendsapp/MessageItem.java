@@ -5,6 +5,9 @@ import android.net.Uri;
 public class MessageItem {
     private Uri mImgResource;
     private String mName, mMessageBody, mMessageTime, mType;
+    private Uri messageContentUri;
+    private String fileName;
+    private long fileSize;
 
     public MessageItem(Uri imageRes, String messengerName, String messageBody, String messageTime, String type){
         mImgResource = imageRes;
@@ -14,6 +17,15 @@ public class MessageItem {
         mType = type;
     }
 
+    public MessageItem(Uri imageRes, String messengerName, Uri messageContentUri, String messageTime, String type, String fileName, long fileSize){
+        mImgResource = imageRes;
+        mName = messengerName;
+        this.messageContentUri = messageContentUri;
+        mMessageTime = messageTime;
+        mType = type;
+        this.fileName = fileName;
+        this.fileSize = fileSize;
+    }
     public MessageItem(String messageBody, String messageTime, String type){
         mMessageBody = messageBody;
         mMessageTime = messageTime;
@@ -24,6 +36,16 @@ public class MessageItem {
         mMessageBody = searchResultMessage;
         mType = type;
     }
+
+    public MessageItem(Uri messageContentUri, String messageTime, String type, String fileName, long fileSize) {
+        this.messageContentUri = messageContentUri;
+        mMessageTime = messageTime;
+        mType = type;
+        this.fileName = fileName;
+        this.fileSize = fileSize;
+    }
+
+    public Uri getMessageContentUri() {return messageContentUri;}
 
     public Uri getMessageImgResource() { return mImgResource; }
 
@@ -38,4 +60,8 @@ public class MessageItem {
     }
 
     public String getMessageType(){ return mType; }
+
+    public String getFileName() {return fileName;}
+
+    public long getFileSize() {return fileSize;}
 }

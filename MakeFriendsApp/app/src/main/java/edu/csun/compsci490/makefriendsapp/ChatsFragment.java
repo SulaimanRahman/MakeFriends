@@ -293,12 +293,14 @@ public class ChatsFragment extends Fragment{
 
             String contactName = contactsNames.get(email);
             String lastMessageKey = contactsLastMessageKey.get(email);
+            Log.d(TAG, "Last message Key is 296: " + lastMessageKey);
             String lastMessage;
             if (lastMessageKey.equals("Note0")) {
                 lastMessage = "Friendship Found!";
             } else {
                lastMessage = contactsLastMessage.get(email);
             }
+            Log.d(TAG, "Last message is 303: " + lastMessage);
 
             Uri profilePicUri = contactsProfilePicUri.get(email);
 
@@ -496,7 +498,7 @@ public class ChatsFragment extends Fragment{
                     ArrayList<String> fieldsKey = new ArrayList();
                     fieldsKey.addAll(data.keySet());
 
-                    int lastKeyIndex = fieldsKey.size() - 1;
+                    int lastKeyIndex = fieldsKey.size() - 2;
 
                     String lastKey = "";
                     for (int i = 0; i < fieldsKey.size(); i++) {
@@ -504,7 +506,7 @@ public class ChatsFragment extends Fragment{
                         if (fieldsKey.get(i).contains(String.valueOf(lastKeyIndex))) {
                             lastKey = fieldsKey.get(i);
                             break;
-                        } else if (fieldsKey.get(i).equals("Note0")) {
+                        } else if (fieldsKey.get(i).equals("Note0") && lastKey.equals("")) {
                             lastKey = fieldsKey.get(i);
                         }
                     }
@@ -542,7 +544,7 @@ public class ChatsFragment extends Fragment{
                             }
 
                             contactsLastMessage.put(allContactsEmail.get(finalI), lastMessage);
-
+                            Log.d(TAG, "Last message: " + lastMessage);
                             if (finalI == allContactsEmail.size() - 1) {
                                 //addActionListenerToDatabase(allContactsEmail);
                                 listAllTheChats(allContactsEmail);
