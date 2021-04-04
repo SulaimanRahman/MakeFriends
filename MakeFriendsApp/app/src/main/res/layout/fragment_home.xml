@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomeFragment">
+    tools:context=".HomeFragment"
+    android:background="@color/white">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -83,6 +84,7 @@
             android:backgroundTint="@color/lightGrey"
             android:gravity="top|left"
             android:hint="Edit your biography here."
+            android:textColorHint="@color/grey"
             android:inputType="textCapSentences|textMultiLine"
             android:maxLength="2000"
             android:maxLines="8"
@@ -153,6 +155,7 @@
             android:drawableLeft="@drawable/ic_baseline_search_24"
             android:drawableTint="@color/grey"
             android:hint="Search Interests"
+            android:textColorHint="@color/grey"
             android:inputType="text"
             android:imeOptions="actionDone"
             android:lines="1"
@@ -191,12 +194,14 @@
                     android:layout_height="wrap_content"
                     android:padding="10sp"
                     android:text="Section:"
+                    android:textColor="@color/grey"
                     android:layout_weight="25"
                     android:textAlignment="center"
                     android:gravity="center_horizontal" />
 
                 <TextView
                     android:id="@+id/course_text"
+                    android:textColor="@color/grey"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="10sp"
@@ -207,6 +212,7 @@
 
                 <TextView
                     android:id="@+id/course_num"
+                    android:textColor="@color/grey"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="10sp"

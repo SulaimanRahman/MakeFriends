@@ -1,5 +1,6 @@
 package edu.csun.compsci490.makefriendsapp;
 
+
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -9,43 +10,82 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.OpenableColumns;
+
+import android.Manifest;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.os.Handler;
+
 import android.util.Log;
-import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FieldPath;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.auth.User;
+import com.sinch.android.rtc.AudioController;
+import com.sinch.android.rtc.PushPair;
+import com.sinch.android.rtc.Sinch;
+import com.sinch.android.rtc.SinchClient;
+import com.sinch.android.rtc.calling.Call;
+import com.sinch.android.rtc.calling.CallClient;
+import com.sinch.android.rtc.calling.CallClientListener;
+import com.sinch.android.rtc.calling.CallListener;
+import com.sinch.android.rtc.video.VideoCallListener;
+import com.sinch.android.rtc.video.VideoController;
+
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import android.os.CountDownTimer;
 
 import java.lang.reflect.Array;
 import java.net.URLConnection;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.concurrent.Semaphore;
+import java.util.List;
+
 
 public class MessagingActivity extends AppCompatActivity {
     RecyclerView messagesRecyclerView;
@@ -75,6 +115,51 @@ public class MessagingActivity extends AppCompatActivity {
     private String contactEmail;
     private boolean firstLoad;
 
+    FirebaseAuth firebaseAuth;
+    FirebaseUser firebaseUser;
+    private Button callBtn, callBtnVideo;
+    SinchClient sinchClient = null;
+    private VideoController vc;
+    private AudioController ac;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private Button hangupBtn;
+    private Button hangupBtnMid;
+    private Button pickupBtn;
+    private String mUID;
+    private String UID = "";
+    private Call call;
+    private TextView callState;
+    private TextView caller,vidCallState;
+    private Boolean speaker = false;
+    private Boolean videoCalling = false;
+    private String isVideoCalling = "false";
+    private Button muteBtn, unmuteBtn, speakerBtn, endVideoCall, pkupBtnVid,hangupBtnVid, muteVid,unmuteVid,speakerVid;
+    RelativeLayout localView;
+    RelativeLayout remoteView;
+
+    private DatabaseReference mDatabase;
+
+
+    ConstraintLayout MainLayout;
+
+    View videoCallLayout;
+    View callLayout;
+    long startTime = 0;
+    MediaPlayer ringTone = null;
+    MediaPlayer ringTone2 = null;
+    private ImageView calleeImg;
+    private int all_per = 1;
+    private String[] PERMISSIONS = {
+            Manifest.permission.ACCESS_NETWORK_STATE,
+            Manifest.permission.MODIFY_AUDIO_SETTINGS,
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.CAMERA,
+            Manifest.permission.BLUETOOTH
+    };
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,12 +171,50 @@ public class MessagingActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.activity_messaging_progress_bar);
         chatBoxEditText = findViewById(R.id.edittext_chatbox);
         sendButton = findViewById(R.id.button_chatbox_send);
+
         attachButton = findViewById(R.id.btn_attach);
 
-        progressBar.setVisibility(View.VISIBLE);
 
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseUser = firebaseAuth.getCurrentUser();
+        mUID = firebaseUser.getUid();
+        callBtn = findViewById(R.id.btn_audio);
+        callBtnVideo = findViewById(R.id.btn_video);
+        //hangupBtn = findViewById(R.id.hangupButton);
+        MainLayout = findViewById(R.id.MessagingLayout);
+        LayoutInflater inflater = getLayoutInflater();
+        videoCallLayout = inflater.inflate(R.layout.video_call_screen,MainLayout,false);
+        callLayout = inflater.inflate(R.layout.activity_call_screen,MainLayout,false);
+        hangupBtn = callLayout.findViewById(R.id.hangupButton);
+        hangupBtnMid = callLayout.findViewById(R.id.hangupButtonMid);
+        pkupBtnVid = videoCallLayout.findViewById(R.id.pickupButtonVideo);
+        hangupBtnVid = videoCallLayout.findViewById(R.id.hangupButtonVideo);
+        unmuteVid = videoCallLayout.findViewById(R.id.unmuteBtnVideo);
+        muteVid = videoCallLayout.findViewById(R.id.muteBtnVideo);
+        endVideoCall = videoCallLayout.findViewById(R.id.hangupButtonMidVideo);
+        localView = videoCallLayout.findViewById(R.id.localVideo);
+        remoteView = videoCallLayout.findViewById(R.id.remoteVideo);
+        //vidCaller = videoCallLayout.findViewById(R.id.remoteUser);
+        //vidTimer = videoCallLayout.findViewById(R.id.callDuration);
+        speakerVid = videoCallLayout.findViewById(R.id.speakerBtnVideo);
+
+        pickupBtn = callLayout.findViewById(R.id.pickupButton);
+
+        progressBar.setVisibility(View.VISIBLE);
+        callState = callLayout.findViewById(R.id.callState);
+        caller = callLayout.findViewById(R.id.caller);
+        ringTone = MediaPlayer.create(getApplicationContext(),R.raw.phone_ring);
+        ringTone2 = MediaPlayer.create(getApplicationContext(),R.raw.discord_call_remix);
+        calleeImg = callLayout.findViewById(R.id.calleePic);
         databaseManager = new DatabaseManager();
         chatSingleton = ChatSingleton.getInstance();
+        unmuteBtn = callLayout.findViewById(R.id.unmuteBtn);
+        muteBtn = callLayout.findViewById(R.id.muteBtn);
+        speakerBtn = callLayout.findViewById(R.id.speakerBtn);
+        vidCallState = videoCallLayout.findViewById(R.id.vidCallState);
+        //vidCallState = videoCallLayout.findViewById(R.id.callState1);
+        //mDatabase = FirebaseDatabase.getInstance().getReference();
+
 
         Intent intent = getIntent();
 
@@ -101,6 +224,7 @@ public class MessagingActivity extends AppCompatActivity {
             Uri contactProfileUri = Uri.parse(intent.getStringExtra("contactProfileUri"));
             Log.d(TAG, "ContactProfileUri: " + intent.getStringExtra("contactProfileUri"));
             chatSingleton.setContactEmail(contactEmail);
+            //Toast.makeText(getApplicationContext(),chatSingleton.getContactEmail(),Toast.LENGTH_LONG).show();
             chatSingleton.setContactName(contactFullName);
             chatSingleton.setContactProfilePicUri(contactProfileUri);
         }
@@ -144,10 +268,23 @@ public class MessagingActivity extends AppCompatActivity {
                 //saving the data at the contact database
                 String contactDocumentPath = contactEmail + "/Contacts/" + userEmail + "/Chat";
                 String contactTimeDocumentPath = contactEmail + "/Contacts/" + userEmail + "/Chat Time";
-                String contactMoreInfoDocPath = contactEmail + "/Contacts/" + userEmail + "/More Info";
+                final String contactMoreInfoDocPath = contactEmail + "/Contacts/" + userEmail + "/More Info";
                 databaseManager.createNewField(contactDocumentPath, "Recipient" + numberOfMessages, message);
                 databaseManager.createNewField(contactTimeDocumentPath, "Time" + numberOfMessages, time);
                 databaseManager.updateTheField(contactMoreInfoDocPath, "All Messages Been Read", "false");
+
+                databaseManager.getFieldValue(contactMoreInfoDocPath, "Number Of Unread Messages", new FirebaseCallback() {
+                    @Override
+                    public void onCallback(Object value) {
+                        if (value == null) {
+                            databaseManager.createNewField(contactMoreInfoDocPath, "Number Of Unread Messages", String.valueOf(1));
+                        } else {
+                            int numberOfUnreadMessages = Integer.valueOf(value.toString());
+                            numberOfUnreadMessages++;
+                            databaseManager.updateTheField(contactMoreInfoDocPath, "Number Of Unread Messages", String.valueOf(numberOfUnreadMessages));
+                        }
+                    }
+                });
 
                 messageAdapter.notifyDataSetChanged();
                 chatBoxEditText.setText("");
@@ -167,6 +304,47 @@ public class MessagingActivity extends AppCompatActivity {
                 startActivityForResult(getAttachFile, 10);
             }
         });
+
+        sinchClient = Sinch.getSinchClientBuilder()
+                .context(getApplicationContext())
+                .applicationKey("218b541c-7b15-40e6-838c-27ea3bfda70d")
+                .applicationSecret("GKKHHnhcIEWctgcgzrA75A==")
+                .environmentHost("clientapi.sinch.com")
+                .userId(mUID)
+                .build();
+
+        sinchClient.setSupportCalling(true);
+        sinchClient.startListeningOnActiveConnection();
+
+        sinchClient.getCallClient().addCallClientListener(new SinchCallClientListener(){
+
+        });
+
+        sinchClient.start();
+
+        getUserID(new userCallback() {
+            @Override
+            public void isUserExist(boolean exist) {
+                if(exist){
+                    //Toast.makeText(getApplicationContext(),UID,Toast.LENGTH_LONG).show();
+                    callUser(UID);
+                }
+            }
+        });
+        getUserIDVid(new userCallback() {
+            @Override
+            public void isUserExist(boolean exist) {
+                if(exist){
+                    callVideoUser(UID);
+                }
+            }
+        });
+
+        //Toast.makeText(getApplicationContext(),UID,Toast.LENGTH_LONG).show();
+
+
+
+
 //        chatBoxEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 //            @Override
 //            public void onFocusChange(View view, boolean b) {
@@ -198,9 +376,470 @@ public class MessagingActivity extends AppCompatActivity {
 //            }
 //        });
 
+
+    }
+    Handler timerHandler = new Handler();
+    Runnable timerRunnable = new Runnable() {
+
+        @Override
+        public void run() {
+            long millis = System.currentTimeMillis() - startTime;
+            int seconds = (int) (millis / 1000);
+            int minutes = seconds / 60;
+            seconds = seconds % 60;
+
+            callState.setText(String.format(Locale.US, "%02d:%02d", minutes, seconds));
+
+            timerHandler.postDelayed(this, 500);
+        }
+    };
+    Handler timerHandler1 = new Handler();
+    Runnable timerRunnable1 = new Runnable() {
+
+        @Override
+        public void run() {
+            long millis = System.currentTimeMillis() - startTime;
+            int seconds = (int) (millis / 1000);
+            int minutes = seconds / 60;
+            seconds = seconds % 60;
+
+            vidCallState.setText(String.format(Locale.US, "%02d:%02d", minutes, seconds));
+
+            timerHandler1.postDelayed(this, 500);
+        }
+    };
+
+    private class SinchVideoCallListener implements VideoCallListener{
+
+        @Override
+        public void onVideoTrackAdded(Call call) {
+            vc = sinchClient.getVideoController();
+
+            localView.addView(vc.getLocalView());
+            localView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    vc.toggleCaptureDevicePosition();
+                }
+            });
+            remoteView.addView(vc.getRemoteView());
+        }
+
+        @Override
+        public void onVideoTrackPaused(Call call) {
+
+        }
+
+        @Override
+        public void onVideoTrackResumed(Call call) {
+            vc = sinchClient.getVideoController();
+
+            localView.addView(vc.getLocalView());
+            localView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    vc.toggleCaptureDevicePosition();
+                }
+            });
+            remoteView.addView(vc.getRemoteView());
+
+        }
+
+        @Override
+        public void onCallProgressing(Call call) {
+
+        }
+
+        @Override
+        public void onCallEstablished(Call call) {
+            ringTone.stop();
+            //MainLayout.removeView(callLayout);
+            //MainLayout.addView(videoCallLayout);
+            if(videoCallLayout.getParent() == null){
+                MainLayout.addView(videoCallLayout);
+            }
+            startTime = System.currentTimeMillis();
+            timerHandler1.postDelayed(timerRunnable1, 500);
+            //vidCallState.setText("Connected");
+            //vidCaller.setText(chatSingleton.getContactName()+" is talking");
+            ac = sinchClient.getAudioController();
+            ac.enableAutomaticAudioRouting(true,AudioController.UseSpeakerphone.SPEAKERPHONE_AUTO);
+            pkupBtnVid.setVisibility(View.INVISIBLE);
+            hangupBtnVid.setVisibility(View.INVISIBLE);
+            endVideoCall.setVisibility(View.VISIBLE);
+            muteVid.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    sinchClient.getAudioController().mute();
+                    muteVid.setVisibility(View.INVISIBLE);
+                    unmuteVid.setVisibility(View.VISIBLE);
+                }
+            });
+            unmuteVid.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    sinchClient.getAudioController().unmute();
+                    unmuteVid.setVisibility(View.INVISIBLE);
+                    muteVid.setVisibility(View.VISIBLE);
+                }
+            });
+            speakerVid.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(!speaker) {
+                        sinchClient.getAudioController().enableSpeaker();
+                        Toast.makeText(getApplication(),"speaker on",Toast.LENGTH_SHORT).show();
+                        muteBtn.setVisibility(View.VISIBLE);
+                        unmuteBtn.setVisibility(View.INVISIBLE);
+                        speaker = true;
+                    }
+                    else{
+                        sinchClient.getAudioController().disableSpeaker();
+                        Toast.makeText(getApplication(),"speaker off",Toast.LENGTH_SHORT).show();
+                        speaker = false;
+                    }
+                }
+            });
+            endVideoCall.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    call.hangup();
+                }
+            });
+        }
+
+        @Override
+        public void onCallEnded(Call callEnded) {
+
+            ringTone.stop();
+            call = callEnded;
+            call.hangup();
+            call = null;
+            vc = sinchClient.getVideoController();
+            if (vc != null) {
+                remoteView.removeView(vc.getRemoteView());
+                localView.removeView(vc.getLocalView());
+            }
+            Toast.makeText(getApplicationContext(),"Call ended",Toast.LENGTH_SHORT).show();
+            MainLayout.removeView(videoCallLayout);
+            setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
+            sinchClient.stop();
+            startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
+            finish();
+        }
+
+        @Override
+        public void onShouldSendPushNotification(Call call, List<PushPair> list) {
+
+        }
     }
 
-    @Override
+    private class SinchCallListener implements CallListener{
+
+
+        @Override
+        public void onCallProgressing(Call call) {
+
+        }
+
+        @Override
+        public void onCallEstablished(Call call) {
+            ringTone.stop();
+            setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+            startTime = System.currentTimeMillis();
+            timerHandler.postDelayed(timerRunnable, 500);
+            caller.setText(chatSingleton.getContactName() + " is talking");
+            //callState.setText("connected");
+            ac = sinchClient.getAudioController();
+            ac.enableAutomaticAudioRouting(true,AudioController.UseSpeakerphone.SPEAKERPHONE_AUTO);
+            pickupBtn.setVisibility(View.INVISIBLE);
+            hangupBtn.setVisibility(View.INVISIBLE);
+            hangupBtnMid.setVisibility(View.VISIBLE);
+            muteBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    sinchClient.getAudioController().mute();
+                    muteBtn.setVisibility(View.INVISIBLE);
+                    unmuteBtn.setVisibility(View.VISIBLE);
+                }
+            });
+            unmuteBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    sinchClient.getAudioController().unmute();
+                    unmuteBtn.setVisibility(View.INVISIBLE);
+                    muteBtn.setVisibility(View.VISIBLE);
+                }
+            });
+            speakerBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(!speaker) {
+                        sinchClient.getAudioController().enableSpeaker();
+                        Toast.makeText(getApplication(),"speaker on",Toast.LENGTH_SHORT).show();
+                        speaker = true;
+                    }
+                    else{
+                        sinchClient.getAudioController().disableSpeaker();
+                        Toast.makeText(getApplication(),"speaker off",Toast.LENGTH_SHORT).show();
+                        speaker = false;
+                    }
+                }
+            });
+            hangupBtnMid.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    call.hangup();
+                }
+            });
+
+
+        }
+
+        @Override
+        public void onCallEnded(Call callEnded) {
+            ringTone.stop();
+            timerHandler.removeCallbacks(timerRunnable);
+            Toast.makeText(getApplicationContext(),"Call ended",Toast.LENGTH_SHORT).show();
+            //callEnded.hangup();
+            call = callEnded;
+            call.hangup();
+            call = null;
+            MainLayout.removeView(callLayout);
+            sinchClient.stop();
+            setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
+            startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
+            finish();
+        }
+
+        @Override
+        public void onShouldSendPushNotification(Call call, List<PushPair> list) {
+
+        }
+    }
+
+
+    private class SinchCallClientListener implements CallClientListener {
+
+        @Override
+        public void onIncomingCall(CallClient callClient, final Call incomingCall) {
+            Log.d(TAG, "Incoming call");
+            if(callLayout.getParent() == null) {
+                MainLayout.addView(callLayout);
+            }
+            ringTone2.start();
+            getVideoCallUpdate(new userCallback() {
+                @Override
+                public void isUserExist(boolean exist) {
+                    if(exist){
+                        callState.setText("Incoming call...");
+                    }
+                }
+            });
+            Glide.with(getApplicationContext())
+                    .load(chatSingleton.getContactProfilePicUri().toString())
+                    .into(calleeImg);
+
+            caller.setText(chatSingleton.getContactName() + " is calling");
+
+
+
+
+            hangupBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    call = incomingCall;
+                    call.hangup();
+                    ringTone2.stop();
+                    startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
+                    finish();
+                }
+            });
+            pickupBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(isVideoCalling.equals("true")) {
+
+                        call = incomingCall;
+                        call.answer();
+                        ringTone2.stop();
+                        updateVideoCall("true");
+                        callState.setText("");
+                        call.addCallListener(new SinchVideoCallListener());
+                        MainLayout.removeView(callLayout);
+
+                    }
+                    else {
+                        call = incomingCall;
+                        call.answer();
+                        ringTone2.stop();
+                        updateVideoCall("false");
+                        call.addCallListener(new SinchCallListener());
+                    }
+                }
+            });
+        }
+
+    }
+    public void getUserID(userCallback callback)
+    {
+        callBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if(!hasPermissions(MessagingActivity.this,PERMISSIONS)){
+                    ActivityCompat.requestPermissions(MessagingActivity.this,PERMISSIONS,all_per);
+                }
+                if(hasPermissions(MessagingActivity.this,PERMISSIONS)) {
+                    //setContentView(R.layout.activity_call_screen);
+                    db.collection(contactEmail).document("Profile")
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                    DocumentSnapshot result = task.getResult();
+                                    UID = result.get("UID").toString();
+                                    callback.isUserExist(true);
+                                    //callUser(UID);
+                                    //Toast.makeText(getApplicationContext(),UID,Toast.LENGTH_LONG).show();
+                                    //Toast.makeText(getApplicationContext(),mUID,Toast.LENGTH_LONG).show();
+                                }
+                            });
+                }
+
+
+            }
+
+        });
+
+    }
+    public void getVideoCallUpdate(userCallback callback){
+        db.collection(contactEmail).document("Profile")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        DocumentSnapshot result = task.getResult();
+                        isVideoCalling = result.get("vidCall").toString();
+                        callback.isUserExist(true);
+                    }
+                });
+    }
+    public void getUserIDVid(userCallback callback)
+    {
+        callBtnVideo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if(!hasPermissions(MessagingActivity.this,PERMISSIONS)){
+                    ActivityCompat.requestPermissions(MessagingActivity.this,PERMISSIONS,all_per);
+                }
+                if(hasPermissions(MessagingActivity.this,PERMISSIONS)) {
+                    //setContentView(R.layout.activity_call_screen);
+                    db.collection(contactEmail).document("Profile")
+                            .get()
+                            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                    DocumentSnapshot result = task.getResult();
+                                    UID = result.get("UID").toString();
+                                    callback.isUserExist(true);
+                                    //callUser(UID);
+                                    //Toast.makeText(getApplicationContext(),UID,Toast.LENGTH_LONG).show();
+                                    //Toast.makeText(getApplicationContext(),mUID,Toast.LENGTH_LONG).show();
+                                }
+                            });
+                }
+
+
+            }
+
+        });
+
+    }
+    public static boolean hasPermissions(Context context, String... permissions) {
+        if (context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    public void callVideoUser(String UID){
+        if(this.call == null) {
+            //videoCalling = true;
+            MainLayout.addView(videoCallLayout);
+            vidCallState.setText("Calling "+chatSingleton.getContactName());
+            updateVideoCall("true");
+            ringTone.start();
+            this.call = sinchClient.getCallClient().callUserVideo(UID);
+            this.call.addCallListener(new SinchVideoCallListener());
+            hangupBtnVid.setVisibility(View.VISIBLE);
+            pkupBtnVid.setVisibility(View.VISIBLE);
+            endVideoCall.setVisibility(View.INVISIBLE);
+
+
+            hangupBtnVid.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    call.hangup();
+                    callState.setText("disconnected");
+                    ringTone.stop();
+                    startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
+                    finish();
+                }
+            });
+            pkupBtnVid.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    call.answer();
+                    ringTone.stop();
+                }
+            });
+
+        }
+
+
+    }
+    public void updateVideoCall(String isVid){
+
+        databaseManager.updateTheField(userEmail+"/Profile","vidCall",isVid);
+
+    }
+
+
+    public void callUser(String UID){
+        if(this.call == null) {
+            //videoCalling = false;
+
+            updateVideoCall("false");
+            this.call = this.sinchClient.getCallClient().callUser(UID);
+            this.call.addCallListener(new SinchCallListener());
+            MainLayout.addView(callLayout);
+            ringTone.start();
+            Glide.with(getApplicationContext())
+                    .load(chatSingleton.getContactProfilePicUri().toString())
+                    .into(calleeImg);
+            hangupBtn.setVisibility(View.INVISIBLE);
+            pickupBtn.setVisibility(View.INVISIBLE);
+            hangupBtnMid.setVisibility(View.VISIBLE);
+            hangupBtnMid.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    call.hangup();
+                    callState.setText("disconnected");
+                    ringTone.stop();
+                    startActivity(new Intent(getApplicationContext(),MessagingActivity.class));
+                    finish();
+                }
+            });
+
+        }
+    }
+
+   @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
@@ -714,6 +1353,13 @@ public class MessagingActivity extends AppCompatActivity {
         //set all the messages been viewed:
         String documentPath = userSingleton.getEmail() + "/Contacts/" + chatSingleton.getContactEmail() + "/More Info";
         databaseManager.updateTheField(documentPath, "All Messages Been Read", "true");
+        try {
+            databaseManager.updateTheField(documentPath, "Number Of Unread Messages", "0");
+        } catch (Exception e) {
+            //just leave this empty for now, to avoid errors for some of the accounts that don't have
+            //the field "Number Of Unread Messages" on his database
+        }
+
 
         progressBar.setVisibility(View.GONE);
 
@@ -910,6 +1556,12 @@ public class MessagingActivity extends AppCompatActivity {
 
                     } else if (data.get("All Messages Been Read").equals("false")) {
                         databaseManager.updateTheField(contactMoreInfoDocPath, "All Messages Been Read", "true");
+                        try {
+                            databaseManager.updateTheField(contactMoreInfoDocPath, "Number Of Unread Messages", "0");
+                        } catch (Exception e) {
+                            //just leave this empty for now, to avoid errors for some of the accounts that don't have
+                            //the field "Number Of Unread Messages" on his database
+                        }
                     }
                 }
             }
