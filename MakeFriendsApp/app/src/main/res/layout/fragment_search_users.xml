@@ -21,11 +21,11 @@
         android:id="@+id/tv_searchBy"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Search by: "
-        android:textSize="18sp"
-        android:textColor="@color/colorPrimaryDark"
         android:layout_marginTop="15dp"
         android:fontFamily="@font/montserrat"
+        android:text="Search by: "
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/img_searchFriends" />
@@ -33,14 +33,36 @@
         android:id="@+id/spinner_Course"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:prompt="@string/spinner_course_prompt"
         android:textColor="@color/colorPrimaryDark"
         android:textSize="18sp"
         android:layout_marginTop="10dp"
         android:fontFamily="@font/montserrat"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_searchBy"/>
+
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/ic_baseline_arrow_drop_down_24"
+        android:backgroundTint="@color/colorPrimaryDark"
+        app:layout_constraintEnd_toEndOf="@id/tv_searchBy"
         app:layout_constraintTop_toBottomOf="@id/tv_searchBy" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Course"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="3dp"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toStartOf="@+id/imageView3"
+        app:layout_constraintTop_toBottomOf="@+id/tv_searchBy"
+        android:layout_marginRight="3dp" />
+
     <TextView
         android:id="@+id/tv_interests"
         android:layout_width="wrap_content"

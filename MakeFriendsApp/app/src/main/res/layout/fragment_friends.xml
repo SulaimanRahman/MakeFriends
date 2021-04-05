@@ -22,7 +22,7 @@
         android:id="@+id/contactSearchBar"
         android:layout_width="350dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="10dp"
         android:layout_marginLeft="30dp"
         android:background="@drawable/input_bubble"
         android:drawableStart="@drawable/ic_baseline_search_24"
@@ -39,17 +39,20 @@
         android:paddingRight="15dp"
         android:paddingBottom="2dp"
         android:textSize="18sp"
-        android:textColorHint="@color/grey"/>
+        android:textColorHint="@color/grey"
+        android:layout_below="@id/Title"/>
 
     <TextView
         android:id="@+id/Title"
+        android:textStyle="bold"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="170dp"
+        android:layout_alignParentTop="true"
         android:layout_marginTop="10dp"
-        android:text="Contacts"
-        android:textSize="24sp"
-        android:textColor="@color/colorPrimaryDark"/>
+        android:layout_centerHorizontal="true"
+        android:text="Friends"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="28sp" />
 
     <TextView
         android:id="@+id/textView2"

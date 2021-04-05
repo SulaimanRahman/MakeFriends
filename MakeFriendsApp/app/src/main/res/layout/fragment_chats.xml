@@ -9,9 +9,23 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="65dp"
-        android:background="@color/grey"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
         android:gravity="center_horizontal" >
+
+        <TextView
+            android:id="@+id/Title"
+            android:layout_width="wrap_content"
+            android:textStyle="bold"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="10dp"
+            android:layout_centerHorizontal="true"
+            android:text="Chats"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="28sp"
+            android:layout_marginBottom="10dp"/>
+
         <EditText
             android:id="@+id/chatsSearchBar"
             android:layout_width="350dp"
@@ -26,6 +40,7 @@
             android:textColorHint="@color/grey"
             android:inputType="textPersonName"
             android:lines="1"
+            android:layout_below="@id/Title"
             android:paddingStart="15dp"
             android:paddingLeft="15dp"
             android:paddingTop="2dp"
@@ -38,7 +53,7 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/chatRecyclerView"
-        android:layout_marginTop="65dp"
+        android:layout_marginTop="110dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
