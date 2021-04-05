@@ -51,6 +51,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import io.grpc.internal.SharedResourceHolder;
@@ -433,7 +434,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 check if biography is null then set "edit your biography here"
                  */
 
-                firstAndLastName.setText(firstName + " " + lastName);
+                firstAndLastName.setText(firstName.toUpperCase() + " " + lastName.toUpperCase());
 
                 if (!biography.equals("null")){
                     biographyTextField.setText(biography);
@@ -718,7 +719,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             interestBubble.setTextColor(getResources().getColor(R.color.white));
             interestBubble.setBackgroundResource(R.drawable.interest_bubble);
             FlexboxLayout.LayoutParams params = new FlexboxLayout.LayoutParams(FlexboxLayout.LayoutParams.WRAP_CONTENT, 80);
-            params.setMargins(10,5,10,15);
+            params.setMargins(10,0,10,20);
             interestBubble.setLayoutParams(params);
             interestBubbleParent.addView(interestBubble);
             // add interest to users interest on firebase

@@ -92,6 +92,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <TextView
+            android:id="@+id/tv_email_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat"
+            android:paddingTop="3dp"
+            android:text="@string/tv_email_hint_text"
+            android:textColor="@android:color/secondary_text_light"
+            android:textSize="10sp"
+            app:layout_constraintEnd_toEndOf="@id/relativeLayout_email"
+            app:layout_constraintTop_toBottomOf="@id/relativeLayout_email"
+            tools:layout_editor_absoluteX="125dp" />
+
         <RelativeLayout
             android:id="@+id/relativeLayout_email"
             android:layout_width="match_parent"
@@ -107,19 +120,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tv_csun_email">
 
-            <TextView
-                android:id="@+id/tv_email_hint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:fontFamily="@font/montserrat"
-                android:paddingTop="3dp"
-                android:text="@string/tv_email_hint_text"
-                android:textColor="@android:color/secondary_text_light"
-                android:textSize="16sp" />
-
             <EditText
                 android:id="@+id/ed_email_input"
                 android:layout_width="wrap_content"
@@ -129,8 +129,6 @@
                 android:layout_alignParentTop="true"
                 android:layout_marginEnd="5dp"
                 android:layout_marginRight="5dp"
-                android:layout_toStartOf="@+id/tv_email_hint"
-                android:layout_toLeftOf="@+id/tv_email_hint"
                 android:background="@android:color/transparent"
                 android:ems="10"
                 android:fontFamily="@font/montserrat"
@@ -149,7 +147,7 @@
             android:id="@+id/tv_password"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="20dp"
             android:fontFamily="@font/montserrat"
             android:text="@string/tv_password_text"
             android:textColor="@android:color/secondary_text_light"
@@ -218,7 +216,8 @@
             android:paddingEnd="5sp"
             android:paddingRight="5sp"
             android:text="Click Here!"
-            android:textColor="@color/colorPrimaryRed"
+            android:textStyle="bold"
+            android:textColor="@color/colorPrimaryDark"
             android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"

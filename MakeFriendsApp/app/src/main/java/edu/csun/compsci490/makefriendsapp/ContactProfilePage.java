@@ -37,7 +37,7 @@ public class ContactProfilePage extends AppCompatActivity {
         String interest = "none";
         Bundle extras = getIntent().getExtras();
         if(extras != null){
-            userName = extras.getString("userName");
+            userName = extras.getString("userName").toUpperCase();
             userBio = extras.getString("userBio");
             userImg = extras.getString("userImg");
             interest = extras.getString("interests");
