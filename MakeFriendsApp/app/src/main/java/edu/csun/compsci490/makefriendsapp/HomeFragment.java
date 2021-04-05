@@ -53,6 +53,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.grpc.internal.SharedResourceHolder;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link HomeFragment#newInstance} factory method to
@@ -208,6 +210,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 .setBalloonAnimation(BalloonAnimation.ELASTIC)
                 .setLifecycleOwner(getActivity())
                 .build();
+
         // add listener to remove the clicked interest bubble
         balloon.setOnBalloonClickListener(new OnBalloonClickListener() {
             @Override
@@ -312,9 +315,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         final Course courseAddition = new Course();
 
         sectionCell.setTextSize(16);
+        sectionCell.setBackgroundColor(getResources().getColor(R.color.lightGrey));
         sectionCell.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
         sectionCell.setGravity(Gravity.CENTER_HORIZONTAL);
-        sectionCell.setPadding(10,0,10,15);
+        sectionCell.setPadding(5,5,5,5);
         sectionCell.setLayoutParams(rowParams);
         sectionCell.setText(section);
         rowParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, .50f);
@@ -337,9 +341,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         });
 
         courseCell.setTextSize(16);
+        courseCell.setBackgroundColor(getResources().getColor(R.color.lightGrey));
         courseCell.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
         courseCell.setGravity(Gravity.CENTER_HORIZONTAL);
-        courseCell.setPadding(10,0,10,15);
+        courseCell.setPadding(5,5,5,5);
         courseCell.setLayoutParams(rowParams);
         courseCell.setText(course);
         courseCell.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -362,9 +367,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
 
         rowParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, .25f);
         courseNumCell.setTextSize(16);
+        courseNumCell.setBackgroundColor(getResources().getColor(R.color.lightGrey));
         courseNumCell.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
         courseNumCell.setGravity(Gravity.CENTER_HORIZONTAL);
-        courseNumCell.setPadding(10,0,10,15);
+        courseNumCell.setPadding(5,5,5,5);
         courseNumCell.setLayoutParams(rowParams);
         courseNumCell.setText(courseNumber);
         courseNumCell.setOnFocusChangeListener(new View.OnFocusChangeListener() {

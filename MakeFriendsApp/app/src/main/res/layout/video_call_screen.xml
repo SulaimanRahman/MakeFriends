@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="39dp"
         android:layout_weight="0.1"
-        android:background="@android:color/holo_purple">
+        android:background="@color/colorPrimaryDark">
 
 
         <TextView
@@ -23,6 +23,7 @@
             android:layout_marginLeft="180dp"
             android:layout_marginTop="20dp"
             android:text="Ringing"
+            android:textStyle="bold"
             android:textAllCaps="true"
             android:textSize="16sp" />
 
@@ -97,7 +98,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1.4"
-        android:background="@android:color/holo_purple">
+        android:background="@color/colorPrimaryDark">
 
         <Button
             android:id="@+id/hangupButtonVideo"
@@ -156,7 +157,7 @@
             android:layout_marginLeft="50dp"
             android:layout_marginTop="20dp"
             android:background="@drawable/microphone"
-            app:backgroundTint="#3F51B5" />
+            app:backgroundTint="@color/white" />
 
         <Button
             android:id="@+id/speakerBtnVideo"
@@ -166,7 +167,7 @@
             android:layout_marginTop="20dp"
             android:background="@drawable/speaker"
 
-            app:backgroundTint="#3F51B5" />
+            app:backgroundTint="@color/white" />
 
     </RelativeLayout>
 

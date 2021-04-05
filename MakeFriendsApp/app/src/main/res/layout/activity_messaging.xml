@@ -144,7 +144,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/recyclerview_messages"
         app:layout_constraintStart_toStartOf="@+id/recyclerview_messages"
-        app:layout_constraintTop_toTopOf="@+id/relativeLayout" />
+        app:layout_constraintTop_toTopOf="@+id/relativeLayout"
+        android:textColor="@color/colorPrimaryDark"/>
 
     <ProgressBar
         android:id="@+id/activity_messaging_progress_bar"

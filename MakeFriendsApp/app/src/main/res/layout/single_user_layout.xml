@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/userContainer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="15dp">
+    android:padding="15dp"
+    android:background="@color/white"
+    android:paddingTop="15dp">
 
 <!--    <androidx.cardview.widget.CardView-->
 <!--        android:id="@+id/cardview"-->
@@ -31,28 +33,38 @@
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/profile_image"
-        android:layout_width="85dp"
-        android:layout_height="85dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:src="@drawable/profile_guy"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <TextView
+    <TextView
         android:id="@+id/fullName"
+        android:textSize="16sp"
+        android:textStyle="bold"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="fullName"
-        android:textColor="@color/colorPrimaryDark" />
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_toEndOf="@+id/profile_image"
+        android:layout_toRightOf="@+id/profile_image"
+        android:hint="Name"
+        android:layout_alignTop="@id/profile_image"
+        android:textColor="@color/colorPrimaryDark"
+        android:textColorHint="@color/colorPrimaryDark" />
 
-        <TextView
-            android:id="@+id/userMajor"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:hint="Major:"
-            android:textColor="@color/colorPrimaryDark" />
-    </LinearLayout>
+    <TextView
+        android:id="@+id/userMajor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/profile_image"
+        android:layout_toRightOf="@+id/profile_image"
+        android:hint="Major:"
+        android:textSize="16sp"
+        android:layout_marginStart="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_below="@id/fullName"
+        android:textColor="@color/colorPrimaryDark"
+        android:textColorHint="@color/colorPrimaryDark" />
 
-</LinearLayout>
+</RelativeLayout>
