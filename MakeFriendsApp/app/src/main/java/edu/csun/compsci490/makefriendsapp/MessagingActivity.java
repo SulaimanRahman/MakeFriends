@@ -127,7 +127,7 @@ public class MessagingActivity extends AppCompatActivity {
     private Button pickupBtn;
     private String mUID;
     private String UID = "";
-    private Call call;
+    private Call call = null;
     private TextView callState;
     private TextView caller,vidCallState;
     private Boolean speaker = false;
@@ -526,6 +526,8 @@ public class MessagingActivity extends AppCompatActivity {
             MainLayout.removeView(videoCallLayout);
             setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
             sinchClient.stop();
+//            sinchClient.stopListeningOnActiveConnection();
+//            sinchClient.terminate();
             startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
             finish();
         }
@@ -609,6 +611,8 @@ public class MessagingActivity extends AppCompatActivity {
             call = null;
             MainLayout.removeView(callLayout);
             sinchClient.stop();
+//            sinchClient.stopListeningOnActiveConnection();
+//            sinchClient.terminate();
             setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
             startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
             finish();
@@ -626,71 +630,86 @@ public class MessagingActivity extends AppCompatActivity {
         @Override
         public void onIncomingCall(CallClient callClient, final Call incomingCall) {
             Log.d(TAG, "Incoming call");
-            if (callLayout.getParent() == null) {
-                MainLayout.addView(callLayout);
+            if (call == null) {
+                if (callLayout.getParent() == null) {
+                    MainLayout.addView(callLayout);
+                }
+                call = incomingCall;
+                ringTone2.start();
+                getVideoCallUpdate(new userCallback() {
+                    @Override
+                    public void isUserExist(boolean exist) {
+                        if (exist) {
+                            callState.setText("Incoming call...");
+                        }
+                    }
+                });
+                Glide.with(getApplicationContext())
+                        .load(chatSingleton.getContactProfilePicUri().toString())
+                        .into(calleeImg);
+
+                caller.setText(chatSingleton.getContactName() + " is calling");
+
+
+                hangupBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //call = incomingCall;
+                        call.hangup();
+                        ringTone2.stop();
+                        startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
+                        finish();
+                    }
+                });
+                pickupBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (isVideoCalling.equals("true")) {
+
+                            //call = incomingCall;
+                            call.answer();
+                            ringTone2.stop();
+                            updateVideoCall("true");
+                            callState.setText("");
+                            call.addCallListener(new SinchVideoCallListener());
+                            MainLayout.removeView(callLayout);
+
+                        } else {
+                            //call = incomingCall;
+                            call.answer();
+                            ringTone2.stop();
+                            updateVideoCall("false");
+                            call.addCallListener(new SinchCallListener());
+                        }
+                    }
+                });
+                //hang up the call after number of seconds
+                Timer noAnswer = new Timer();
+                noAnswer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        //Toast.makeText(getApplicationContext(), "10secs is up", Toast.LENGTH_LONG).show();
+                        if(call != null) {
+                            call.hangup();
+                            sinchClient.stop();
+                            ringTone2.stop();
+                            startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
+                            finish();
+                        }
+                    }
+                }, 12000);
             }
-            call = incomingCall;
-            ringTone2.start();
-            getVideoCallUpdate(new userCallback() {
-                @Override
-                public void isUserExist(boolean exist) {
-                    if (exist) {
-                        callState.setText("Incoming call...");
-                    }
-                }
-            });
-            Glide.with(getApplicationContext())
-                    .load(chatSingleton.getContactProfilePicUri().toString())
-                    .into(calleeImg);
-
-            caller.setText(chatSingleton.getContactName() + " is calling");
-
-
-            hangupBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //call = incomingCall;
-                    call.hangup();
-                    ringTone2.stop();
-                    startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
-                    finish();
-                }
-            });
-            pickupBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (isVideoCalling.equals("true")) {
-
-                        //call = incomingCall;
-                        call.answer();
-                        ringTone2.stop();
-                        updateVideoCall("true");
-                        callState.setText("");
-                        call.addCallListener(new SinchVideoCallListener());
-                        MainLayout.removeView(callLayout);
-
-                    } else {
-                        //call = incomingCall;
-                        call.answer();
-                        ringTone2.stop();
-                        updateVideoCall("false");
-                        call.addCallListener(new SinchCallListener());
-                    }
-                }
-            });
-            //hang up the call after number of seconds
-            Timer noAnswer = new Timer();
-            noAnswer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    //Toast.makeText(getApplicationContext(), "10secs is up", Toast.LENGTH_LONG).show();
-                    call.hangup();
-                    ringTone2.stop();
-                    startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
-                    finish();
-                }
-            },12000);
+            else{
+                call.hangup();
+                sinchClient.stop();
+                Toast.makeText(getApplicationContext(),"call is not null",Toast.LENGTH_SHORT).show();
+                ringTone2.stop();
+                startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
+                finish();
+            }
         }
+
+
 
     }
     public void getUserID(userCallback callback)
