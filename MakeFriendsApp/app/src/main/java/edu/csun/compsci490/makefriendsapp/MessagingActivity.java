@@ -541,9 +541,9 @@ public class MessagingActivity extends AppCompatActivity {
             MainLayout.removeView(videoCallLayout);
             setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
             timerHandler1.removeCallbacks(timerRunnable1);
-            //sinchClient.stop();
-            sinchClient.stopListeningOnActiveConnection();
-            sinchClient.terminate();
+            sinchClient.stop();
+//            sinchClient.stopListeningOnActiveConnection();
+//            sinchClient.terminate();
             startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
             finish();
         }
@@ -626,14 +626,14 @@ public class MessagingActivity extends AppCompatActivity {
             ringTone2.stop();
             timerHandler.removeCallbacks(timerRunnable);
             Toast.makeText(getApplicationContext(),"Call ended",Toast.LENGTH_SHORT).show();
-            //callEnded.hangup();
-            call = callEnded;
-            call.hangup();
+            callEnded.hangup();
+//            call = callEnded;
+//            call.hangup();
             call = null;
             MainLayout.removeView(callLayout);
-            //sinchClient.stop();
-            sinchClient.stopListeningOnActiveConnection();
-            sinchClient.terminate();
+            sinchClient.stop();
+//            sinchClient.stopListeningOnActiveConnection();
+//            sinchClient.terminate();
             setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
             startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
             finish();
@@ -675,17 +675,6 @@ public class MessagingActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            hangupBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        //call = incomingCall;
-                        call.hangup();
-                        ringTone2.stop();
-                        //ringTone.stop();
-                        startActivity(new Intent(getApplicationContext(),MessagingActivity.class));
-                        finish();
-                    }
-                });
             //hang up the call after number of seconds
             Timer noAnswer = new Timer();
             noAnswer.schedule(new TimerTask() {
@@ -700,10 +689,23 @@ public class MessagingActivity extends AppCompatActivity {
                 }
             }, 10000);
             //noAnswer.cancel();
+            hangupBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //call = incomingCall;
+                    call.hangup();
+                    ringTone2.stop();
+                    //ringTone.stop();
+                    noAnswer.cancel();
+                    startActivity(new Intent(getApplicationContext(),MessagingActivity.class));
+                    finish();
+                }
+            });
                 pickupBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         //call = incomingCall;
+                        noAnswer.cancel();
 
                         if (isVideoCalling.equals("true")) {
 
@@ -716,7 +718,7 @@ public class MessagingActivity extends AppCompatActivity {
                             //callState.setText("");
                             call.addCallListener(new SinchVideoCallListener());
                             MainLayout.removeView(callLayout);
-                            noAnswer.cancel();
+                            //noAnswer.cancel();
 
                         } else {
                             //call = incomingCall;
@@ -724,7 +726,7 @@ public class MessagingActivity extends AppCompatActivity {
                             ringTone2.stop();
                             updateVideoCall("false");
                             call.addCallListener(new SinchCallListener());
-                            noAnswer.cancel();
+                            //noAnswer.cancel();
                         }
 //
                     }
