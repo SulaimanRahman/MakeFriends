@@ -304,6 +304,9 @@ public class MessagingActivity extends AppCompatActivity {
                 startActivityForResult(getAttachFile, 10);
             }
         });
+        if(!hasPermissions(MessagingActivity.this,PERMISSIONS)){
+            ActivityCompat.requestPermissions(MessagingActivity.this,PERMISSIONS,all_per);
+        }
 
         sinchClient = Sinch.getSinchClientBuilder()
                 .context(getApplicationContext())
@@ -453,8 +456,6 @@ public class MessagingActivity extends AppCompatActivity {
         @Override
         public void onCallEstablished(Call call) {
             ringTone.stop();
-            //MainLayout.removeView(callLayout);
-            //MainLayout.addView(videoCallLayout);
             if(videoCallLayout.getParent() == null){
                 MainLayout.addView(videoCallLayout);
             }
