@@ -830,12 +830,19 @@ public class MessagingActivity extends AppCompatActivity {
             ringTone.start();
             hangupBtnVid.setVisibility(View.INVISIBLE);
             pkupBtnVid.setVisibility(View.INVISIBLE);
-            endVideoCall.setVisibility(View.INVISIBLE);
+            endVideoCall.setVisibility(View.VISIBLE);
+
 
             endVideoCall.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     call.hangup();
+                    callState.setText("disconnected");
+                    ringTone.stop();
+                    sinchClient.stop();
+                    startActivity(new Intent(getApplicationContext(),MessagingActivity.class));
+                    finish();
+
                 }
             });
 
@@ -864,13 +871,14 @@ public class MessagingActivity extends AppCompatActivity {
                     .into(calleeImg);
             hangupBtn.setVisibility(View.INVISIBLE);
             pickupBtn.setVisibility(View.INVISIBLE);
-            hangupBtnMid.setVisibility(View.INVISIBLE);
+            hangupBtnMid.setVisibility(View.VISIBLE);
             hangupBtnMid.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     call.hangup();
                     callState.setText("disconnected");
                     ringTone.stop();
+                    sinchClient.stop();
                     startActivity(new Intent(getApplicationContext(),MessagingActivity.class));
                     finish();
                 }
