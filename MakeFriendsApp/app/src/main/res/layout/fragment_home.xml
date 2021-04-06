@@ -2,24 +2,25 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/profile_progress_bar"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomeFragment"
-    android:background="@color/white">
+    android:background="@color/white"
+    tools:context=".HomeFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:focusableInTouchMode="true"
         android:clickable="true"
         android:focusable="true"
+        android:focusableInTouchMode="true"
         android:paddingBottom="250dp">
 
         <ImageButton
             android:id="@+id/btn_logOut"
-            android:layout_marginLeft="10dp"
             android:layout_width="30dp"
             android:layout_height="30dp"
+            android:layout_marginLeft="10dp"
             android:layout_marginTop="10dp"
             android:background="@drawable/button"
             android:backgroundTint="@color/colorPrimaryRed"
@@ -37,9 +38,9 @@
             android:fontFamily="@font/montserrat"
             android:gravity="center"
             android:text=""
-            android:textStyle="bold"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="28sp"
+            android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -60,6 +61,13 @@
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 android:src="@drawable/profile_guy" />
+
+            <ProgressBar
+                android:id="@+id/profile_progress_bar_home_fragment"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
         </androidx.cardview.widget.CardView>
 
         <TextView
@@ -85,16 +93,16 @@
             android:backgroundTint="@color/lightGrey"
             android:gravity="top|left"
             android:hint="Edit your biography here."
-            android:textColorHint="@color/grey"
             android:inputType="textCapSentences|textMultiLine"
             android:maxLength="2000"
             android:maxLines="8"
             android:textColor="@color/colorPrimaryDark"
+            android:textColorHint="@color/grey"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/biography" />
-        
+
         <TextView
             android:id="@+id/schedule_text"
             android:layout_width="wrap_content"
@@ -132,14 +140,15 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/btn_addSchedule"
             app:layout_constraintTop_toBottomOf="@+id/tableLayout" />
+
         <TextView
             android:id="@+id/textView4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
             android:fontFamily="@font/montserrat"
             android:gravity="center"
             android:text="Interests"
-            android:layout_marginTop="20dp"
             android:textColor="@color/colorPrimaryDark"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -148,17 +157,16 @@
 
         <AutoCompleteTextView
             android:id="@+id/interestSearchBar"
-            android:layout_marginTop="5dp"
             android:layout_width="250dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
             android:background="@drawable/input_bubble"
             android:drawableStart="@drawable/ic_baseline_search_24"
             android:drawableLeft="@drawable/ic_baseline_search_24"
             android:drawableTint="@color/grey"
             android:hint="Search Interests"
-            android:textColorHint="@color/grey"
-            android:inputType="text"
             android:imeOptions="actionDone"
+            android:inputType="text"
             android:lines="1"
             android:paddingStart="15dp"
             android:paddingLeft="15dp"
@@ -167,11 +175,11 @@
             android:paddingRight="15dp"
             android:paddingBottom="2dp"
             android:textColor="@color/colorPrimaryDark"
+            android:textColorHint="@color/grey"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView4"
-            />
+            app:layout_constraintTop_toBottomOf="@+id/textView4" />
 
         <TableLayout
             android:id="@+id/tableLayout"
@@ -193,34 +201,34 @@
                     android:id="@+id/section_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_weight="25"
+                    android:gravity="center_horizontal"
                     android:padding="10sp"
                     android:text="Section:"
-                    android:textColor="@color/grey"
-                    android:layout_weight="25"
                     android:textAlignment="center"
-                    android:gravity="center_horizontal" />
+                    android:textColor="@color/grey" />
 
                 <TextView
                     android:id="@+id/course_text"
-                    android:textColor="@color/grey"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_weight="50"
+                    android:gravity="center_horizontal"
                     android:padding="10sp"
                     android:text="Course:"
-                    android:layout_weight="50"
                     android:textAlignment="center"
-                    android:gravity="center_horizontal"/>
+                    android:textColor="@color/grey" />
 
                 <TextView
                     android:id="@+id/course_num"
-                    android:textColor="@color/grey"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_weight="25"
+                    android:gravity="center_horizontal"
                     android:padding="10sp"
                     android:text="Course #:"
-                    android:layout_weight="25"
                     android:textAlignment="center"
-                    android:gravity="center_horizontal"/>
+                    android:textColor="@color/grey" />
             </TableRow>
         </TableLayout>
 
@@ -228,9 +236,9 @@
             android:id="@+id/flexbox_interestBubbleParent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
             android:layout_marginStart="3dp"
             android:layout_marginLeft="3dp"
+            android:layout_marginTop="15dp"
             android:layout_marginEnd="3dp"
             android:layout_marginRight="3dp"
             app:flexWrap="wrap"
@@ -240,5 +248,6 @@
             app:layout_constraintTop_toBottomOf="@+id/interestSearchBar">
 
         </com.google.android.flexbox.FlexboxLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

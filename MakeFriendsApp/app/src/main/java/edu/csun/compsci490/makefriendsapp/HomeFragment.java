@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -96,6 +97,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     private Button interestBubble;
     private Balloon balloon;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private ProgressBar profileProgressBar;
+
     public HomeFragment() {
         // Required empty public constructor
         Log.d("HomeFagment", "worked constructor");
@@ -138,7 +141,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         //getActivity().startService(new Intent(getActivity(), BackgroundService.class));
-      
+
+        profileProgressBar = view.findViewById(R.id.profile_progress_bar_home_fragment);
+        profileProgressBar.setVisibility(View.VISIBLE);
         databaseManager = new DatabaseManager();
         userSingleton = UserSingleton.getInstance();
         userEmail = userSingleton.getEmail();
@@ -406,6 +411,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         switch (requestCode) {
             case 1:
                 //if (resultCode == RESULT_OK) {
+                profileProgressBar.setVisibility(View.VISIBLE);
                 String path = data.getData().getPath();
                 Uri uri = data.getData();
                 saveUserProfilePicture(uri);
@@ -468,7 +474,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                  */
 
                 Glide.with(getActivity().getApplicationContext()).load(uri.toString()).into(profilePicture);
-
+                profileProgressBar.setVisibility(View.GONE);
             }
         });
     }
