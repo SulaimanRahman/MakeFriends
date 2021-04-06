@@ -155,7 +155,8 @@ public class MessagingActivity extends AppCompatActivity {
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.CAMERA,
-            Manifest.permission.BLUETOOTH
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.WAKE_LOCK
     };
 
 
@@ -625,14 +626,15 @@ public class MessagingActivity extends AppCompatActivity {
         @Override
         public void onIncomingCall(CallClient callClient, final Call incomingCall) {
             Log.d(TAG, "Incoming call");
-            if(callLayout.getParent() == null) {
+            if (callLayout.getParent() == null) {
                 MainLayout.addView(callLayout);
             }
+            call = incomingCall;
             ringTone2.start();
             getVideoCallUpdate(new userCallback() {
                 @Override
                 public void isUserExist(boolean exist) {
-                    if(exist){
+                    if (exist) {
                         callState.setText("Incoming call...");
                     }
                 }
@@ -644,12 +646,10 @@ public class MessagingActivity extends AppCompatActivity {
             caller.setText(chatSingleton.getContactName() + " is calling");
 
 
-
-
             hangupBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    call = incomingCall;
+                    //call = incomingCall;
                     call.hangup();
                     ringTone2.stop();
                     startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
@@ -659,9 +659,9 @@ public class MessagingActivity extends AppCompatActivity {
             pickupBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(isVideoCalling.equals("true")) {
+                    if (isVideoCalling.equals("true")) {
 
-                        call = incomingCall;
+                        //call = incomingCall;
                         call.answer();
                         ringTone2.stop();
                         updateVideoCall("true");
@@ -669,9 +669,8 @@ public class MessagingActivity extends AppCompatActivity {
                         call.addCallListener(new SinchVideoCallListener());
                         MainLayout.removeView(callLayout);
 
-                    }
-                    else {
-                        call = incomingCall;
+                    } else {
+                        //call = incomingCall;
                         call.answer();
                         ringTone2.stop();
                         updateVideoCall("false");
@@ -679,6 +678,18 @@ public class MessagingActivity extends AppCompatActivity {
                     }
                 }
             });
+            //hang up the call after number of seconds
+            Timer noAnswer = new Timer();
+            noAnswer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    //Toast.makeText(getApplicationContext(), "10secs is up", Toast.LENGTH_LONG).show();
+                    call.hangup();
+                    ringTone2.stop();
+                    startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
+                    finish();
+                }
+            },12000);
         }
 
     }
