@@ -155,7 +155,8 @@ public class NotificationService extends Service {
                                 lastKey = keys.get(i);
                             }
                         }
-                        if (lastKey.contains("Me")) {
+                        Log.d(TAG, "From NotificationService.java Last Message Key is: " + lastKey);
+                        if (lastKey.contains("Me") || lastKey.contains("Sent") || lastKey.contains("Note0")) {
                             //don't do anything
                         } else if (lastKey.contains("Received")) {
                             String newMassage = "File Received";
