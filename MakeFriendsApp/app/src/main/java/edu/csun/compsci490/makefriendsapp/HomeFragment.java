@@ -558,7 +558,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onCallback(Object value) {
                 saveUserProfilePictureUri(uri);
-                getUserProfilePicture(uri.getPath());//basically this is to refresh and show the picture
+                getUserProfilePicture(userEmail + "/ProfilePic");//basically this is to refresh and show the picture
 
             }
         });
