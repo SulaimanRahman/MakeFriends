@@ -160,16 +160,9 @@ public class NotificationService extends Service {
                                 lastKey = keys.get(i);
                             }
                         }
-<<<<<<< Updated upstream
+
                         Log.d(TAG, "From NotificationService.java Last Message Key is: " + lastKey);
                         if (lastKey.contains("Me") || lastKey.contains("Sent") || lastKey.contains("Note0")) {
-=======
-
-                        Log.d(TAG, "From Notification Service - lastKey is: " + lastKey);
-                        Log.d(TAG, "From Notification Service - lastKeyIndex is: " + lastKeyIndex);
-
-                        if (lastKey.contains("Me")) {
->>>>>>> Stashed changes
                             //don't do anything
                         } else if (lastKey.contains("Received")) {
                             String newMassage = "File Received";
