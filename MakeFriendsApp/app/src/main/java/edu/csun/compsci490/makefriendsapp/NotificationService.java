@@ -101,6 +101,10 @@ public class NotificationService extends Service {
                         String contactPath = userEmail + "/Contacts/" + allUsers.get(i) + "/Chat";
                         final String contactEmail = allUsers.get(i).toString();
                         final int uniqueID = i;
+                        if (firstTime) {
+                            firstTime = false;
+                            break;
+                        }
                         databaseManager.getDocumentSnapshot(contactPath, new FirebaseCallback() {
                             @Override
                             public void onCallback(Object value) {
@@ -129,6 +133,7 @@ public class NotificationService extends Service {
                     return;
                 }
 
+                Log.d(TAG, "NotificationService - getting data from the path: " + documentSnapshot.getReference().getPath());
                 //refreshing the snapshot
                 databaseManager.getDocumentSnapshot(documentSnapshot.getReference().getPath(), new FirebaseCallback() {
                     @Override
@@ -155,8 +160,16 @@ public class NotificationService extends Service {
                                 lastKey = keys.get(i);
                             }
                         }
+<<<<<<< Updated upstream
                         Log.d(TAG, "From NotificationService.java Last Message Key is: " + lastKey);
                         if (lastKey.contains("Me") || lastKey.contains("Sent") || lastKey.contains("Note0")) {
+=======
+
+                        Log.d(TAG, "From Notification Service - lastKey is: " + lastKey);
+                        Log.d(TAG, "From Notification Service - lastKeyIndex is: " + lastKeyIndex);
+
+                        if (lastKey.contains("Me")) {
+>>>>>>> Stashed changes
                             //don't do anything
                         } else if (lastKey.contains("Received")) {
                             String newMassage = "File Received";

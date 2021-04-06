@@ -293,7 +293,7 @@ public class ChatsFragment extends Fragment{
 
             String contactName = contactsNames.get(email);
             String lastMessageKey = contactsLastMessageKey.get(email);
-            Log.d(TAG, "Last message Key is 296: " + lastMessageKey);
+            Log.d(TAG, "Last message Key from line 296: " + lastMessageKey);
             String lastMessage;
             if (lastMessageKey.equals("Note0")) {
                 lastMessage = "Friendship Found!";
@@ -303,7 +303,7 @@ public class ChatsFragment extends Fragment{
             Log.d(TAG, "Last message is 303: " + lastMessage);
 
             Uri profilePicUri = contactsProfilePicUri.get(email);
-
+            Log.d(TAG, "ChatsFragement - Email is " + email);
             boolean isConversationEnded = this.isConversationEnded.get(email);
             boolean isConversationEndedByMe = this.isConversationEndedByMe.get(email);
             boolean isUserBlocked = this.isUserBlocked.get(email);
@@ -528,7 +528,7 @@ public class ChatsFragment extends Fragment{
                             String userBlockedStatus = snapshot.get("Blocked User").toString();
                             String otherUSerDeactivatedAccount = snapshot.get("OtherUserDeactivatedAccount").toString();
                             String allMessagesBeenRead = snapshot.get("All Messages Been Read").toString();
-
+                            //Log.d(TAG, "Conversation Ended for email " + allContactsEmail.get(finalI) + ": " + conversationEndedStatus);
                             isConversationEnded.put(allContactsEmail.get(finalI), Boolean.valueOf(conversationEndedStatus));
                             isConversationEndedByMe.put(allContactsEmail.get(finalI), Boolean.valueOf(conversationEndedByMeStatus));
                             isUserBlocked.put(allContactsEmail.get(finalI), Boolean.valueOf(userBlockedStatus));
