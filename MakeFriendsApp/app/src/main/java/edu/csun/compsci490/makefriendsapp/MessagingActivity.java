@@ -553,9 +553,6 @@ public class MessagingActivity extends AppCompatActivity {
 
         }
     }
-    private void sleepDelay() throws InterruptedException {
-        Thread.sleep(250);
-    }
 
     private class SinchCallListener implements CallListener{
 
