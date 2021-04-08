@@ -2,15 +2,16 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="edu.csun.compsci490.makefriendsapp">
+
     <uses-feature
         android:name="android.hardware.microphone"
-        android:required="false"/>
+        android:required="false" />
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -25,6 +26,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".Tour" />
 
         <service android:name=".NotificationService" />
 
@@ -32,8 +34,8 @@
         <activity android:name=".PlaceHolder" />
         <activity android:name=".SignUp" />
         <activity android:name=".MessagingActivity" />
-        <activity android:name=".VideoViewPopActivity"/>
-        <activity android:name=".ImageViewPopActivity"/>
+        <activity android:name=".VideoViewPopActivity" />
+        <activity android:name=".ImageViewPopActivity" />
         <activity
             android:name=".SplashScreen"
             android:theme="@style/SplashTheme">

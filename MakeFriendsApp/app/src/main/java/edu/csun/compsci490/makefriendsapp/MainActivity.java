@@ -30,6 +30,10 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Map;
 
@@ -44,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseManager databaseManager = new DatabaseManager();
     private UserSingleton userSingleton;
     private SharedPreferences userLocalDatabase;
+
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, SignUp.class);
+                Intent intent = new Intent(getApplicationContext(), SignUp.class);
                 startActivity(intent);
             }
         });
@@ -71,8 +77,9 @@ public class MainActivity extends AppCompatActivity {
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
 
@@ -129,10 +136,37 @@ public class MainActivity extends AppCompatActivity {
                                 Intent serverPage = new Intent(getApplicationContext(), ServerPage.class);
                                 startActivity(serverPage);
                             } else {
+                                DocumentReference documentReference = db.collection(userSingleton.getEmail()).document("Profile");
+                                documentReference.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                        if(task.isSuccessful()){
+                                            Log.d("A1A", "Retrieving first login value...");
+                                            DocumentSnapshot documentSnapshot = task.getResult();
+                                            String firstLogin = documentSnapshot.get("isFirstLogin").toString();
+                                            Log.d("A1A", "first login value: " + firstLogin);
+                                            if(firstLogin.equals("true")){
+                                                // go to tour
+                                                Log.d("A1A", "Going to tour");
+                                                Intent intent = new Intent(getApplicationContext(), Tour.class);
+                                                startActivity(intent);
+                                                finish();
+                                            } else {
+                                                // was not users first time logging in so start home page
+                                                Log.d("A1A", "Going to home");
+                                                Log.d("A1A", "first login value 2: " + firstLogin);
+                                                startActivity(new Intent(getApplicationContext(), MainNavigation.class));
+                                                finish();
+                                            }
 
-                                startActivity(new Intent(getApplicationContext(),MainNavigation.class));
+                                        } else {
+                                            Log.e("LOGINERROR", "isFirstLogin field does not exist in users db");
+                                        }
+                                    }
+                                });
 
                             }
+
 //                            Intent homePage = new Intent(getApplicationContext(), HomePage.class);
 //                            startActivity(homePage);
                             finish();
