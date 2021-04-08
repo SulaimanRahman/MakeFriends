@@ -836,11 +836,11 @@ public class MessagingActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     call.hangup();
-                    callState.setText("disconnected");
-                    ringTone.stop();
-                    sinchClient.stop();
-                    startActivity(new Intent(getApplicationContext(),MessagingActivity.class));
-                    finish();
+//                    callState.setText("disconnected");
+//                    ringTone.stop();
+//                    sinchClient.stop();
+//                    startActivity(new Intent(getApplicationContext(),MessagingActivity.class));
+//                    finish();
 
                 }
             });
@@ -875,11 +875,11 @@ public class MessagingActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     call.hangup();
-                    callState.setText("disconnected");
-                    ringTone.stop();
-                    sinchClient.stop();
-                    startActivity(new Intent(getApplicationContext(),MessagingActivity.class));
-                    finish();
+//                    callState.setText("disconnected");
+//                    ringTone.stop();
+//                    sinchClient.stop();
+//                    startActivity(new Intent(getApplicationContext(),MessagingActivity.class));
+//                    finish();
                 }
             });
 
