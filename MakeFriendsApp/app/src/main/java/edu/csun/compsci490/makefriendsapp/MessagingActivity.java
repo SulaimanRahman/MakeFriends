@@ -127,7 +127,7 @@ public class MessagingActivity extends AppCompatActivity {
     private Button pickupBtn;
     private String mUID;
     private String UID = "";
-    private Call call = null;
+    private Call mCall = null;
     private TextView callState;
     private TextView caller,vidCallState;
     private Boolean speaker = false;
@@ -467,6 +467,7 @@ public class MessagingActivity extends AppCompatActivity {
 
         @Override
         public void onCallEstablished(Call call) {
+            mCall = call;
             ringTone2.stop();
             ringTone.stop();
             if(videoCallLayout.getParent() == null){
@@ -528,17 +529,16 @@ public class MessagingActivity extends AppCompatActivity {
 
             ringTone2.stop();
             ringTone.stop();
-//            call = callEnded;
-//            call.hangup();
-            callEnded.hangup();
-            call = null;
+            mCall = callEnded;
+            mCall.hangup();
             vc = sinchClient.getVideoController();
             if (vc != null) {
                 remoteView.removeView(vc.getRemoteView());
                 localView.removeView(vc.getLocalView());
             }
             Toast.makeText(getApplicationContext(),"Call ended",Toast.LENGTH_SHORT).show();
-            MainLayout.removeView(videoCallLayout);
+            //MainLayout.removeView(videoCallLayout);
+            MainLayout.removeAllViews();
             setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
             timerHandler1.removeCallbacks(timerRunnable1);
             sinchClient.stop();
@@ -564,6 +564,7 @@ public class MessagingActivity extends AppCompatActivity {
 
         @Override
         public void onCallEstablished(Call call) {
+            mCall = call;
             ringTone.stop();
             ringTone2.stop();
             setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
@@ -610,7 +611,7 @@ public class MessagingActivity extends AppCompatActivity {
             hangupBtnMid.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    call.hangup();
+                    mCall.hangup();
                 }
             });
 
@@ -623,10 +624,10 @@ public class MessagingActivity extends AppCompatActivity {
             ringTone2.stop();
             timerHandler.removeCallbacks(timerRunnable);
             Toast.makeText(getApplicationContext(),"Call ended",Toast.LENGTH_SHORT).show();
-            callEnded.hangup();
-//            call = callEnded;
-//            call.hangup();
-            call = null;
+            //callEnded.hangup();
+            mCall = callEnded;
+            mCall.hangup();
+            //call = null;
             MainLayout.removeView(callLayout);
             sinchClient.stop();
 //            sinchClient.stopListeningOnActiveConnection();
@@ -651,7 +652,7 @@ public class MessagingActivity extends AppCompatActivity {
                 if (callLayout.getParent() == null) {
                     MainLayout.addView(callLayout);
                 }
-                call = incomingCall;
+                mCall = incomingCall;
                 ringTone2.start();
                 getVideoCallUpdate(new userCallback() {
                     @Override
@@ -677,8 +678,8 @@ public class MessagingActivity extends AppCompatActivity {
             noAnswer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    if(call != null) {
-                        call.hangup();
+                    if(mCall != null && ringTone2.isPlaying()) {
+                        mCall.hangup();
                         sinchClient.stop();
                         ringTone2.stop();
                         startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
@@ -690,9 +691,10 @@ public class MessagingActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     //call = incomingCall;
-                    call.hangup();
+                    mCall.hangup();
                     ringTone2.stop();
                     //ringTone.stop();
+                    sinchClient.stop();
                     noAnswer.cancel();
                     startActivity(new Intent(getApplicationContext(),MessagingActivity.class));
                     finish();
@@ -708,21 +710,21 @@ public class MessagingActivity extends AppCompatActivity {
 
                             //call = incomingCall;
                             //MainLayout.removeView(callLayout);
-                            call.answer();
+                            mCall.answer();
                             ringTone2.stop();
                             updateVideoCall("true");
                             //call.removeCallListener(new SinchVideoCallListener());
                             //callState.setText("");
-                            call.addCallListener(new SinchVideoCallListener());
+                            mCall.addCallListener(new SinchVideoCallListener());
                             MainLayout.removeView(callLayout);
                             //noAnswer.cancel();
 
                         } else {
                             //call = incomingCall;
-                            call.answer();
+                            mCall.answer();
                             ringTone2.stop();
                             updateVideoCall("false");
-                            call.addCallListener(new SinchCallListener());
+                            mCall.addCallListener(new SinchCallListener());
                             //noAnswer.cancel();
                         }
 //
@@ -819,10 +821,10 @@ public class MessagingActivity extends AppCompatActivity {
         return true;
     }
     public void callVideoUser(String UID){
-        if(this.call == null) {
+        if(mCall == null) {
             updateVideoCall("true");
-            this.call = sinchClient.getCallClient().callUserVideo(UID);
-            this.call.addCallListener(new SinchVideoCallListener());
+            mCall = sinchClient.getCallClient().callUserVideo(UID);
+            mCall.addCallListener(new SinchVideoCallListener());
             //videoCalling = true;
             MainLayout.addView(videoCallLayout);
             vidCallState.setText("Calling "+chatSingleton.getContactName());
@@ -835,7 +837,7 @@ public class MessagingActivity extends AppCompatActivity {
             endVideoCall.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    call.hangup();
+                    mCall.hangup();
 //                    callState.setText("disconnected");
 //                    ringTone.stop();
 //                    sinchClient.stop();
@@ -857,12 +859,12 @@ public class MessagingActivity extends AppCompatActivity {
 
 
     public void callUser(String UID){
-        if(this.call == null) {
+        if(mCall == null) {
             //videoCalling = false;
 
             updateVideoCall("false");
-            this.call = this.sinchClient.getCallClient().callUser(UID);
-            this.call.addCallListener(new SinchCallListener());
+            mCall = this.sinchClient.getCallClient().callUser(UID);
+            mCall.addCallListener(new SinchCallListener());
             MainLayout.addView(callLayout);
             ringTone.start();
             Glide.with(getApplicationContext())
@@ -874,7 +876,7 @@ public class MessagingActivity extends AppCompatActivity {
             hangupBtnMid.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    call.hangup();
+                    mCall.hangup();
 //                    callState.setText("disconnected");
 //                    ringTone.stop();
 //                    sinchClient.stop();
