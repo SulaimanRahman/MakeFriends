@@ -680,13 +680,14 @@ public class MessagingActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     if(mCall != null && ringTone2.isPlaying()) {
+                        noAnswer.cancel();
                         mCall.hangup();
                         sinchClient.stop();
                         ringTone2.stop();
                         startActivity(new Intent(getApplicationContext(), MessagingActivity.class));
                     }
                 }
-            }, 10000);
+            }, 12000);
             //noAnswer.cancel();
             hangupBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
