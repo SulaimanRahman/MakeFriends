@@ -29,6 +29,7 @@
         android:drawableLeft="@drawable/ic_baseline_search_24"
         android:drawableTint="@color/grey"
         android:textColor="#000"
+        android:fontFamily="@font/montserrat"
         android:hint="Search Contacts"
         android:inputType="textPersonName"
         android:lines="1"
