@@ -628,7 +628,8 @@ public class MessagingActivity extends AppCompatActivity {
             mCall = callEnded;
             mCall.hangup();
             //call = null;
-            MainLayout.removeView(callLayout);
+            //MainLayout.removeView(callLayout);
+            MainLayout.removeAllViews();
             sinchClient.stop();
 //            sinchClient.stopListeningOnActiveConnection();
 //            sinchClient.terminate();
