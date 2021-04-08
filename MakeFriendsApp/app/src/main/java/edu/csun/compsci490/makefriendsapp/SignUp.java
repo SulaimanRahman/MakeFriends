@@ -130,7 +130,8 @@ public class SignUp extends AppCompatActivity {
                             user.put("UID",userID);
                             user.put("Biography", "null");
                             user.put("Profile Picture Uri", "Default/BlankProfilePic");
-                            //user.put("Phone",123456);
+                            user.put("isFirstLogin", "true");
+                            Log.d("A1A", "Created the first login field: true");
 
                             String documentPath = "Default/All Users";
                             databaseManager.createNewField(documentPath, userID, email);
@@ -173,7 +174,9 @@ public class SignUp extends AppCompatActivity {
 
                             Toast.makeText(SignUp.this,"Your Account has been Successfully Created!",Toast.LENGTH_SHORT).show();
 
+                            Log.d("A1A", "going from sign up to sign in page");
                             startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                            finish();
                         }
                         else{
                             Toast.makeText(SignUp.this,"Error! "+ task.getException().getMessage(),Toast.LENGTH_SHORT).show();
@@ -189,7 +192,9 @@ public class SignUp extends AppCompatActivity {
         mLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d("A1A", "Wrong login pressed");
                 startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                finish();
             }
         });
 
