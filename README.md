@@ -5,13 +5,14 @@ Currently, the MakeFriends app is designed to be used by students of CSUN.  In o
 
 ### Contributors
 
-@SulaimanRahman https://github.com/SulaimanRahman
-
 @eddiemm https://github.com/eddiemm
+
+@JoshuaHuynh https://github.com/JoshuaHuynh
 
 @nostalgia2021 https://github.com/nostalgia2021
 
-@JoshuaHuynh https://github.com/JoshuaHuynh
+@SulaimanRahman https://github.com/SulaimanRahman
+
 
 ### Demo
 
