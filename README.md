@@ -22,28 +22,28 @@ Sulaiman Rahman @SulaimanRahman https://github.com/SulaimanRahman
 
 _Sign Up Page_
 
-<img src="images/Signup%20page.PNG" width="300"> 
+<kbd><img src="images/Signup%20page.PNG" width="300"></kbd>
 
 _Home Page_
 
-<img src="images/Home%20page.png" width="300"> 
+<kbd><img src="images/Home%20page.png" width="300"></kbd>
 
 _Chat Page_
 
-<img src="images/Chat%20Page.PNG" width="300"> 
+<kbd><img src="images/Chat%20Page.PNG" width="300"></kbd>
 
 _Search Page (searching for strangers to connect with)_
 
-<img src="images/Searching%20Page.PNG" width="300"> 
+<kbd><img src="images/Searching%20Page.PNG" width="300"></kbd>
 
 _Conversation Page_
 
-<img src="images/conversation_image.PNG" width="300"> 
+<kbd><img src="images/conversation_image.PNG" width="300"></kbd>
 
 _Contacts Page_
 
-<img src="images/friend_makefriends.PNG" width="300"> 
+<kbd><img src="images/friend_makefriends.PNG" width="300"></kbd>
 
 _Settings Page_
 
-<img src="images/settings_page.PNG" width="300">
+<kbd><img src="images/settings_page.PNG" width="300"></kbd>
