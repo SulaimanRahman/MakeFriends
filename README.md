@@ -8,4 +8,31 @@ Currently, the MakeFriends app is designed to be used by students of CSUN.  In o
 [![Make Friends](images/Demo_Preview.PNG)](https://youtu.be/T9oL1jYpnI8)
 
 ### Screenshots
-<img src="images/Signup%20page.PNG" width="300"> <img src="images/Home%20page.png" width="300"> <img src="images/Home%20page.png" width="300"> <img src="images/Chat%20Page.PNG" width="300"> <img src="images/Searching%20Page.PNG" width="300"> <img src="images/conversation_image.PNG" width="300"> <img src="images/friend_makefriends.PNG" width="300"> <img src="images/settings_page.PNG" width="300">
+
+_Sign Up Page_
+
+<img src="images/Signup%20page.PNG" width="300"> 
+
+_Home Page_
+
+<img src="images/Home%20page.png" width="300"> 
+
+_Chat Page_
+
+<img src="images/Chat%20Page.PNG" width="300"> 
+
+_Search Page (searching for strangers to connect with)_
+
+<img src="images/Searching%20Page.PNG" width="300"> 
+
+_Conversation Page_
+
+<img src="images/conversation_image.PNG" width="300"> 
+
+_Contacts Page_
+
+<img src="images/friend_makefriends.PNG" width="300"> 
+
+_Settings Page_
+
+<img src="images/settings_page.PNG" width="300">
