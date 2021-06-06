@@ -3,6 +3,13 @@ MakeFriends is a mobile Android app designed to help CSUN students meet and make
 
 Currently, the MakeFriends app is designed to be used by students of CSUN.  In other words, anyone with a CSUN student email account can use the app.  Unfortunately, the app is not designed in a way that lets non-students such as staff members of CSUN use the app.  However, although the MakeFriends app is fully ready for use, there are considerations to have future updates expand MakeFriends to allow staff members of CSUN or even people from other Cal State Universities use the app freely.
 
+### Contributors
+
+@SulaimanRahman
+@eddiemm
+@nostalgia2021
+@JoshuaHuynh
+
 ### Demo
 
 [![Make Friends](images/Demo_Preview.PNG)](https://youtu.be/T9oL1jYpnI8)
